@@ -157,7 +157,7 @@ export default function App() {
           <ListScreen items={items} listId={list.id} userName={userName} onItemChange={() => fetchItems(list.id)} />
         )}
         {tab === 'bring' && (
-          <BringScreen items={items} userName={userName} onItemChange={() => fetchItems(list.id)} />
+          <BringScreen items={items} listId={list.id} userName={userName} onItemChange={() => fetchItems(list.id)} />
         )}
         {tab === 'settings' && (
           <SettingsScreen

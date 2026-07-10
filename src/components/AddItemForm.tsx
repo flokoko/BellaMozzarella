@@ -8,13 +8,15 @@ interface AddItemFormProps {
   listId: string
   userName: string
   onAdded?: () => void
+  defaultAssignedTo?: string
+  placeholder?: string
 }
 
-export default function AddItemForm({ listId, userName, onAdded }: AddItemFormProps) {
+export default function AddItemForm({ listId, userName, onAdded, defaultAssignedTo, placeholder }: AddItemFormProps) {
   const [name, setName] = useState('')
   const [quantity, setQuantity] = useState('')
   const [category, setCategory] = useState<Category>('Essen')
-  const [assignedTo, setAssignedTo] = useState('')
+  const [assignedTo, setAssignedTo] = useState(defaultAssignedTo ?? '')
   const [expanded, setExpanded] = useState(false)
 
   const handleAdd = async () => {
@@ -45,7 +47,7 @@ export default function AddItemForm({ listId, userName, onAdded }: AddItemFormPr
           <input
             className="add-input"
             type="text"
-            placeholder="Was soll gekauft werden?"
+            placeholder={placeholder ?? "Was soll gekauft werden?"}
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
