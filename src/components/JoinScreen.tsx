@@ -55,7 +55,7 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
           type="text"
           value={joinCode}
           onChange={(e) => setJoinCode(e.target.value)}
-          placeholder="z.B. BELLA26"
+          placeholder="Join-Code"
           onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
         />
 
