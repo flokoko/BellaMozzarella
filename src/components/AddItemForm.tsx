@@ -31,6 +31,12 @@ export default function AddItemForm({
   const handleAdd = async () => {
     const n = name.trim()
     if (!n) return
+    // Reset UI immediately, fire insert in background
+    setName('')
+    setQuantity('')
+    setAssignedTo(defaultAssignedTo ?? '')
+    setCategory(categories[0]?.name ?? '')
+    setExpanded(false)
     const { error: insertError } = await supabase.from('items').insert({
       list_id: listId,
       name: n,
@@ -43,14 +49,12 @@ export default function AddItemForm({
       list_type: listType,
     })
     if (insertError) {
-      alert('Insert failed: ' + (insertError as any).message + ' | code: ' + (insertError as any).code)
+      // Restore form on error
+      setExpanded(true)
+      setName(n)
+      alert('Fehler beim Speichern: ' + (insertError as any).message)
       return
     }
-    setName('')
-    setQuantity('')
-    setAssignedTo(defaultAssignedTo ?? '')
-    setCategory(categories[0]?.name ?? '')
-    setExpanded(false)
     onAdded?.()
   }
 
