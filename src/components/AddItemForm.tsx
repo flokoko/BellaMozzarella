@@ -32,10 +32,7 @@ export default function AddItemForm({ listId, userName, onAdded, defaultAssigned
       is_brought: false,
       created_by: userName,
     })
-    if (insertError) {
-      console.error('Insert failed:', insertError)
-      return
-    }
+    if (insertError) return
     setName('')
     setQuantity('')
     setAssignedTo(defaultAssignedTo ?? '')
