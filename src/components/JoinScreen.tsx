@@ -8,7 +8,7 @@ interface JoinScreenProps {
 }
 
 export default function JoinScreen({ onJoin }: JoinScreenProps) {
-  const [joinCode, setJoinCode] = useState(() => localStorage.getItem('join_code') || 'BELLA26')
+  const [joinCode, setJoinCode] = useState(() => localStorage.getItem('join_code') || '')
   const [name, setName] = useState(() => localStorage.getItem('user_name') || '')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
