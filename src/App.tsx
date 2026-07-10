@@ -73,13 +73,10 @@ export default function App() {
     const savedCode = localStorage.getItem('join_code')
     if (savedName && savedCode) {
       supabase
-        .from('lists')
-        .select('*')
-        .eq('join_code', savedCode)
-        .single()
+        .rpc('verify_join_code', { code: savedCode })
         .then(({ data }) => {
-          if (data) {
-            const listData = data as ShoppingList
+          if (data && data.length > 0) {
+            const listData = data[0] as ShoppingList
             setJoinCode(listData.join_code)
             setUserName(savedName)
             setList(listData)
