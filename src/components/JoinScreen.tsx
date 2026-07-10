@@ -23,18 +23,16 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
     setLoading(true)
     setError('')
     try {
-      const { data, error: dbError } = await supabase
-        .from('lists')
-        .select('*')
-        .eq('join_code', code)
-        .single()
-      if (dbError || !data) {
+      const { data, error: rpcError } = await supabase
+        .rpc('verify_join_code', { code })
+      if (rpcError || !data || data.length === 0) {
         setError('Liste nicht gefunden. Code korrekt?')
         return
       }
+      const listData = data[0] as ShoppingList
       localStorage.setItem('user_name', n)
       localStorage.setItem('join_code', code)
-      onJoin(n, data as ShoppingList)
+      onJoin(n, listData)
     } catch {
       setError('Verbindung fehlgeschlagen.')
     } finally {

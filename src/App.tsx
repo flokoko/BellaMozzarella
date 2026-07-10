@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { ListItem, ShoppingList, TabView } from './types'
-import { supabase } from './lib/supabase'
+import { supabase, setJoinCode } from './lib/supabase'
 import { getResolvedTheme, toggleTheme, applyTheme, initThemeListener } from './lib/theme'
 import JoinScreen from './components/JoinScreen'
 import ListScreen from './components/ListScreen'
@@ -45,6 +45,7 @@ export default function App() {
   }, [])
 
   const handleJoin = (name: string, l: ShoppingList) => {
+    setJoinCode(l.join_code)
     setUserName(name)
     setList(l)
     fetchItems(l.id)
@@ -54,7 +55,11 @@ export default function App() {
   useEffect(() => {
     if (!list) return
     const channel = supabase
-      .channel(`items:${list.id}`)
+      .channel(`items:${list.id}`, {
+        config: {
+          headers: { 'x-join-code': list.join_code }
+        }
+      } as any)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'items', filter: `list_id=eq.${list.id}` },
         () => fetchItems(list.id)
       )
@@ -74,9 +79,11 @@ export default function App() {
         .single()
         .then(({ data }) => {
           if (data) {
+            const listData = data as ShoppingList
+            setJoinCode(listData.join_code)
             setUserName(savedName)
-            setList(data as ShoppingList)
-            fetchItems((data as ShoppingList).id)
+            setList(listData)
+            fetchItems(listData.id)
           }
         })
     }
@@ -87,6 +94,7 @@ export default function App() {
   }
 
   const handleLeave = () => {
+    setJoinCode('')
     localStorage.removeItem('user_name')
     localStorage.removeItem('join_code')
     setUserName(null)
