@@ -1,4 +1,5 @@
 import type { ListItem } from '../types'
+import type { PointerEvent as ReactPointerEvent } from 'react'
 import { supabase } from '../lib/supabase'
 import './ItemRow.css'
 
@@ -6,11 +7,19 @@ interface ItemRowProps {
   item: ListItem
   onChange?: () => void
   categoryMeta?: { icon: string; color: string; bg: string }
+  dragHandleProps?: {
+    onPointerDown: (e: ReactPointerEvent) => void
+    onPointerMove: (e: ReactPointerEvent) => void
+    onPointerUp: (e: ReactPointerEvent) => void
+  }
+  isDragging?: boolean
+  isDragOver?: boolean
+  registerRef?: (el: HTMLDivElement | null) => void
 }
 
 const FALLBACK_META = { icon: '📦', color: '#9b6dd9', bg: '#e8dcf7' }
 
-export default function ItemRow({ item, onChange, categoryMeta }: ItemRowProps) {
+export default function ItemRow({ item, onChange, categoryMeta, dragHandleProps, isDragging, isDragOver, registerRef }: ItemRowProps) {
   const meta = categoryMeta ?? FALLBACK_META
 
   const toggleChecked = async () => {
@@ -23,8 +32,28 @@ export default function ItemRow({ item, onChange, categoryMeta }: ItemRowProps) 
     onChange?.()
   }
 
+  const rowClass = [
+    'item-row',
+    item.is_checked ? 'checked' : '',
+    isDragging ? 'dragging' : '',
+    isDragOver ? 'drag-over' : '',
+  ].filter(Boolean).join(' ')
+
   return (
-    <div className={`item-row ${item.is_checked ? 'checked' : ''}`}>
+    <div
+      className={rowClass}
+      ref={registerRef ?? undefined}
+      onPointerMove={dragHandleProps?.onPointerMove}
+      onPointerUp={dragHandleProps?.onPointerUp}
+    >
+      {dragHandleProps && (
+        <span
+          className="item-drag-handle"
+          onPointerDown={dragHandleProps.onPointerDown}
+        >
+          ☰
+        </span>
+      )}
       <label className="item-checkbox-wrap">
         <input type="checkbox" checked={item.is_checked} onChange={toggleChecked} />
         <span className="item-checkmark" />

@@ -24,6 +24,7 @@ export interface ListItem {
   created_by: string | null
   created_at: string
   list_type: ListType
+  sort_order: number
 }
 
 export interface ShoppingList {

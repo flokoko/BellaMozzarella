@@ -38,6 +38,7 @@ export default function App() {
       .select('*')
       .eq('list_id', listId)
       .eq('list_type', listType)
+      .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true })
     if (err) return
     const items = (data || []) as ListItem[]
@@ -128,6 +129,15 @@ export default function App() {
     setUserName(newName)
   }
 
+  const reorderItems = useCallback(async (listType: ListType, newOrder: string[]) => {
+    if (!list) return
+    const updates = newOrder.map((id, index) =>
+      supabase.from('items').update({ sort_order: index }).eq('id', id)
+    )
+    await Promise.all(updates)
+    await fetchItems(list.id, listType)
+  }, [list, fetchItems])
+
   const handleToggleTheme = () => {
     toggleTheme()
     setIsDark(getResolvedTheme() === 'dark')
@@ -183,6 +193,7 @@ export default function App() {
             listId={list.id}
             userName={userName}
             onItemChange={() => fetchItems(list.id, 'shopping')}
+            onReorder={reorderItems}
           />
         )}
         {tab === 'bring' && (
@@ -192,6 +203,7 @@ export default function App() {
             listId={list.id}
             userName={userName}
             onItemChange={() => fetchItems(list.id, 'bring')}
+            onReorder={reorderItems}
           />
         )}
         {tab === 'settings' && (

@@ -1,7 +1,9 @@
 import { useState, useMemo } from 'react'
-import type { BringFilter, ListItem, ItemCategory } from '../types'
+import type { PointerEvent as ReactPointerEvent } from 'react'
+import type { BringFilter, ListItem, ItemCategory, ListType } from '../types'
 import { supabase } from '../lib/supabase'
 import AddItemForm from './AddItemForm'
+import { useDragReorder } from '../hooks/useDragReorder'
 import './BringScreen.css'
 
 interface BringScreenProps {
@@ -10,9 +12,82 @@ interface BringScreenProps {
   listId: string
   userName: string
   onItemChange?: () => void
+  onReorder?: (listType: ListType, newOrder: string[]) => void
 }
 
-export default function BringScreen({ items, categories, listId, userName, onItemChange }: BringScreenProps) {
+/** Wraps one person's bring items with independent drag-reorder. */
+function DraggableBringGroup({
+  person,
+  personItems,
+  isMe,
+  onToggleBrought,
+  onReorder,
+}: {
+  person: string
+  personItems: ListItem[]
+  isMe: boolean
+  onToggleBrought: (item: ListItem) => void
+  onReorder?: (newOrder: string[]) => void
+}) {
+  const {
+    dragState,
+    handlePointerDown,
+    handlePointerMove,
+    handlePointerUp,
+    registerItem,
+  } = useDragReorder<ListItem>(personItems, (newOrder) => onReorder?.(newOrder))
+
+  const broughtCount = personItems.filter((i) => i.is_brought).length
+
+  return (
+    <div className="bring-group">
+      <div className="bring-group-header">
+        <span className="bring-person">
+          {isMe && <span className="bring-me-badge">Du</span>}
+          {person}
+        </span>
+        <span className="bring-group-count">{broughtCount}/{personItems.length} mitgebracht</span>
+      </div>
+      {personItems.map((item) => {
+        const itemClass = [
+          'bring-item',
+          item.is_brought ? 'brought' : '',
+          dragState.draggingId === item.id ? 'dragging' : '',
+          dragState.dragOverId === item.id ? 'drag-over' : '',
+        ].filter(Boolean).join(' ')
+
+        return (
+          <div
+            key={item.id}
+            className={itemClass}
+            ref={(el) => registerItem(item.id, el)}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+          >
+            <span
+              className="bring-drag-handle"
+              onPointerDown={(e: ReactPointerEvent) => handlePointerDown(e, item.id)}
+            >
+              ☰
+            </span>
+            <label className="bring-checkbox-wrap">
+              <input
+                type="checkbox"
+                checked={item.is_brought}
+                onChange={() => onToggleBrought(item)}
+              />
+              <span className="bring-checkmark" />
+            </label>
+            <span className="bring-item-name">{item.name}</span>
+            <span className="bring-item-qty">{item.quantity}</span>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+export default function BringScreen({ items, categories, listId, userName, onItemChange, onReorder }: BringScreenProps) {
   const [filter, setFilter] = useState<BringFilter>('all')
 
   const filtered = useMemo(() => {
@@ -80,32 +155,16 @@ export default function BringScreen({ items, categories, listId, userName, onIte
       )}
 
       {grouped.map(([person, personItems]) => {
-        const broughtCount = personItems.filter((i) => i.is_brought).length
         const isMe = person === userName
         return (
-          <div key={person} className="bring-group">
-            <div className="bring-group-header">
-              <span className="bring-person">
-                {isMe && <span className="bring-me-badge">Du</span>}
-                {person}
-              </span>
-              <span className="bring-group-count">{broughtCount}/{personItems.length} mitgebracht</span>
-            </div>
-            {personItems.map((item) => (
-              <div key={item.id} className={`bring-item ${item.is_brought ? 'brought' : ''}`}>
-                <label className="bring-checkbox-wrap">
-                  <input
-                    type="checkbox"
-                    checked={item.is_brought}
-                    onChange={() => toggleBrought(item)}
-                  />
-                  <span className="bring-checkmark" />
-                </label>
-                <span className="bring-item-name">{item.name}</span>
-                <span className="bring-item-qty">{item.quantity}</span>
-              </div>
-            ))}
-          </div>
+          <DraggableBringGroup
+            key={person}
+            person={person}
+            personItems={personItems}
+            isMe={isMe}
+            onToggleBrought={toggleBrought}
+            onReorder={(newOrder) => onReorder?.('bring', newOrder)}
+          />
         )
       })}
     </div>

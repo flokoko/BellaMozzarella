@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { ItemCategory, ListType } from '../types'
 import { supabase } from '../lib/supabase'
 import './AddItemForm.css'
@@ -28,17 +28,17 @@ export default function AddItemForm({
   const [assignedTo, setAssignedTo] = useState(defaultAssignedTo ?? '')
   const [expanded, setExpanded] = useState(false)
 
+  // Update category when categories load async from Supabase
+  useEffect(() => {
+    if (!category && categories.length > 0) {
+      setCategory(categories[0].name)
+    }
+  }, [categories, category])
+
   const handleAdd = async () => {
     const n = name.trim()
     if (!n) return
-    alert('handleAdd called with: ' + n + ' | listType: ' + listType + ' | listId: ' + listId)
-    // Reset UI immediately, fire insert in background
-    setName('')
-    setQuantity('')
-    setAssignedTo(defaultAssignedTo ?? '')
-    setCategory(categories[0]?.name ?? '')
-    setExpanded(false)
-    const { error: insertError } = await supabase.from('items').insert({
+    const { error } = await supabase.from('items').insert({
       list_id: listId,
       name: n,
       quantity: quantity.trim() || '1',
@@ -49,13 +49,12 @@ export default function AddItemForm({
       created_by: userName,
       list_type: listType,
     })
-    if (insertError) {
-      // Restore form on error
-      setExpanded(true)
-      setName(n)
-      alert('Fehler beim Speichern: ' + (insertError as any).message)
-      return
-    }
+    if (error) return
+    setName('')
+    setQuantity('')
+    setAssignedTo(defaultAssignedTo ?? '')
+    setCategory(categories[0]?.name ?? '')
+    setExpanded(false)
     onAdded?.()
   }
 

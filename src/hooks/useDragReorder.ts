@@ -1,0 +1,78 @@
+import { useState, useRef, useCallback } from 'react'
+
+interface DragState {
+  draggingId: string | null
+  dragOverId: string | null
+}
+
+export function useDragReorder<T extends { id: string }>(
+  items: T[],
+  onReorder: (newOrder: string[]) => void
+) {
+  const [dragState, setDragState] = useState<DragState>({ draggingId: null, dragOverId: null })
+  const dragStartY = useRef(0)
+  const dragItemIndex = useRef(-1)
+  const itemTops = useRef<Map<string, number>>(new Map())
+
+  // Register item position for hit-testing
+  const registerItem = useCallback((id: string, el: HTMLElement | null) => {
+    if (el) {
+      itemTops.current.set(id, el.getBoundingClientRect().top)
+    } else {
+      itemTops.current.delete(id)
+    }
+  }, [])
+
+  const handlePointerDown = useCallback((e: React.PointerEvent, id: string) => {
+    // Only start drag on primary button or touch
+    if (e.button !== 0 && e.pointerType === 'mouse') return
+    dragStartY.current = e.clientY
+    dragItemIndex.current = items.findIndex(i => i.id === id)
+    setDragState({ draggingId: id, dragOverId: null })
+    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+  }, [items])
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!dragState.draggingId) return
+    // Find which item we're hovering over
+    const currentY = e.clientY
+    let closestId: string | null = null
+    let closestDist = Infinity
+    for (const [id, top] of itemTops.current) {
+      const dist = Math.abs(top - currentY)
+      if (dist < closestDist) {
+        closestDist = dist
+        closestId = id
+      }
+    }
+    if (closestId && closestId !== dragState.draggingId) {
+      setDragState(prev => ({ ...prev, dragOverId: closestId }))
+    }
+  }, [dragState])
+
+  const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    if (!dragState.draggingId) return
+    const { draggingId, dragOverId } = dragState
+    if (dragOverId && draggingId !== dragOverId) {
+      // Compute new order
+      const ids = items.map(i => i.id)
+      const fromIdx = ids.indexOf(draggingId)
+      const toIdx = ids.indexOf(dragOverId)
+      if (fromIdx !== -1 && toIdx !== -1) {
+        ids.splice(fromIdx, 1)
+        ids.splice(toIdx, 0, draggingId)
+        onReorder(ids)
+      }
+    }
+    setDragState({ draggingId: null, dragOverId: null })
+    ;(e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId)
+  }, [dragState, items, onReorder])
+
+  return {
+    dragState,
+    handlePointerDown,
+    handlePointerMove,
+    handlePointerUp,
+    registerItem,
+  }
+}
