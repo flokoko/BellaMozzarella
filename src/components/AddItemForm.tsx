@@ -31,6 +31,7 @@ export default function AddItemForm({
   const handleAdd = async () => {
     const n = name.trim()
     if (!n) return
+    alert('handleAdd called with: ' + n + ' | listType: ' + listType + ' | listId: ' + listId)
     // Reset UI immediately, fire insert in background
     setName('')
     setQuantity('')
