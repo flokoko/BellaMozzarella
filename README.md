@@ -50,7 +50,7 @@ npm run build
    - `VITE_SUPABASE_ANON_KEY` — der Supabase Anon Key
 4. Bei jedem Push auf `main` baut der Workflow automatisch und deployt
 
-Die App ist dann erreichbar unter: **https://flokoko.github.io/urlaubsliste/**
+Die App ist dann erreichbar unter: **https://flokoko.github.io/BellaMozzarella/**
 
 ### Manuell (gh-pages)
 
