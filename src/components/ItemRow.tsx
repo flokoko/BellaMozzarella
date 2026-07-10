@@ -5,17 +5,20 @@ import './ItemRow.css'
 
 interface ItemRowProps {
   item: ListItem
+  onChange?: () => void
 }
 
-export default function ItemRow({ item }: ItemRowProps) {
+export default function ItemRow({ item, onChange }: ItemRowProps) {
   const meta = CATEGORY_META[item.category]
 
   const toggleChecked = async () => {
     await supabase.from('items').update({ is_checked: !item.is_checked }).eq('id', item.id)
+    onChange?.()
   }
 
   const deleteItem = async () => {
     await supabase.from('items').delete().eq('id', item.id)
+    onChange?.()
   }
 
   return (

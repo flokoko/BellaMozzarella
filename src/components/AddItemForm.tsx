@@ -7,9 +7,10 @@ import './AddItemForm.css'
 interface AddItemFormProps {
   listId: string
   userName: string
+  onAdded?: () => void
 }
 
-export default function AddItemForm({ listId, userName }: AddItemFormProps) {
+export default function AddItemForm({ listId, userName, onAdded }: AddItemFormProps) {
   const [name, setName] = useState('')
   const [quantity, setQuantity] = useState('')
   const [category, setCategory] = useState<Category>('Essen')
@@ -34,6 +35,7 @@ export default function AddItemForm({ listId, userName }: AddItemFormProps) {
     setAssignedTo('')
     setCategory('Essen')
     setExpanded(false)
+    onAdded?.()
   }
 
   return (

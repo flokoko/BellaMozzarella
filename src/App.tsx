@@ -13,7 +13,6 @@ export default function App() {
   const [list, setList] = useState<ShoppingList | null>(null)
   const [items, setItems] = useState<ListItem[]>([])
   const [tab, setTab] = useState<TabView>('list')
-  const [error, setError] = useState('')
   const [isDark, setIsDark] = useState(false)
 
   // ── Theme: apply on mount, listen for system changes ──────────────
@@ -38,7 +37,6 @@ export default function App() {
       .eq('list_id', listId)
       .order('created_at', { ascending: true })
     if (err) {
-      setError('Fehler beim Laden der Items.')
       return
     }
     setItems((data || []) as ListItem[])
@@ -51,20 +49,23 @@ export default function App() {
     fetchItems(l.id)
   }
 
-  // Realtime subscription
+  // Polling: fetch items every 3 seconds (Realtime WebSocket doesn't support custom headers for RLS)
   useEffect(() => {
     if (!list) return
-    const channel = supabase
-      .channel(`items:${list.id}`, {
-        config: {
-          headers: { 'x-join-code': list.join_code }
-        }
-      } as any)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'items', filter: `list_id=eq.${list.id}` },
-        () => fetchItems(list.id)
-      )
-      .subscribe()
-    return () => { supabase.removeChannel(channel) }
+    const interval = setInterval(() => {
+      fetchItems(list.id)
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [list, fetchItems])
+
+  // Also re-fetch when the tab becomes visible again (user switches back to the app)
+  useEffect(() => {
+    if (!list) return
+    const onVisible = () => {
+      if (!document.hidden) fetchItems(list.id)
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
   }, [list, fetchItems])
 
   // Restore session from localStorage
@@ -152,12 +153,11 @@ export default function App() {
       </header>
 
       <main className="app-main">
-        {error && <p className="app-error">{error}</p>}
         {tab === 'list' && (
-          <ListScreen items={items} listId={list.id} userName={userName} />
+          <ListScreen items={items} listId={list.id} userName={userName} onItemChange={() => fetchItems(list.id)} />
         )}
         {tab === 'bring' && (
-          <BringScreen items={items} userName={userName} />
+          <BringScreen items={items} userName={userName} onItemChange={() => fetchItems(list.id)} />
         )}
         {tab === 'settings' && (
           <SettingsScreen

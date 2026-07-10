@@ -6,9 +6,10 @@ import './BringScreen.css'
 interface BringScreenProps {
   items: ListItem[]
   userName: string
+  onItemChange?: () => void
 }
 
-export default function BringScreen({ items, userName }: BringScreenProps) {
+export default function BringScreen({ items, userName, onItemChange }: BringScreenProps) {
   const [filter, setFilter] = useState<BringFilter>('all')
 
   const filtered = useMemo(() => {
@@ -35,6 +36,7 @@ export default function BringScreen({ items, userName }: BringScreenProps) {
 
   const toggleBrought = async (item: ListItem) => {
     await supabase.from('items').update({ is_brought: !item.is_brought }).eq('id', item.id)
+    onItemChange?.()
   }
 
   return (

@@ -8,12 +8,13 @@ interface ListScreenProps {
   items: ListItem[]
   listId: string
   userName: string
+  onItemChange?: () => void
 }
 
-export default function ListScreen({ items, listId, userName }: ListScreenProps) {
+export default function ListScreen({ items, listId, userName, onItemChange }: ListScreenProps) {
   return (
     <div className="list-screen">
-      <AddItemForm listId={listId} userName={userName} />
+      <AddItemForm listId={listId} userName={userName} onAdded={onItemChange} />
 
       {items.length === 0 && (
         <p className="list-empty">Noch keine Items — füge welche hinzu! ☀️</p>
@@ -34,7 +35,7 @@ export default function ListScreen({ items, listId, userName }: ListScreenProps)
               </span>
             </div>
             {catItems.map((item) => (
-              <ItemRow key={item.id} item={item} />
+              <ItemRow key={item.id} item={item} onChange={onItemChange} />
             ))}
           </div>
         )
