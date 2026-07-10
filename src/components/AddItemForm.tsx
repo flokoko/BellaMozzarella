@@ -43,7 +43,7 @@ export default function AddItemForm({
       list_type: listType,
     })
     if (insertError) {
-      console.error('Insert failed:', insertError.message, insertError.code)
+      alert('Insert failed: ' + (insertError as any).message + ' | code: ' + (insertError as any).code)
       return
     }
     setName('')
