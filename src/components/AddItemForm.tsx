@@ -42,7 +42,10 @@ export default function AddItemForm({
       created_by: userName,
       list_type: listType,
     })
-    if (insertError) return
+    if (insertError) {
+      console.error('Insert failed:', insertError.message, insertError.code)
+      return
+    }
     setName('')
     setQuantity('')
     setAssignedTo(defaultAssignedTo ?? '')
