@@ -30,5 +30,5 @@ export interface ShoppingList {
   created_at: string
 }
 
-export type TabView = 'list' | 'bring'
+export type TabView = 'list' | 'bring' | 'settings'
 export type BringFilter = 'all' | 'mine' | 'unfilled'

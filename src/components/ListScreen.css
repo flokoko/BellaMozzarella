@@ -4,7 +4,7 @@
 
 .list-empty {
   text-align: center;
-  color: #aaa;
+  color: var(--text-muted);
   padding: 2rem 1rem;
   font-size: 0.95rem;
 }
@@ -20,6 +20,7 @@
   padding: 0.5rem 0.75rem;
   border-radius: 10px;
   margin-bottom: 0.4rem;
+  transition: background-color 0.3s ease;
 }
 
 .cat-icon {
@@ -34,6 +35,13 @@
 
 .cat-count {
   font-size: 0.75rem;
-  color: #888;
+  color: var(--text-secondary);
   font-weight: 500;
 }
+
+/* ── Dark mode category header overrides ─────────────────────────── */
+[data-theme="dark"] .cat-header[data-cat="Essen"]     { background: rgba(224, 120, 86, 0.15); }
+[data-theme="dark"] .cat-header[data-cat="Getraenke"]  { background: rgba(74, 144, 217, 0.15); }
+[data-theme="dark"] .cat-header[data-cat="Snacks"]    { background: rgba(232, 168, 58, 0.15); }
+[data-theme="dark"] .cat-header[data-cat="Equipment"]  { background: rgba(107, 142, 90, 0.15); }
+[data-theme="dark"] .cat-header[data-cat="Sonstiges"]  { background: rgba(155, 109, 217, 0.15); }

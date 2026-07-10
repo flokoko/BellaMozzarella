@@ -26,7 +26,7 @@ export default function ListScreen({ items, listId, userName }: ListScreenProps)
         const checkedCount = catItems.filter((i) => i.is_checked).length
         return (
           <div key={cat} className="cat-section">
-            <div className="cat-header" style={{ background: meta.bg }}>
+            <div className="cat-header" style={{ background: meta.bg }} data-cat={cat}>
               <span className="cat-icon">{meta.icon}</span>
               <span className="cat-title" style={{ color: meta.color }}>{cat}</span>
               <span className="cat-count">

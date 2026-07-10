@@ -3,18 +3,18 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.65rem 0.75rem;
-  background: white;
+  background: var(--card-bg);
   border-radius: 12px;
   margin-bottom: 0.4rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-  transition: opacity 0.2s;
+  box-shadow: 0 1px 4px var(--shadow);
+  transition: opacity 0.2s, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .item-row.checked .item-name,
 .item-row.checked .item-qty,
 .item-row.checked .item-assigned {
   text-decoration: line-through;
-  color: #aaa;
+  color: var(--text-muted);
 }
 
 .item-checkbox-wrap {
@@ -36,13 +36,13 @@
 .item-checkmark {
   width: 22px;
   height: 22px;
-  border: 2px solid #d0d0d0;
+  border: 2px solid var(--checkbox-border);
   border-radius: 7px;
   transition: all 0.2s;
 }
 
 .item-checkbox-wrap input:checked + .item-checkmark {
-  background: linear-gradient(135deg, #6a5acd, #00bfff);
+  background: var(--accent-gradient);
   border-color: transparent;
 }
 
@@ -67,6 +67,7 @@
   font-weight: 500;
   display: block;
   word-break: break-word;
+  color: var(--text-primary);
 }
 
 .item-meta {
@@ -77,12 +78,12 @@
 
 .item-qty {
   font-size: 0.8rem;
-  color: #999;
+  color: var(--text-secondary);
 }
 
 .item-assigned {
   font-size: 0.8rem;
-  color: #6a5acd;
+  color: var(--accent);
   font-weight: 500;
 }
 
@@ -95,6 +96,7 @@
   border-radius: 8px;
   font-size: 1rem;
   flex-shrink: 0;
+  transition: background-color 0.3s ease;
 }
 
 .item-delete {
@@ -111,5 +113,13 @@
 
 .item-delete:hover {
   opacity: 1;
-  background: #fde8dc;
+  background: var(--danger-hover);
+  border-radius: 6px;
 }
+
+/* ── Dark mode category badge overrides ──────────────────────────── */
+[data-theme="dark"] .item-cat-badge[data-cat="Essen"]     { background: rgba(224, 120, 86, 0.15); }
+[data-theme="dark"] .item-cat-badge[data-cat="Getraenke"]  { background: rgba(74, 144, 217, 0.15); }
+[data-theme="dark"] .item-cat-badge[data-cat="Snacks"]    { background: rgba(232, 168, 58, 0.15); }
+[data-theme="dark"] .item-cat-badge[data-cat="Equipment"]  { background: rgba(107, 142, 90, 0.15); }
+[data-theme="dark"] .item-cat-badge[data-cat="Sonstiges"]  { background: rgba(155, 109, 217, 0.15); }

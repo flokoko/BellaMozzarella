@@ -31,7 +31,7 @@ export default function ItemRow({ item }: ItemRowProps) {
           {item.assigned_to && <span className="item-assigned">→ {item.assigned_to}</span>}
         </div>
       </div>
-      <span className="item-cat-badge" style={{ background: meta.bg, color: meta.color }}>
+      <span className="item-cat-badge" style={{ background: meta.bg, color: meta.color }} data-cat={item.category}>
         {meta.icon}
       </span>
       <button className="item-delete" onClick={deleteItem} aria-label="Löschen">

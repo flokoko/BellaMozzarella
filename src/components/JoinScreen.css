@@ -4,17 +4,19 @@
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  background: linear-gradient(135deg, #6a5acd 0%, #00bfff 100%);
+  background: var(--accent-gradient);
+  transition: background 0.3s ease;
 }
 
 .join-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--card-bg);
   border-radius: 24px;
   padding: 2.5rem 2rem;
   max-width: 380px;
   width: 100%;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 20px 60px var(--shadow);
   text-align: center;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .join-icon {
@@ -25,12 +27,12 @@
 .join-card h1 {
   margin: 0 0 0.25rem;
   font-size: 1.5rem;
-  color: #2d2d44;
+  color: var(--text-primary);
 }
 
 .join-subtitle {
   margin: 0 0 1.5rem;
-  color: #888;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
@@ -39,7 +41,7 @@
   text-align: left;
   font-size: 0.8rem;
   font-weight: 600;
-  color: #555;
+  color: var(--text-secondary);
   margin-bottom: 0.35rem;
 }
 
@@ -50,20 +52,22 @@
 .join-input {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--input-border);
   border-radius: 12px;
   font-size: 1rem;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background-color 0.3s ease, color 0.3s ease;
   box-sizing: border-box;
+  background: var(--input-bg);
+  color: var(--text-primary);
 }
 
 .join-input:focus {
-  border-color: #6a5acd;
+  border-color: var(--accent);
 }
 
 .join-error {
-  color: #e74c3c;
+  color: var(--error-color);
   font-size: 0.85rem;
   margin: 0.75rem 0 0;
 }
@@ -74,7 +78,7 @@
   padding: 0.85rem;
   border: none;
   border-radius: 12px;
-  background: linear-gradient(135deg, #6a5acd, #00bfff);
+  background: var(--accent-gradient);
   color: white;
   font-size: 1.05rem;
   font-weight: 600;

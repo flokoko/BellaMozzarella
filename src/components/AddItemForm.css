@@ -5,19 +5,19 @@
 .add-item-trigger {
   width: 100%;
   padding: 0.85rem;
-  border: 2px dashed #c8c8e0;
+  border: 2px dashed var(--dashed-border);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(128, 128, 128, 0.03);
   font-size: 0.95rem;
-  color: #6a5acd;
+  color: var(--accent);
   font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
+  transition: border-color 0.2s, background-color 0.2s;
 }
 
 .add-item-trigger:hover {
-  border-color: #6a5acd;
-  background: rgba(106, 90, 205, 0.06);
+  border-color: var(--accent);
+  background: rgba(128, 128, 128, 0.06);
 }
 
 .add-plus {
@@ -26,26 +26,29 @@
 }
 
 .add-item-expanded {
-  background: white;
+  background: var(--card-bg);
   border-radius: 14px;
   padding: 1rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px var(--shadow);
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .add-input {
   width: 100%;
   padding: 0.65rem 0.75rem;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--input-border);
   border-radius: 10px;
   font-size: 0.95rem;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background-color 0.3s ease, color 0.3s ease;
   box-sizing: border-box;
   margin-bottom: 0.5rem;
+  background: var(--input-bg);
+  color: var(--text-primary);
 }
 
 .add-input:focus {
-  border-color: #6a5acd;
+  border-color: var(--accent);
 }
 
 .add-row {
@@ -60,16 +63,18 @@
 .add-select {
   flex: 1;
   padding: 0.65rem 0.5rem;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--input-border);
   border-radius: 10px;
   font-size: 0.95rem;
   outline: none;
   cursor: pointer;
-  background: white;
+  background: var(--select-bg);
+  color: var(--text-primary);
+  transition: border-color 0.2s, background-color 0.3s ease, color 0.3s ease;
 }
 
 .add-select:focus {
-  border-color: #6a5acd;
+  border-color: var(--accent);
 }
 
 .add-actions {
@@ -87,15 +92,16 @@
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .add-btn-cancel {
-  background: #f0f0f0;
-  color: #666;
+  background: var(--button-bg);
+  color: var(--button-text);
 }
 
 .add-btn-confirm {
-  background: linear-gradient(135deg, #6a5acd, #00bfff);
+  background: var(--accent-gradient);
   color: white;
 }
 

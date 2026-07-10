@@ -1,0 +1,194 @@
+.settings-screen {
+  padding: 0.75rem 0;
+}
+
+.settings-section {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 1.25rem 1.1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 4px var(--shadow);
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.settings-section-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-bottom: 0.85rem;
+}
+
+/* ── SettingsItem: icon + label + control ─────────────────────────── */
+.settings-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0;
+}
+
+.settings-item + .settings-item {
+  border-top: 1px solid var(--border-color);
+}
+
+.settings-item-icon {
+  font-size: 1.15rem;
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.settings-item-label {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.settings-item-control {
+  flex-shrink: 0;
+}
+
+/* ── Theme toggle group ──────────────────────────────────────────── */
+.theme-toggle-group {
+  display: flex;
+  gap: 0;
+  background: var(--button-bg);
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.theme-toggle-btn {
+  border: none;
+  background: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--button-text);
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.theme-toggle-btn.active {
+  background: var(--accent);
+  color: white;
+}
+
+/* ── Account info display ────────────────────────────────────────── */
+.settings-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.45rem 0;
+}
+
+.settings-info-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.settings-info-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ── Inline edit form ────────────────────────────────────────────── */
+.settings-inline-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.settings-inline-input {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--input-border);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  transition: border-color 0.2s;
+}
+
+.settings-inline-input:focus {
+  border-color: var(--accent);
+}
+
+.settings-btn {
+  border: none;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.settings-btn-primary {
+  background: var(--accent-gradient);
+  color: white;
+}
+
+.settings-btn-secondary {
+  background: var(--button-bg);
+  color: var(--button-text);
+}
+
+.settings-btn-danger {
+  background: none;
+  color: var(--danger-hover);
+  border: 1px solid var(--danger-hover);
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.55rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.settings-btn-danger:hover {
+  background: var(--danger-hover);
+  color: white;
+}
+
+/* ── Info section ────────────────────────────────────────────────── */
+.settings-info-block {
+  text-align: center;
+}
+
+.settings-app-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.1rem;
+}
+
+.settings-app-version {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.settings-app-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+}
+
+.settings-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.settings-link:hover {
+  text-decoration: underline;
+}

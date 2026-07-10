@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { ListItem, ShoppingList, TabView } from './types'
 import { supabase } from './lib/supabase'
+import { getResolvedTheme, toggleTheme, applyTheme, initThemeListener } from './lib/theme'
 import JoinScreen from './components/JoinScreen'
 import ListScreen from './components/ListScreen'
 import BringScreen from './components/BringScreen'
+import SettingsScreen from './components/SettingsScreen'
 import './App.css'
 
 export default function App() {
@@ -12,6 +14,22 @@ export default function App() {
   const [items, setItems] = useState<ListItem[]>([])
   const [tab, setTab] = useState<TabView>('list')
   const [error, setError] = useState('')
+  const [isDark, setIsDark] = useState(false)
+
+  // ── Theme: apply on mount, listen for system changes ──────────────
+  useEffect(() => {
+    applyTheme()
+    setIsDark(getResolvedTheme() === 'dark')
+    const cleanup = initThemeListener()
+    // Update icon when system changes while in 'auto' mode
+    const mql = window.matchMedia('(prefers-color-scheme: dark)')
+    const handler = () => setIsDark(getResolvedTheme() === 'dark')
+    mql.addEventListener('change', handler)
+    return () => {
+      cleanup()
+      mql.removeEventListener('change', handler)
+    }
+  }, [])
 
   const fetchItems = useCallback(async (listId: string) => {
     const { data, error: err } = await supabase
@@ -76,6 +94,16 @@ export default function App() {
     setItems([])
   }
 
+  const handleRename = (newName: string) => {
+    localStorage.setItem('user_name', newName)
+    setUserName(newName)
+  }
+
+  const handleToggleTheme = () => {
+    toggleTheme()
+    setIsDark(getResolvedTheme() === 'dark')
+  }
+
   const checkedCount = items.filter((i) => i.is_checked).length
 
   return (
@@ -88,7 +116,12 @@ export default function App() {
               Angemeldet als: <strong>{userName}</strong>
             </span>
           </div>
-          <button className="header-leave" onClick={handleLeave}>Verlassen</button>
+          <div className="header-actions">
+            <button className="header-theme-toggle" onClick={handleToggleTheme} aria-label="Theme wechseln">
+              {isDark ? '☀️' : '🌙'}
+            </button>
+            <button className="header-leave" onClick={handleLeave}>Verlassen</button>
+          </div>
         </div>
         <div className="header-tabs">
           <button
@@ -104,15 +137,31 @@ export default function App() {
           >
             🎒 Mitbringen
           </button>
+          <button
+            className={`header-tab ${tab === 'settings' ? 'active' : ''}`}
+            onClick={() => setTab('settings')}
+          >
+            ⚙️
+          </button>
         </div>
       </header>
 
       <main className="app-main">
         {error && <p className="app-error">{error}</p>}
-        {tab === 'list' ? (
+        {tab === 'list' && (
           <ListScreen items={items} listId={list.id} userName={userName} />
-        ) : (
+        )}
+        {tab === 'bring' && (
           <BringScreen items={items} userName={userName} />
+        )}
+        {tab === 'settings' && (
+          <SettingsScreen
+            userName={userName}
+            listName={list.name}
+            joinCode={list.join_code}
+            onLeave={handleLeave}
+            onRename={handleRename}
+          />
         )}
       </main>
     </div>
