@@ -8,7 +8,7 @@ interface JoinScreenProps {
 }
 
 export default function JoinScreen({ onJoin }: JoinScreenProps) {
-  const [joinCode, setJoinCode] = useState(() => localStorage.getItem('join_code') || 'URLAUB26')
+  const [joinCode, setJoinCode] = useState(() => localStorage.getItem('join_code') || 'BELLA26')
   const [name, setName] = useState(() => localStorage.getItem('user_name') || '')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -45,8 +45,8 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
   return (
     <div className="join-screen">
       <div className="join-card">
-        <div className="join-icon">🏖️</div>
-        <h1>Urlaubs-Einkaufsliste</h1>
+        <div className="join-icon">🧀</div>
+        <h1>Bella Mozzarella</h1>
         <p className="join-subtitle">Gemeinsam planen, zusammenpacken.</p>
 
         <label className="join-label">Join-Code</label>
@@ -55,7 +55,7 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
           type="text"
           value={joinCode}
           onChange={(e) => setJoinCode(e.target.value)}
-          placeholder="z.B. URLAUB26"
+          placeholder="z.B. BELLA26"
           onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
         />
 

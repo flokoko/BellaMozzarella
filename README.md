@@ -1,10 +1,10 @@
-# 🏖️ Urlaubs-Einkaufslisten-App
+# 🧀 Bella Mozzarella
 
-Gemeinsame Einkaufsliste für Gruppenurlaube. Realtime-Sync via Supabase, mobil-optimiert.
+Gemeinsame Einkaufsliste für Gruppenausflüge. Realtime-Sync via Supabase, mobil-optimiert.
 
 ## Features
 
-- **Join-Code System**: Teilnehmer treten mit einem Code (z.B. `URLAUB26`) bei
+- **Join-Code System**: Teilnehmer treten mit einem Code (z.B. `BELLA26`) bei
 - **Einkaufsliste**: Items nach Kategorien gruppiert (Essen, Getraenke, Snacks, Equipment, Sonstiges)
 - **Mitbringen-Ansicht**: Wer bringt was mit? Items Personen zuweisen und "mitgebracht" abhaken
 - **Realtime-Sync**: Alle Änderungen erscheinen sofort bei allen Teilnehmern (Supabase Realtime)
@@ -86,7 +86,7 @@ Dies baut die App und pusht `dist/` auf den `gh-pages` Branch.
 
 ## Nutzung
 
-1. App öffnen → Join-Code eingeben (default: `URLAUB26`)
+1. App öffnen → Join-Code eingeben (default: `BELLA26`)
 2. Namen eingeben → "Beitreten"
 3. Items hinzufügen (Name, Menge, Kategorie, optional zugewiesen an)
 4. Häkchen setzen wenn gekauft ("erledigt")
