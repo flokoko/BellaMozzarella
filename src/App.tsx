@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { ListItem, ShoppingList, TabView } from './types'
+import type { ListItem, ShoppingList, TabView, ItemCategory, ListType } from './types'
 import { supabase, setJoinCode } from './lib/supabase'
 import { getResolvedTheme, toggleTheme, applyTheme, initThemeListener } from './lib/theme'
 import JoinScreen from './components/JoinScreen'
@@ -11,7 +11,9 @@ import './App.css'
 export default function App() {
   const [userName, setUserName] = useState<string | null>(null)
   const [list, setList] = useState<ShoppingList | null>(null)
-  const [items, setItems] = useState<ListItem[]>([])
+  const [shoppingItems, setShoppingItems] = useState<ListItem[]>([])
+  const [bringItems, setBringItems] = useState<ListItem[]>([])
+  const [categories, setCategories] = useState<ItemCategory[]>([])
   const [tab, setTab] = useState<TabView>('list')
   const [isDark, setIsDark] = useState(false)
 
@@ -30,43 +32,62 @@ export default function App() {
     }
   }, [])
 
-  const fetchItems = useCallback(async (listId: string) => {
+  const fetchItems = useCallback(async (listId: string, listType: ListType) => {
     const { data, error: err } = await supabase
       .from('items')
       .select('*')
       .eq('list_id', listId)
+      .eq('list_type', listType)
       .order('created_at', { ascending: true })
-    if (err) {
-      return
-    }
-    setItems((data || []) as ListItem[])
+    if (err) return
+    const items = (data || []) as ListItem[]
+    if (listType === 'shopping') setShoppingItems(items)
+    else setBringItems(items)
   }, [])
+
+  const fetchCategories = useCallback(async (listId: string) => {
+    const { data, error: err } = await supabase
+      .from('categories')
+      .select('*')
+      .eq('list_id', listId)
+      .order('sort_order', { ascending: true })
+    if (err) return
+    setCategories((data || []) as ItemCategory[])
+  }, [])
+
+  const fetchAll = useCallback(async (listId: string) => {
+    await Promise.all([
+      fetchItems(listId, 'shopping'),
+      fetchItems(listId, 'bring'),
+      fetchCategories(listId),
+    ])
+  }, [fetchItems, fetchCategories])
 
   const handleJoin = (name: string, l: ShoppingList) => {
     setJoinCode(l.join_code)
     setUserName(name)
     setList(l)
-    fetchItems(l.id)
+    fetchAll(l.id)
   }
 
-  // Polling: fetch items every 3 seconds (Realtime WebSocket doesn't support custom headers for RLS)
+  // Polling: fetch items and categories every 3 seconds
   useEffect(() => {
     if (!list) return
     const interval = setInterval(() => {
-      fetchItems(list.id)
+      fetchAll(list.id)
     }, 3000)
     return () => clearInterval(interval)
-  }, [list, fetchItems])
+  }, [list, fetchAll])
 
-  // Also re-fetch when the tab becomes visible again (user switches back to the app)
+  // Also re-fetch when the tab becomes visible again
   useEffect(() => {
     if (!list) return
     const onVisible = () => {
-      if (!document.hidden) fetchItems(list.id)
+      if (!document.hidden) fetchAll(list.id)
     }
     document.addEventListener('visibilitychange', onVisible)
     return () => document.removeEventListener('visibilitychange', onVisible)
-  }, [list, fetchItems])
+  }, [list, fetchAll])
 
   // Restore session from localStorage
   useEffect(() => {
@@ -81,11 +102,11 @@ export default function App() {
             setJoinCode(listData.join_code)
             setUserName(savedName)
             setList(listData)
-            fetchItems(listData.id)
+            fetchAll(listData.id)
           }
         })
     }
-  }, [fetchItems])
+  }, [fetchAll])
 
   if (!userName || !list) {
     return <JoinScreen onJoin={handleJoin} />
@@ -97,7 +118,9 @@ export default function App() {
     localStorage.removeItem('join_code')
     setUserName(null)
     setList(null)
-    setItems([])
+    setShoppingItems([])
+    setBringItems([])
+    setCategories([])
   }
 
   const handleRename = (newName: string) => {
@@ -110,7 +133,7 @@ export default function App() {
     setIsDark(getResolvedTheme() === 'dark')
   }
 
-  const checkedCount = items.filter((i) => i.is_checked).length
+  const checkedCount = shoppingItems.filter((i) => i.is_checked).length
 
   return (
     <div className="app">
@@ -135,7 +158,7 @@ export default function App() {
             onClick={() => setTab('list')}
           >
             🛒 Einkaufsliste
-            {checkedCount > 0 && <span className="tab-badge">{checkedCount}/{items.length}</span>}
+            {checkedCount > 0 && <span className="tab-badge">{checkedCount}/{shoppingItems.length}</span>}
           </button>
           <button
             className={`header-tab ${tab === 'bring' ? 'active' : ''}`}
@@ -154,10 +177,22 @@ export default function App() {
 
       <main className="app-main">
         {tab === 'list' && (
-          <ListScreen items={items} listId={list.id} userName={userName} onItemChange={() => fetchItems(list.id)} />
+          <ListScreen
+            items={shoppingItems}
+            categories={categories.filter((c) => c.list_type === 'shopping')}
+            listId={list.id}
+            userName={userName}
+            onItemChange={() => fetchItems(list.id, 'shopping')}
+          />
         )}
         {tab === 'bring' && (
-          <BringScreen items={items} listId={list.id} userName={userName} onItemChange={() => fetchItems(list.id)} />
+          <BringScreen
+            items={bringItems}
+            categories={categories.filter((c) => c.list_type === 'bring')}
+            listId={list.id}
+            userName={userName}
+            onItemChange={() => fetchItems(list.id, 'bring')}
+          />
         )}
         {tab === 'settings' && (
           <SettingsScreen
@@ -166,6 +201,9 @@ export default function App() {
             joinCode={list.join_code}
             onLeave={handleLeave}
             onRename={handleRename}
+            categories={categories}
+            listId={list.id}
+            onCategoriesChange={() => fetchCategories(list.id)}
           />
         )}
       </main>

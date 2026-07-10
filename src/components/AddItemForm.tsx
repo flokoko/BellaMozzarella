@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import type { Category } from '../types'
-import { CATEGORIES, CATEGORY_META } from '../types'
+import type { ItemCategory, ListType } from '../types'
 import { supabase } from '../lib/supabase'
 import './AddItemForm.css'
 
@@ -10,12 +9,22 @@ interface AddItemFormProps {
   onAdded?: () => void
   defaultAssignedTo?: string
   placeholder?: string
+  categories: ItemCategory[]
+  listType: ListType
 }
 
-export default function AddItemForm({ listId, userName, onAdded, defaultAssignedTo, placeholder }: AddItemFormProps) {
+export default function AddItemForm({
+  listId,
+  userName,
+  onAdded,
+  defaultAssignedTo,
+  placeholder,
+  categories,
+  listType,
+}: AddItemFormProps) {
   const [name, setName] = useState('')
   const [quantity, setQuantity] = useState('')
-  const [category, setCategory] = useState<Category>('Essen')
+  const [category, setCategory] = useState<string>(categories[0]?.name ?? '')
   const [assignedTo, setAssignedTo] = useState(defaultAssignedTo ?? '')
   const [expanded, setExpanded] = useState(false)
 
@@ -31,12 +40,13 @@ export default function AddItemForm({ listId, userName, onAdded, defaultAssigned
       is_checked: false,
       is_brought: false,
       created_by: userName,
+      list_type: listType,
     })
     if (insertError) return
     setName('')
     setQuantity('')
     setAssignedTo(defaultAssignedTo ?? '')
-    setCategory('Essen')
+    setCategory(categories[0]?.name ?? '')
     setExpanded(false)
     onAdded?.()
   }
@@ -66,13 +76,17 @@ export default function AddItemForm({ listId, userName, onAdded, defaultAssigned
             <select
               className="add-select"
               value={category}
-              onChange={(e) => setCategory(e.target.value as Category)}
+              onChange={(e) => setCategory(e.target.value)}
             >
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {CATEGORY_META[c].icon} {c}
-                </option>
-              ))}
+              {categories.length === 0 ? (
+                <option disabled>Keine Kategorien</option>
+              ) : (
+                categories.map((cat) => (
+                  <option key={cat.id} value={cat.name}>
+                    {cat.icon} {cat.name}
+                  </option>
+                ))
+              )}
             </select>
           </div>
           <input

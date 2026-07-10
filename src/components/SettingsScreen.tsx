@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
+import type { ItemCategory, ListType } from '../types'
 import type { ThemeMode } from '../lib/theme'
 import { getTheme, setTheme } from '../lib/theme'
+import { supabase } from '../lib/supabase'
 import './SettingsScreen.css'
 
 interface SettingsScreenProps {
@@ -9,9 +11,21 @@ interface SettingsScreenProps {
   joinCode: string
   onLeave: () => void
   onRename: (newName: string) => void
+  categories: ItemCategory[]
+  listId: string
+  onCategoriesChange: () => void
 }
 
-export default function SettingsScreen({ userName, listName, joinCode, onLeave, onRename }: SettingsScreenProps) {
+export default function SettingsScreen({
+  userName,
+  listName,
+  joinCode,
+  onLeave,
+  onRename,
+  categories,
+  listId,
+  onCategoriesChange,
+}: SettingsScreenProps) {
   const [theme, setThemeState] = useState<ThemeMode>('auto')
   const [editingName, setEditingName] = useState(false)
   const [newName, setNewName] = useState(userName)
@@ -31,6 +45,90 @@ export default function SettingsScreen({ userName, listName, joinCode, onLeave, 
       onRename(trimmed)
     }
     setEditingName(false)
+  }
+
+  const updateCategory = async (id: string, fields: Partial<ItemCategory>) => {
+    await supabase.from('categories').update(fields).eq('id', id)
+    onCategoriesChange()
+  }
+
+  const deleteCategory = async (id: string) => {
+    await supabase.from('categories').delete().eq('id', id)
+    onCategoriesChange()
+  }
+
+  const addCategory = async (listType: ListType) => {
+    const sortOrder = categories.filter((c) => c.list_type === listType).length + 1
+    await supabase.from('categories').insert({
+      list_id: listId,
+      list_type: listType,
+      name: 'Neue Kategorie',
+      icon: '📦',
+      color: '#9b6dd9',
+      bg: '#e8dcf7',
+      sort_order: sortOrder,
+    })
+    onCategoriesChange()
+  }
+
+  const renderCategoryEditor = (listType: ListType, title: string) => {
+    const cats = categories.filter((c) => c.list_type === listType)
+    return (
+      <div className="settings-cat-subsection" key={listType}>
+        <div className="settings-cat-subsection-header">
+          <span className="settings-cat-subsection-title">{title}</span>
+          <button
+            className="settings-cat-add-btn"
+            onClick={() => addCategory(listType)}
+          >
+            + Kategorie
+          </button>
+        </div>
+        {cats.length === 0 && (
+          <p className="settings-cat-empty">Keine Kategorien</p>
+        )}
+        {cats.map((cat) => (
+          <div key={cat.id} className="settings-cat-item">
+            <input
+              className="settings-cat-icon-input"
+              type="text"
+              value={cat.icon}
+              maxLength={4}
+              onChange={(e) => updateCategory(cat.id, { icon: e.target.value })}
+            />
+            <input
+              className="settings-cat-name-input"
+              type="text"
+              value={cat.name}
+              onChange={(e) => updateCategory(cat.id, { name: e.target.value })}
+            />
+            <label className="settings-cat-color-label">
+              <input
+                className="settings-cat-color-input"
+                type="color"
+                value={cat.color}
+                onChange={(e) => updateCategory(cat.id, { color: e.target.value })}
+              />
+            </label>
+            <label className="settings-cat-bg-label">
+              <input
+                className="settings-cat-color-input"
+                type="color"
+                value={cat.bg}
+                onChange={(e) => updateCategory(cat.id, { bg: e.target.value })}
+              />
+            </label>
+            <button
+              className="settings-cat-delete-btn"
+              onClick={() => deleteCategory(cat.id)}
+              aria-label="Kategorie löschen"
+            >
+              🗑
+            </button>
+          </div>
+        ))}
+      </div>
+    )
   }
 
   return (
@@ -110,6 +208,14 @@ export default function SettingsScreen({ userName, listName, joinCode, onLeave, 
         <button className="settings-btn-danger" onClick={onLeave}>
           Liste verlassen
         </button>
+      </div>
+
+      {/* ── Kategorien ──────────────────────────────────────────────── */}
+      <div className="settings-section">
+        <h3 className="settings-section-title">Kategorien</h3>
+        <p className="settings-cat-hint">Kategorien für Einkaufsliste und Mitbringen getrennt verwalten.</p>
+        {renderCategoryEditor('shopping', '🛒 Einkaufsliste')}
+        {renderCategoryEditor('bring', '🎒 Mitbringen')}
       </div>
 
       {/* ── Info ─────────────────────────────────────────────────────── */}

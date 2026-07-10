@@ -157,6 +157,137 @@
   color: white;
 }
 
+/* ── Category editor ──────────────────────────────────────────────── */
+.settings-cat-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+
+.settings-cat-subsection {
+  margin-bottom: 1rem;
+}
+
+.settings-cat-subsection:last-child {
+  margin-bottom: 0;
+}
+
+.settings-cat-subsection-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.settings-cat-subsection-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.settings-cat-add-btn {
+  border: 1px solid var(--border-color);
+  background: var(--button-bg);
+  color: var(--button-text);
+  padding: 0.3rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.settings-cat-add-btn:hover {
+  background: var(--accent);
+  color: white;
+}
+
+.settings-cat-empty {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  padding: 0.5rem 0;
+}
+
+.settings-cat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0;
+}
+
+.settings-cat-item + .settings-cat-item {
+  border-top: 1px solid var(--border-color);
+}
+
+.settings-cat-icon-input {
+  width: 42px;
+  text-align: center;
+  font-size: 1.1rem;
+  padding: 0.3rem;
+  border: 2px solid var(--input-border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  outline: none;
+  flex-shrink: 0;
+  transition: border-color 0.2s;
+}
+
+.settings-cat-icon-input:focus {
+  border-color: var(--accent);
+}
+
+.settings-cat-name-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.85rem;
+  border: 2px solid var(--input-border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.settings-cat-name-input:focus {
+  border-color: var(--accent);
+}
+
+.settings-cat-color-label {
+  flex-shrink: 0;
+  cursor: pointer;
+  position: relative;
+}
+
+.settings-cat-color-input {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--input-border);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 2px;
+  background: none;
+}
+
+.settings-cat-delete-btn {
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  font-size: 1rem;
+  padding: 0.3rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+  opacity: 0.6;
+}
+
+.settings-cat-delete-btn:hover {
+  opacity: 1;
+  background: var(--danger-hover);
+}
+
 /* ── Info section ────────────────────────────────────────────────── */
 .settings-info-block {
   text-align: center;

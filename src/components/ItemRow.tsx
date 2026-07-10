@@ -1,15 +1,17 @@
 import type { ListItem } from '../types'
-import { CATEGORY_META } from '../types'
 import { supabase } from '../lib/supabase'
 import './ItemRow.css'
 
 interface ItemRowProps {
   item: ListItem
   onChange?: () => void
+  categoryMeta?: { icon: string; color: string; bg: string }
 }
 
-export default function ItemRow({ item, onChange }: ItemRowProps) {
-  const meta = CATEGORY_META[item.category]
+const FALLBACK_META = { icon: '📦', color: '#9b6dd9', bg: '#e8dcf7' }
+
+export default function ItemRow({ item, onChange, categoryMeta }: ItemRowProps) {
+  const meta = categoryMeta ?? FALLBACK_META
 
   const toggleChecked = async () => {
     await supabase.from('items').update({ is_checked: !item.is_checked }).eq('id', item.id)

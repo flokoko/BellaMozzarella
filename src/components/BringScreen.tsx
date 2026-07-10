@@ -1,17 +1,18 @@
 import { useState, useMemo } from 'react'
-import type { BringFilter, ListItem } from '../types'
+import type { BringFilter, ListItem, ItemCategory } from '../types'
 import { supabase } from '../lib/supabase'
 import AddItemForm from './AddItemForm'
 import './BringScreen.css'
 
 interface BringScreenProps {
   items: ListItem[]
+  categories: ItemCategory[]
   listId: string
   userName: string
   onItemChange?: () => void
 }
 
-export default function BringScreen({ items, listId, userName, onItemChange }: BringScreenProps) {
+export default function BringScreen({ items, categories, listId, userName, onItemChange }: BringScreenProps) {
   const [filter, setFilter] = useState<BringFilter>('all')
 
   const filtered = useMemo(() => {
@@ -70,6 +71,8 @@ export default function BringScreen({ items, listId, userName, onItemChange }: B
         onAdded={onItemChange}
         defaultAssignedTo={userName}
         placeholder="Was bringst du mit?"
+        categories={categories}
+        listType="bring"
       />
 
       {grouped.length === 0 && (
