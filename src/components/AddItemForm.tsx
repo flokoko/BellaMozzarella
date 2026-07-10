@@ -22,7 +22,7 @@ export default function AddItemForm({ listId, userName, onAdded, defaultAssigned
   const handleAdd = async () => {
     const n = name.trim()
     if (!n) return
-    await supabase.from('items').insert({
+    const { error: insertError } = await supabase.from('items').insert({
       list_id: listId,
       name: n,
       quantity: quantity.trim() || '1',
@@ -32,9 +32,13 @@ export default function AddItemForm({ listId, userName, onAdded, defaultAssigned
       is_brought: false,
       created_by: userName,
     })
+    if (insertError) {
+      console.error('Insert failed:', insertError)
+      return
+    }
     setName('')
     setQuantity('')
-    setAssignedTo('')
+    setAssignedTo(defaultAssignedTo ?? '')
     setCategory('Essen')
     setExpanded(false)
     onAdded?.()
