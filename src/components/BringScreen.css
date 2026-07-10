@@ -1,0 +1,141 @@
+.bring-screen {
+  padding: 0.75rem 0;
+}
+
+.bring-filters {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.bring-filter-btn {
+  flex: 1;
+  padding: 0.5rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  background: white;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #777;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.bring-filter-btn.active {
+  border-color: #6a5acd;
+  background: #6a5acd;
+  color: white;
+}
+
+.bring-empty {
+  text-align: center;
+  color: #aaa;
+  padding: 2rem 1rem;
+  font-size: 0.95rem;
+}
+
+.bring-group {
+  margin-bottom: 1rem;
+}
+
+.bring-group-header {
+  display: flex;
+  align-items: center;
+  padding: 0.4rem 0.75rem;
+  border-radius: 10px;
+  background: #f5f0ff;
+  margin-bottom: 0.35rem;
+}
+
+.bring-person {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #2d2d44;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.bring-me-badge {
+  background: linear-gradient(135deg, #6a5acd, #00bfff);
+  color: white;
+  font-size: 0.7rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 5px;
+  font-weight: 600;
+}
+
+.bring-group-count {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.bring-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.75rem;
+  background: white;
+  border-radius: 10px;
+  margin-bottom: 0.3rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.bring-item.brought .bring-item-name,
+.bring-item.brought .bring-item-qty {
+  text-decoration: line-through;
+  color: #aaa;
+}
+
+.bring-checkbox-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.bring-checkbox-wrap input {
+  opacity: 0;
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+}
+
+.bring-checkmark {
+  width: 22px;
+  height: 22px;
+  border: 2px solid #d0d0d0;
+  border-radius: 7px;
+  transition: all 0.2s;
+}
+
+.bring-checkbox-wrap input:checked + .bring-checkmark {
+  background: linear-gradient(135deg, #2eae6b, #6bd9a0);
+  border-color: transparent;
+}
+
+.bring-checkbox-wrap input:checked + .bring-checkmark::after {
+  content: '✓';
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 18px;
+}
+
+.bring-item-name {
+  flex: 1;
+  font-size: 0.92rem;
+  word-break: break-word;
+}
+
+.bring-item-qty {
+  font-size: 0.8rem;
+  color: #999;
+  flex-shrink: 0;
+}

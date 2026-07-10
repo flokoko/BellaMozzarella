@@ -1,0 +1,143 @@
+:root {
+  --bg-gradient: linear-gradient(135deg, #f5f0ff 0%, #e8f4fd 100%);
+  --header-bg: rgba(255, 255, 255, 0.92);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  background: var(--bg-gradient);
+  color: #2d2d44;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 600px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--header-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid #e8e8e8;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.85rem;
+}
+
+.header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.header-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #2d2d44;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-user {
+  font-size: 0.72rem;
+  color: #888;
+}
+
+.header-user strong {
+  color: #6a5acd;
+}
+
+.header-leave {
+  border: none;
+  background: #f0f0f0;
+  color: #777;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.35rem 0.6rem;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.header-leave:hover {
+  background: #ff6b6b;
+  color: white;
+}
+
+.header-tabs {
+  display: flex;
+  gap: 0;
+  padding: 0 0.5rem;
+}
+
+.header-tab {
+  flex: 1;
+  padding: 0.6rem 0.5rem;
+  border: none;
+  background: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #999;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+}
+
+.header-tab.active {
+  color: #6a5acd;
+  border-bottom-color: #6a5acd;
+}
+
+.tab-badge {
+  font-size: 0.68rem;
+  background: #6a5acd;
+  color: white;
+  padding: 0.1rem 0.35rem;
+  border-radius: 5px;
+}
+
+.app-main {
+  flex: 1;
+  padding: 0 0.85rem 1.5rem;
+}
+
+.app-error {
+  color: #e74c3c;
+  text-align: center;
+  padding: 0.75rem;
+  font-size: 0.85rem;
+}

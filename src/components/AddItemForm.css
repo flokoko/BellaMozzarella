@@ -1,0 +1,105 @@
+.add-item-form {
+  margin-bottom: 0.75rem;
+}
+
+.add-item-trigger {
+  width: 100%;
+  padding: 0.85rem;
+  border: 2px dashed #c8c8e0;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.6);
+  font-size: 0.95rem;
+  color: #6a5acd;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.add-item-trigger:hover {
+  border-color: #6a5acd;
+  background: rgba(106, 90, 205, 0.06);
+}
+
+.add-plus {
+  font-size: 1.1rem;
+  margin-right: 0.25rem;
+}
+
+.add-item-expanded {
+  background: white;
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.add-input {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  margin-bottom: 0.5rem;
+}
+
+.add-input:focus {
+  border-color: #6a5acd;
+}
+
+.add-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.add-qty {
+  flex: 0 0 90px;
+}
+
+.add-select {
+  flex: 1;
+  padding: 0.65rem 0.5rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  outline: none;
+  cursor: pointer;
+  background: white;
+}
+
+.add-select:focus {
+  border-color: #6a5acd;
+}
+
+.add-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.add-btn-cancel,
+.add-btn-confirm {
+  flex: 1;
+  padding: 0.65rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.add-btn-cancel {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.add-btn-confirm {
+  background: linear-gradient(135deg, #6a5acd, #00bfff);
+  color: white;
+}
+
+.add-btn-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

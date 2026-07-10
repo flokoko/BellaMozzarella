@@ -1,0 +1,39 @@
+.list-screen {
+  padding: 0.75rem 0;
+}
+
+.list-empty {
+  text-align: center;
+  color: #aaa;
+  padding: 2rem 1rem;
+  font-size: 0.95rem;
+}
+
+.cat-section {
+  margin-bottom: 1rem;
+}
+
+.cat-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  margin-bottom: 0.4rem;
+}
+
+.cat-icon {
+  font-size: 1.2rem;
+}
+
+.cat-title {
+  font-size: 1rem;
+  font-weight: 700;
+  flex: 1;
+}
+
+.cat-count {
+  font-size: 0.75rem;
+  color: #888;
+  font-weight: 500;
+}
