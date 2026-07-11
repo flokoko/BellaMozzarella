@@ -1,65 +1,65 @@
 /* ── CSS Variables: Light mode (default) ──────────────────────────── */
 :root {
-  --bg-gradient: linear-gradient(160deg, #f0f4ff 0%, #faf0ff 50%, #f0f8ff 100%);
+  --bg-gradient: linear-gradient(160deg, #f0fff4 0%, #fafff0 50%, #fff0f0 100%);
   --header-bg: rgba(255, 255, 255, 0.72);
   --card-bg: rgba(255, 255, 255, 0.80);
   --card-bg-solid: #ffffff;
-  --text-primary: #1a1a2e;
-  --text-secondary: #6b6b80;
-  --text-muted: #9a9aae;
+  --text-primary: #1a2e1a;
+  --text-secondary: #6b806b;
+  --text-muted: #9aae9a;
   --border-color: rgba(0, 0, 0, 0.06);
   --input-border: rgba(0, 0, 0, 0.08);
-  --accent: #6c5ce7;
-  --accent-light: rgba(108, 92, 231, 0.1);
-  --accent-gradient: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
-  --accent-gradient-hover: linear-gradient(135deg, #5f50e3 0%, #8a82fc 100%);
+  --accent: #009246;
+  --accent-light: rgba(0, 146, 70, 0.1);
+  --accent-gradient: linear-gradient(135deg, #009246 0%, #00b35e 100%);
+  --accent-gradient-hover: linear-gradient(135deg, #007a3a 0%, #00a050 100%);
   --button-bg: rgba(0, 0, 0, 0.04);
-  --button-text: #6b6b80;
-  --shadow: rgba(108, 92, 231, 0.06);
+  --button-text: #6b806b;
+  --shadow: rgba(0, 146, 70, 0.06);
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
-  --checkbox-border: #d0d0e0;
+  --checkbox-border: #d0e0d0;
   --input-bg: rgba(255, 255, 255, 0.9);
   --select-bg: rgba(255, 255, 255, 0.9);
-  --cat-header-bg: #f5f0ff;
-  --danger: #e74c3c;
-  --danger-hover: #e74c3c;
-  --green-gradient: linear-gradient(135deg, #00b894, #55efc4);
-  --error-color: #e74c3c;
-  --dashed-border: rgba(108, 92, 231, 0.2);
+  --cat-header-bg: #f0fff4;
+  --danger: #ce2b37;
+  --danger-hover: #ce2b37;
+  --green-gradient: linear-gradient(135deg, #009246, #00b35e);
+  --error-color: #ce2b37;
+  --dashed-border: rgba(0, 146, 70, 0.2);
 }
 
 /* ── CSS Variables: Dark mode ─────────────────────────────────────── */
 [data-theme="dark"] {
-  --bg-gradient: linear-gradient(160deg, #0f0f1e 0%, #1a1a2e 50%, #16132e 100%);
-  --header-bg: rgba(20, 20, 35, 0.72);
-  --card-bg: rgba(30, 30, 50, 0.80);
-  --card-bg-solid: #252540;
-  --text-primary: #f0f0fa;
-  --text-secondary: #9999b8;
-  --text-muted: #666680;
+  --bg-gradient: linear-gradient(160deg, #0f1e0f 0%, #1a2e1a 50%, #1e1a16 100%);
+  --header-bg: rgba(20, 35, 20, 0.72);
+  --card-bg: rgba(30, 50, 30, 0.80);
+  --card-bg-solid: #254025;
+  --text-primary: #f0faf0;
+  --text-secondary: #99b899;
+  --text-muted: #668066;
   --border-color: rgba(255, 255, 255, 0.06);
   --input-border: rgba(255, 255, 255, 0.08);
-  --accent: #a29bfe;
-  --accent-light: rgba(162, 155, 254, 0.1);
-  --accent-gradient: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
-  --accent-gradient-hover: linear-gradient(135deg, #5f50e3 0%, #8a82fc 100%);
+  --accent: #00b35e;
+  --accent-light: rgba(0, 179, 94, 0.1);
+  --accent-gradient: linear-gradient(135deg, #009246 0%, #00b35e 100%);
+  --accent-gradient-hover: linear-gradient(135deg, #007a3a 0%, #00a050 100%);
   --button-bg: rgba(255, 255, 255, 0.06);
-  --button-text: #9999b8;
+  --button-text: #99b899;
   --shadow: rgba(0, 0, 0, 0.4);
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.4);
-  --checkbox-border: #444466;
-  --input-bg: rgba(40, 40, 60, 0.8);
-  --select-bg: rgba(40, 40, 60, 0.8);
-  --cat-header-bg: rgba(162, 155, 254, 0.12);
+  --checkbox-border: #446644;
+  --input-bg: rgba(40, 60, 40, 0.8);
+  --select-bg: rgba(40, 60, 40, 0.8);
+  --cat-header-bg: rgba(0, 179, 94, 0.12);
   --danger: #ff6b6b;
   --danger-hover: #ff6b6b;
-  --green-gradient: linear-gradient(135deg, #00b894, #55efc4);
+  --green-gradient: linear-gradient(135deg, #009246, #00b35e);
   --error-color: #ff6b6b;
-  --dashed-border: rgba(162, 155, 254, 0.2);
+  --dashed-border: rgba(0, 179, 94, 0.2);
 }
 
 /* ── Reset + base ─────────────────────────────────────────────────── */

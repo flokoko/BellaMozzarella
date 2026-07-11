@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bella-mozzarella-v1';
+const CACHE_NAME = 'bella-mozzarella-v2';
 const ASSETS = [
   '/BellaMozzarella/',
   '/BellaMozzarella/manifest.json',

@@ -6,8 +6,8 @@
   "scope": "/BellaMozzarella/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#6c5ce7",
-  "theme_color": "#6c5ce7",
+  "background_color": "#009246",
+  "theme_color": "#009246",
   "icons": [
     {
       "src": "/BellaMozzarella/icon-192.png",

@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  background: linear-gradient(160deg, #6c5ce7 0%, #a29bfe 50%, #4ab8e8 100%);
+  background: linear-gradient(160deg, #009246 0%, #f5fff5 50%, #ce2b37 100%);
   transition: background 0.3s ease;
 }
 
@@ -94,7 +94,7 @@
 
 .join-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(108, 92, 231, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 146, 70, 0.3);
 }
 
 .join-btn:active:not(:disabled) {
