@@ -277,22 +277,6 @@
   border-color: var(--accent);
 }
 
-.settings-cat-color-label {
-  flex-shrink: 0;
-  cursor: pointer;
-  position: relative;
-}
-
-.settings-cat-color-input {
-  width: 36px;
-  height: 36px;
-  border: 2px solid var(--input-border);
-  border-radius: 10px;
-  cursor: pointer;
-  padding: 2px;
-  background: none;
-}
-
 .settings-cat-delete-btn {
   flex-shrink: 0;
   border: none;

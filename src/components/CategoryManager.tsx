@@ -60,22 +60,6 @@ export default function CategoryManager({ categories, listId, listType, onCatego
                 value={cat.name}
                 onChange={(e) => updateCategory(cat.id, { name: e.target.value })}
               />
-              <label className="cat-manager-color-label" title="Textfarbe">
-                <input
-                  className="cat-manager-color-input"
-                  type="color"
-                  value={cat.color}
-                  onChange={(e) => updateCategory(cat.id, { color: e.target.value })}
-                />
-              </label>
-              <label className="cat-manager-color-label" title="Hintergrundfarbe">
-                <input
-                  className="cat-manager-color-input"
-                  type="color"
-                  value={cat.bg}
-                  onChange={(e) => updateCategory(cat.id, { bg: e.target.value })}
-                />
-              </label>
               <button
                 className="cat-manager-delete-btn"
                 onClick={() => deleteCategory(cat.id)}

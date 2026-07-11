@@ -135,22 +135,6 @@
   border-color: var(--accent);
 }
 
-.cat-manager-color-label {
-  flex-shrink: 0;
-  cursor: pointer;
-  position: relative;
-}
-
-.cat-manager-color-input {
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--input-border);
-  border-radius: 10px;
-  cursor: pointer;
-  padding: 2px;
-  background: none;
-}
-
 .cat-manager-delete-btn {
   flex-shrink: 0;
   border: none;

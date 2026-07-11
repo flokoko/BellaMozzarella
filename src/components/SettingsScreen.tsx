@@ -95,22 +95,6 @@ export default function SettingsScreen({
               value={cat.name}
               onChange={(e) => updateCategory(cat.id, { name: e.target.value })}
             />
-            <label className="settings-cat-color-label">
-              <input
-                className="settings-cat-color-input"
-                type="color"
-                value={cat.color}
-                onChange={(e) => updateCategory(cat.id, { color: e.target.value })}
-              />
-            </label>
-            <label className="settings-cat-bg-label">
-              <input
-                className="settings-cat-color-input"
-                type="color"
-                value={cat.bg}
-                onChange={(e) => updateCategory(cat.id, { bg: e.target.value })}
-              />
-            </label>
             <button
               className="settings-cat-delete-btn"
               onClick={() => deleteCategory(cat.id)}
