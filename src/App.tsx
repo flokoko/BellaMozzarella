@@ -109,6 +109,15 @@ export default function App() {
     }
   }, [fetchAll])
 
+  const reorderItems = useCallback(async (listType: ListType, newOrder: string[]) => {
+    if (!list) return
+    const updates = newOrder.map((id, index) =>
+      supabase.from('items').update({ sort_order: index }).eq('id', id)
+    )
+    await Promise.all(updates)
+    await fetchItems(list.id, listType)
+  }, [list, fetchItems])
+
   if (!userName || !list) {
     return <JoinScreen onJoin={handleJoin} />
   }
@@ -128,15 +137,6 @@ export default function App() {
     localStorage.setItem('user_name', newName)
     setUserName(newName)
   }
-
-  const reorderItems = useCallback(async (listType: ListType, newOrder: string[]) => {
-    if (!list) return
-    const updates = newOrder.map((id, index) =>
-      supabase.from('items').update({ sort_order: index }).eq('id', id)
-    )
-    await Promise.all(updates)
-    await fetchItems(list.id, listType)
-  }, [list, fetchItems])
 
   const handleToggleTheme = () => {
     toggleTheme()
