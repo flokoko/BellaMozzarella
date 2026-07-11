@@ -49,7 +49,11 @@ export default function AddItemForm({
       created_by: userName,
       list_type: listType,
     })
-    if (error) return
+    if (error) {
+      console.error('Insert failed:', error)
+      alert(`Fehler beim Speichern: ${error.message}`)
+      return
+    }
     setName('')
     setQuantity('')
     setAssignedTo(defaultAssignedTo ?? '')
