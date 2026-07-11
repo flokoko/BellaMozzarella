@@ -23,12 +23,14 @@ function DraggableBringGroup({
   personItems,
   isMe,
   onToggleBrought,
+  onDelete,
   onReorder,
 }: {
   person: string
   personItems: ListItem[]
   isMe: boolean
   onToggleBrought: (item: ListItem) => void
+  onDelete: (item: ListItem) => void
   onReorder?: (newOrder: string[]) => void
 }) {
   const {
@@ -82,6 +84,9 @@ function DraggableBringGroup({
             </label>
             <span className="bring-item-name">{item.name}</span>
             <span className="bring-item-qty">{item.quantity}</span>
+            <button className="bring-item-delete" onClick={() => onDelete(item)} aria-label="Löschen">
+              🗑
+            </button>
           </div>
         )
       })}
@@ -116,6 +121,11 @@ export default function BringScreen({ items, categories, listId, userName, onIte
 
   const toggleBrought = async (item: ListItem) => {
     await supabase.from('items').update({ is_brought: !item.is_brought }).eq('id', item.id)
+    onItemChange?.()
+  }
+
+  const deleteItem = async (item: ListItem) => {
+    await supabase.from('items').delete().eq('id', item.id)
     onItemChange?.()
   }
 
@@ -172,6 +182,7 @@ export default function BringScreen({ items, categories, listId, userName, onIte
             personItems={personItems}
             isMe={isMe}
             onToggleBrought={toggleBrought}
+            onDelete={deleteItem}
             onReorder={(newOrder) => onReorder?.('bring', newOrder)}
           />
         )

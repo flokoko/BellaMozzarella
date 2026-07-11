@@ -159,6 +159,24 @@
   flex-shrink: 0;
 }
 
+.bring-item-delete {
+  border: none;
+  background: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 8px;
+  opacity: 0.3;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.bring-item-delete:hover {
+  opacity: 1;
+  background: var(--accent-light);
+  transform: scale(1.1);
+}
+
 .bring-drag-handle {
   cursor: grab;
   font-size: 1rem;
