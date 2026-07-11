@@ -12,13 +12,13 @@
   color: var(--accent);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .add-item-trigger:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
   border-color: var(--accent);
-  background: var(--accent-light);
+  box-shadow: 0 4px 16px rgba(0, 146, 70, 0.15);
 }
 
 .add-item-trigger:active {
@@ -39,6 +39,7 @@
   padding: 1rem;
   box-shadow: var(--shadow-md);
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .add-input {
@@ -100,12 +101,17 @@
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .add-btn-cancel {
   background: var(--button-bg);
   color: var(--button-text);
+}
+
+.add-btn-cancel:hover {
+  background: var(--accent-light);
+  transform: translateY(-1px);
 }
 
 .add-btn-cancel:active {
@@ -118,11 +124,13 @@
 }
 
 .add-btn-confirm:hover:not(:disabled) {
-  filter: brightness(1.05);
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 146, 70, 0.25);
 }
 
 .add-btn-confirm:active:not(:disabled) {
-  transform: scale(0.97);
+  transform: scale(0.96);
 }
 
 .add-btn-confirm:disabled {

@@ -10,6 +10,7 @@
   border: 1px dashed var(--dashed-border);
   border-radius: 20px;
   margin: 0.5rem 0;
+  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .cat-section {
@@ -23,7 +24,12 @@
   padding: 0.6rem 0.85rem;
   border-radius: 14px;
   margin-bottom: 0.4rem;
-  transition: all 0.2s;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cat-header:hover {
+  transform: scale(1.01);
+  box-shadow: 0 2px 12px var(--shadow);
 }
 
 .cat-icon {

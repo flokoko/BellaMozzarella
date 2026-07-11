@@ -17,12 +17,12 @@
   font-weight: 600;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   box-shadow: var(--shadow-sm);
 }
 
 .cat-manager-toggle:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
   box-shadow: var(--shadow-md);
   border-color: var(--accent-light);
 }
@@ -62,7 +62,7 @@
 .cat-manager-panel {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .cat-manager-panel.expanded {
@@ -78,6 +78,7 @@
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
+  animation: fadeIn 0.3s ease;
 }
 
 .cat-manager-empty {
@@ -143,15 +144,19 @@
   padding: 0.3rem;
   cursor: pointer;
   border-radius: 8px;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   opacity: 0.5;
 }
 
 .cat-manager-delete-btn:hover {
   opacity: 1;
   background: var(--danger);
-  transform: scale(1.1);
+  transform: scale(1.15);
   color: white;
+}
+
+.cat-manager-delete-btn:active {
+  transform: scale(0.9);
 }
 
 .cat-manager-add-btn {
@@ -165,15 +170,16 @@
   font-weight: 600;
   color: var(--accent);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .cat-manager-add-btn:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
   background: var(--accent-light);
   border-color: var(--accent);
+  box-shadow: var(--shadow-sm);
 }
 
 .cat-manager-add-btn:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
 }

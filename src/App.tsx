@@ -185,7 +185,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="app-main">
+      <main className="app-main" key={tab}>
         {tab === 'list' && (
           <ListScreen
             items={shoppingItems}

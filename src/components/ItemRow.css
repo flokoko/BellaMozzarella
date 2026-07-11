@@ -10,12 +10,19 @@
   border-radius: 16px;
   margin-bottom: 0.4rem;
   box-shadow: var(--shadow-sm);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .item-row:hover {
   box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+}
+
+.item-row:active {
+  transform: scale(0.98);
 }
 
 .item-row.checked .item-name,
@@ -45,12 +52,13 @@
   height: 22px;
   border: 2px solid var(--checkbox-border);
   border-radius: 7px;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .item-checkbox-wrap input:checked + .item-checkmark {
   background: var(--accent-gradient);
   border-color: transparent;
+  animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .item-checkbox-wrap input:checked + .item-checkmark::after {
@@ -107,15 +115,19 @@
   cursor: pointer;
   padding: 4px 6px;
   border-radius: 8px;
-  opacity: 0.3;
-  transition: all 0.2s;
+  opacity: 0.25;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   flex-shrink: 0;
 }
 
 .item-delete:hover {
   opacity: 1;
   background: var(--accent-light);
-  transform: scale(1.1);
+  transform: scale(1.2) rotate(-5deg);
+}
+
+.item-delete:active {
+  transform: scale(0.9);
 }
 
 .item-drag-handle {
