@@ -43,7 +43,7 @@ export default function AddItemForm({
       name: n,
       quantity: quantity.trim() || '1',
       category,
-      assigned_to: assignedTo.trim() || null,
+      assigned_to: listType === 'bring' ? (assignedTo.trim() || null) : null,
       is_checked: false,
       is_brought: false,
       created_by: userName,
@@ -96,14 +96,16 @@ export default function AddItemForm({
               )}
             </select>
           </div>
-          <input
-            className="add-input"
-            type="text"
-            placeholder="Zuweisen an (optional)"
-            value={assignedTo}
-            onChange={(e) => setAssignedTo(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-          />
+          {listType === 'bring' && (
+            <input
+              className="add-input"
+              type="text"
+              placeholder="Zuweisen an (optional)"
+              value={assignedTo}
+              onChange={(e) => setAssignedTo(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+            />
+          )}
           <div className="add-actions">
             <button className="add-btn-cancel" onClick={() => setExpanded(false)}>
               Abbrechen

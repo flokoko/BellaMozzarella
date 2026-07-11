@@ -58,7 +58,6 @@ export default function ItemRow({ item, onChange, dragHandleProps, isDragging, i
         <span className="item-name">{item.name}</span>
         <div className="item-meta">
           <span className="item-qty">{item.quantity}</span>
-          {item.assigned_to && <span className="item-assigned">→ {item.assigned_to}</span>}
         </div>
       </div>
       <button className="item-delete" onClick={deleteItem} aria-label="Löschen">

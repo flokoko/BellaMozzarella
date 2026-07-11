@@ -19,8 +19,7 @@
 }
 
 .item-row.checked .item-name,
-.item-row.checked .item-qty,
-.item-row.checked .item-assigned {
+.item-row.checked .item-qty {
   text-decoration: line-through;
   color: var(--text-muted);
 }
@@ -87,12 +86,6 @@
 .item-qty {
   font-size: 0.8rem;
   color: var(--text-secondary);
-}
-
-.item-assigned {
-  font-size: 0.8rem;
-  color: var(--accent);
-  font-weight: 500;
 }
 
 .item-cat-badge {
