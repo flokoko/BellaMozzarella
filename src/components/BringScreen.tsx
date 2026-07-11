@@ -3,6 +3,7 @@ import type { PointerEvent as ReactPointerEvent } from 'react'
 import type { BringFilter, ListItem, ItemCategory, ListType } from '../types'
 import { supabase } from '../lib/supabase'
 import AddItemForm from './AddItemForm'
+import CategoryManager from './CategoryManager'
 import { useDragReorder } from '../hooks/useDragReorder'
 import './BringScreen.css'
 
@@ -13,6 +14,7 @@ interface BringScreenProps {
   userName: string
   onItemChange?: () => void
   onReorder?: (listType: ListType, newOrder: string[]) => void
+  onCategoriesChange?: () => void
 }
 
 /** Wraps one person's bring items with independent drag-reorder. */
@@ -87,7 +89,7 @@ function DraggableBringGroup({
   )
 }
 
-export default function BringScreen({ items, categories, listId, userName, onItemChange, onReorder }: BringScreenProps) {
+export default function BringScreen({ items, categories, listId, userName, onItemChange, onReorder, onCategoriesChange }: BringScreenProps) {
   const [filter, setFilter] = useState<BringFilter>('all')
 
   const filtered = useMemo(() => {
@@ -139,6 +141,13 @@ export default function BringScreen({ items, categories, listId, userName, onIte
           Unzugewiesen
         </button>
       </div>
+
+      <CategoryManager
+        categories={categories}
+        listId={listId}
+        listType="bring"
+        onCategoriesChange={onCategoriesChange}
+      />
 
       <AddItemForm
         listId={listId}

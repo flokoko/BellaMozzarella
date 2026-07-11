@@ -10,28 +10,37 @@
 
 .bring-filter-btn {
   flex: 1;
-  padding: 0.5rem;
+  padding: 0.5rem 0.8rem;
   border: 2px solid var(--input-border);
-  border-radius: 10px;
+  border-radius: 999px;
   background: var(--card-bg);
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--button-text);
   cursor: pointer;
-  transition: border-color 0.2s, background-color 0.2s, color 0.2s;
+  transition: all 0.2s;
 }
 
 .bring-filter-btn.active {
   border-color: var(--accent);
   background: var(--accent);
   color: white;
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.bring-filter-btn:active {
+  transform: scale(0.96);
 }
 
 .bring-empty {
   text-align: center;
   color: var(--text-muted);
-  padding: 2rem 1rem;
-  font-size: 0.95rem;
+  padding: 2.5rem 1rem;
+  font-size: 1.05rem;
+  border: 1px dashed var(--dashed-border);
+  border-radius: 20px;
+  margin: 0.5rem 0;
 }
 
 .bring-group {
@@ -41,8 +50,8 @@
 .bring-group-header {
   display: flex;
   align-items: center;
-  padding: 0.4rem 0.75rem;
-  border-radius: 10px;
+  padding: 0.5rem 0.85rem;
+  border-radius: 14px;
   background: var(--cat-header-bg);
   margin-bottom: 0.35rem;
   transition: background-color 0.3s ease;
@@ -62,9 +71,9 @@
   background: var(--accent-gradient);
   color: white;
   font-size: 0.7rem;
-  padding: 0.1rem 0.4rem;
-  border-radius: 5px;
-  font-weight: 600;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  font-weight: 700;
 }
 
 .bring-group-count {
@@ -78,10 +87,17 @@
   gap: 0.5rem;
   padding: 0.55rem 0.75rem;
   background: var(--card-bg);
-  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
   margin-bottom: 0.3rem;
-  box-shadow: 0 1px 3px var(--shadow);
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s;
+}
+
+.bring-item:hover {
+  box-shadow: var(--shadow-md);
 }
 
 .bring-item.brought .bring-item-name,
@@ -145,22 +161,26 @@
 
 .bring-drag-handle {
   cursor: grab;
-  font-size: 0.9rem;
-  opacity: 0.3;
-  padding: 0 2px;
+  font-size: 1rem;
+  opacity: 0.25;
+  padding: 4px 2px;
   flex-shrink: 0;
   touch-action: none;
   user-select: none;
+  transition: opacity 0.2s;
 }
+
 .bring-drag-handle:active {
   cursor: grabbing;
-  opacity: 0.6;
+  opacity: 0.7;
 }
+
 .bring-item.dragging {
-  opacity: 0.4;
-  box-shadow: 0 4px 12px var(--shadow);
+  opacity: 0.5;
+  box-shadow: var(--shadow-lg);
 }
+
 .bring-item.drag-over {
-  border-top: 2px solid var(--accent);
-  padding-top: calc(0.55rem - 2px);
+  border-top: 3px solid var(--accent);
+  padding-top: calc(0.55rem - 3px);
 }

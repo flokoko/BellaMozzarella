@@ -194,6 +194,7 @@ export default function App() {
             userName={userName}
             onItemChange={() => fetchItems(list.id, 'shopping')}
             onReorder={reorderItems}
+            onCategoriesChange={() => fetchCategories(list.id)}
           />
         )}
         {tab === 'bring' && (
@@ -204,6 +205,7 @@ export default function App() {
             userName={userName}
             onItemChange={() => fetchItems(list.id, 'bring')}
             onReorder={reorderItems}
+            onCategoriesChange={() => fetchCategories(list.id)}
           />
         )}
         {tab === 'settings' && (

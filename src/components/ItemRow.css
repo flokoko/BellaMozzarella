@@ -4,10 +4,18 @@
   gap: 0.5rem;
   padding: 0.65rem 0.75rem;
   background: var(--card-bg);
-  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
   margin-bottom: 0.4rem;
-  box-shadow: 0 1px 4px var(--shadow);
-  transition: opacity 0.2s, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.item-row:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 .item-row.checked .item-name,
@@ -91,10 +99,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  font-size: 1rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  font-size: 1.1rem;
   flex-shrink: 0;
   transition: background-color 0.3s ease;
 }
@@ -105,43 +113,41 @@
   font-size: 1.1rem;
   cursor: pointer;
   padding: 4px 6px;
-  border-radius: 6px;
-  opacity: 0.4;
-  transition: opacity 0.2s, background 0.2s;
+  border-radius: 8px;
+  opacity: 0.3;
+  transition: all 0.2s;
   flex-shrink: 0;
 }
 
 .item-delete:hover {
   opacity: 1;
-  background: var(--danger-hover);
-  border-radius: 6px;
+  background: var(--accent-light);
+  transform: scale(1.1);
 }
 
 .item-drag-handle {
   cursor: grab;
-  font-size: 1.1rem;
-  opacity: 0.3;
+  font-size: 1rem;
+  opacity: 0.25;
   padding: 4px 2px;
   flex-shrink: 0;
-  touch-action: none;  /* CRITICAL: prevents scrolling when dragging on touch */
+  touch-action: none;
   user-select: none;
-}
-.item-drag-handle:active {
-  cursor: grabbing;
-  opacity: 0.6;
-}
-.item-row.dragging {
-  opacity: 0.4;
-  box-shadow: 0 4px 12px var(--shadow);
-}
-.item-row.drag-over {
-  border-top: 2px solid var(--accent);
-  padding-top: calc(0.65rem - 2px);
+  transition: opacity 0.2s;
 }
 
-/* ── Dark mode category badge overrides ──────────────────────────── */
-[data-theme="dark"] .item-cat-badge[data-cat="Essen"]     { background: rgba(224, 120, 86, 0.15); }
-[data-theme="dark"] .item-cat-badge[data-cat="Getraenke"]  { background: rgba(74, 144, 217, 0.15); }
-[data-theme="dark"] .item-cat-badge[data-cat="Snacks"]    { background: rgba(232, 168, 58, 0.15); }
-[data-theme="dark"] .item-cat-badge[data-cat="Equipment"]  { background: rgba(107, 142, 90, 0.15); }
-[data-theme="dark"] .item-cat-badge[data-cat="Sonstiges"]  { background: rgba(155, 109, 217, 0.15); }
+.item-drag-handle:active {
+  cursor: grabbing;
+  opacity: 0.7;
+}
+
+.item-row.dragging {
+  opacity: 0.5;
+  box-shadow: var(--shadow-lg);
+  transform: scale(1.01);
+}
+
+.item-row.drag-over {
+  border-top: 3px solid var(--accent);
+  padding-top: calc(0.65rem - 3px);
+}

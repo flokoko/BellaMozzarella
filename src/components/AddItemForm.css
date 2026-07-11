@@ -4,20 +4,25 @@
 
 .add-item-trigger {
   width: 100%;
-  padding: 0.85rem;
+  padding: 0.95rem;
   border: 2px dashed var(--dashed-border);
-  border-radius: 14px;
-  background: rgba(128, 128, 128, 0.03);
+  border-radius: 16px;
+  background: var(--accent-light);
   font-size: 0.95rem;
   color: var(--accent);
   font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.2s, background-color 0.2s;
+  transition: all 0.2s;
 }
 
 .add-item-trigger:hover {
+  transform: translateY(-1px);
   border-color: var(--accent);
-  background: rgba(128, 128, 128, 0.06);
+  background: var(--accent-light);
+}
+
+.add-item-trigger:active {
+  transform: scale(0.97);
 }
 
 .add-plus {
@@ -27,20 +32,23 @@
 
 .add-item-expanded {
   background: var(--card-bg);
-  border-radius: 14px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
   padding: 1rem;
-  box-shadow: 0 4px 16px var(--shadow);
+  box-shadow: var(--shadow-md);
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .add-input {
   width: 100%;
-  padding: 0.65rem 0.75rem;
+  padding: 0.7rem 0.85rem;
   border: 2px solid var(--input-border);
-  border-radius: 10px;
+  border-radius: 14px;
   font-size: 0.95rem;
   outline: none;
-  transition: border-color 0.2s, background-color 0.3s ease, color 0.3s ease;
+  transition: all 0.2s;
   box-sizing: border-box;
   margin-bottom: 0.5rem;
   background: var(--input-bg);
@@ -48,7 +56,7 @@
 }
 
 .add-input:focus {
-  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-light);
 }
 
 .add-row {
@@ -62,19 +70,19 @@
 
 .add-select {
   flex: 1;
-  padding: 0.65rem 0.5rem;
+  padding: 0.7rem 0.5rem;
   border: 2px solid var(--input-border);
-  border-radius: 10px;
+  border-radius: 14px;
   font-size: 0.95rem;
   outline: none;
   cursor: pointer;
   background: var(--select-bg);
   color: var(--text-primary);
-  transition: border-color 0.2s, background-color 0.3s ease, color 0.3s ease;
+  transition: all 0.2s;
 }
 
 .add-select:focus {
-  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-light);
 }
 
 .add-actions {
@@ -88,11 +96,11 @@
   flex: 1;
   padding: 0.65rem;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s, color 0.2s;
+  transition: all 0.2s;
 }
 
 .add-btn-cancel {
@@ -100,9 +108,21 @@
   color: var(--button-text);
 }
 
+.add-btn-cancel:active {
+  transform: scale(0.97);
+}
+
 .add-btn-confirm {
   background: var(--accent-gradient);
   color: white;
+}
+
+.add-btn-confirm:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.add-btn-confirm:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 .add-btn-confirm:disabled {

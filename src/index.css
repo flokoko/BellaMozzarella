@@ -1,51 +1,65 @@
 /* ── CSS Variables: Light mode (default) ──────────────────────────── */
 :root {
-  --bg-gradient: linear-gradient(135deg, #f5f0ff 0%, #e8f4fd 100%);
-  --header-bg: rgba(255, 255, 255, 0.92);
-  --card-bg: #ffffff;
-  --text-primary: #2d2d44;
-  --text-secondary: #888888;
-  --text-muted: #aaaaaa;
-  --border-color: #e8e8e8;
-  --input-border: #e0e0e0;
-  --accent: #6a5acd;
-  --accent-gradient: linear-gradient(135deg, #6a5acd, #00bfff);
-  --button-bg: #f0f0f0;
-  --button-text: #777777;
-  --shadow: rgba(0, 0, 0, 0.06);
-  --checkbox-border: #d0d0d0;
-  --input-bg: #ffffff;
-  --select-bg: #ffffff;
+  --bg-gradient: linear-gradient(160deg, #f0f4ff 0%, #faf0ff 50%, #f0f8ff 100%);
+  --header-bg: rgba(255, 255, 255, 0.72);
+  --card-bg: rgba(255, 255, 255, 0.80);
+  --card-bg-solid: #ffffff;
+  --text-primary: #1a1a2e;
+  --text-secondary: #6b6b80;
+  --text-muted: #9a9aae;
+  --border-color: rgba(0, 0, 0, 0.06);
+  --input-border: rgba(0, 0, 0, 0.08);
+  --accent: #6c5ce7;
+  --accent-light: rgba(108, 92, 231, 0.1);
+  --accent-gradient: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+  --accent-gradient-hover: linear-gradient(135deg, #5f50e3 0%, #8a82fc 100%);
+  --button-bg: rgba(0, 0, 0, 0.04);
+  --button-text: #6b6b80;
+  --shadow: rgba(108, 92, 231, 0.06);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+  --checkbox-border: #d0d0e0;
+  --input-bg: rgba(255, 255, 255, 0.9);
+  --select-bg: rgba(255, 255, 255, 0.9);
   --cat-header-bg: #f5f0ff;
-  --danger-hover: #ff6b6b;
-  --green-gradient: linear-gradient(135deg, #2eae6b, #6bd9a0);
+  --danger: #e74c3c;
+  --danger-hover: #e74c3c;
+  --green-gradient: linear-gradient(135deg, #00b894, #55efc4);
   --error-color: #e74c3c;
-  --dashed-border: #c8c8e0;
+  --dashed-border: rgba(108, 92, 231, 0.2);
 }
 
 /* ── CSS Variables: Dark mode ─────────────────────────────────────── */
 [data-theme="dark"] {
-  --bg-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  --header-bg: rgba(26, 26, 46, 0.92);
-  --card-bg: #232338;
-  --text-primary: #e8e8f0;
-  --text-secondary: #9999aa;
-  --text-muted: #666677;
-  --border-color: #333344;
-  --input-border: #444455;
-  --accent: #8b7ed8;
-  --accent-gradient: linear-gradient(135deg, #8b7ed8, #4ab8e8);
-  --button-bg: #333344;
-  --button-text: #aaaabb;
-  --shadow: rgba(0, 0, 0, 0.3);
-  --checkbox-border: #555566;
-  --input-bg: #2a2a3e;
-  --select-bg: #2a2a3e;
-  --cat-header-bg: rgba(139, 126, 216, 0.15);
+  --bg-gradient: linear-gradient(160deg, #0f0f1e 0%, #1a1a2e 50%, #16132e 100%);
+  --header-bg: rgba(20, 20, 35, 0.72);
+  --card-bg: rgba(30, 30, 50, 0.80);
+  --card-bg-solid: #252540;
+  --text-primary: #f0f0fa;
+  --text-secondary: #9999b8;
+  --text-muted: #666680;
+  --border-color: rgba(255, 255, 255, 0.06);
+  --input-border: rgba(255, 255, 255, 0.08);
+  --accent: #a29bfe;
+  --accent-light: rgba(162, 155, 254, 0.1);
+  --accent-gradient: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+  --accent-gradient-hover: linear-gradient(135deg, #5f50e3 0%, #8a82fc 100%);
+  --button-bg: rgba(255, 255, 255, 0.06);
+  --button-text: #9999b8;
+  --shadow: rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.4);
+  --checkbox-border: #444466;
+  --input-bg: rgba(40, 40, 60, 0.8);
+  --select-bg: rgba(40, 40, 60, 0.8);
+  --cat-header-bg: rgba(162, 155, 254, 0.12);
+  --danger: #ff6b6b;
   --danger-hover: #ff6b6b;
-  --green-gradient: linear-gradient(135deg, #2eae6b, #6bd9a0);
+  --green-gradient: linear-gradient(135deg, #00b894, #55efc4);
   --error-color: #ff6b6b;
-  --dashed-border: #444455;
+  --dashed-border: rgba(162, 155, 254, 0.2);
 }
 
 /* ── Reset + base ─────────────────────────────────────────────────── */
@@ -60,7 +74,9 @@ html, body {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
   background: var(--bg-gradient);
   color: var(--text-primary);
   min-height: 100vh;

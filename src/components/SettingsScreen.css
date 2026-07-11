@@ -4,18 +4,21 @@
 
 .settings-section {
   background: var(--card-bg);
-  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
   padding: 1.25rem 1.1rem;
   margin-bottom: 1rem;
-  box-shadow: 0 1px 4px var(--shadow);
+  box-shadow: var(--shadow-sm);
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .settings-section-title {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   color: var(--text-secondary);
   margin-bottom: 0.85rem;
 }
@@ -66,14 +69,19 @@
   font-weight: 600;
   color: var(--button-text);
   padding: 0.4rem 0.75rem;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: background-color 0.2s, color 0.2s;
+  transition: all 0.2s;
+}
+
+.theme-toggle-btn:active {
+  transform: scale(0.95);
 }
 
 .theme-toggle-btn.active {
   background: var(--accent);
   color: white;
+  box-shadow: var(--shadow-sm);
 }
 
 /* ── Account info display ────────────────────────────────────────── */
@@ -106,26 +114,31 @@
   flex: 1;
   padding: 0.5rem 0.75rem;
   border: 2px solid var(--input-border);
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 0.9rem;
   outline: none;
   background: var(--input-bg);
   color: var(--text-primary);
-  transition: border-color 0.2s;
+  transition: all 0.2s;
 }
 
 .settings-inline-input:focus {
+  box-shadow: 0 0 0 4px var(--accent-light);
   border-color: var(--accent);
 }
 
 .settings-btn {
   border: none;
   padding: 0.45rem 0.85rem;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s, color 0.2s;
+  transition: all 0.2s;
+}
+
+.settings-btn:active {
+  transform: scale(0.97);
 }
 
 .settings-btn-primary {
@@ -140,21 +153,27 @@
 
 .settings-btn-danger {
   background: none;
-  color: var(--danger-hover);
-  border: 1px solid var(--danger-hover);
+  color: var(--danger);
+  border: 1px solid var(--danger);
   width: 100%;
   margin-top: 0.75rem;
   padding: 0.55rem;
-  border-radius: 10px;
+  border-radius: 14px;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s, color 0.2s;
+  transition: all 0.2s;
 }
 
 .settings-btn-danger:hover {
-  background: var(--danger-hover);
+  background: var(--danger);
   color: white;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.settings-btn-danger:active {
+  transform: scale(0.97);
 }
 
 /* ── Category editor ──────────────────────────────────────────────── */
@@ -191,16 +210,17 @@
   background: var(--button-bg);
   color: var(--button-text);
   padding: 0.3rem 0.6rem;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
 }
 
 .settings-cat-add-btn:hover {
   background: var(--accent);
   color: white;
+  transform: translateY(-1px);
 }
 
 .settings-cat-empty {
@@ -213,7 +233,7 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.4rem 0;
+  padding: 0.5rem 0;
 }
 
 .settings-cat-item + .settings-cat-item {
@@ -226,15 +246,16 @@
   font-size: 1.1rem;
   padding: 0.3rem;
   border: 2px solid var(--input-border);
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--input-bg);
   color: var(--text-primary);
   outline: none;
   flex-shrink: 0;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
 }
 
 .settings-cat-icon-input:focus {
+  box-shadow: 0 0 0 4px var(--accent-light);
   border-color: var(--accent);
 }
 
@@ -244,14 +265,15 @@
   padding: 0.3rem 0.5rem;
   font-size: 0.85rem;
   border: 2px solid var(--input-border);
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--input-bg);
   color: var(--text-primary);
   outline: none;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
 }
 
 .settings-cat-name-input:focus {
+  box-shadow: 0 0 0 4px var(--accent-light);
   border-color: var(--accent);
 }
 
@@ -262,10 +284,10 @@
 }
 
 .settings-cat-color-input {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border: 2px solid var(--input-border);
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   padding: 2px;
   background: none;
@@ -278,14 +300,16 @@
   font-size: 1rem;
   padding: 0.3rem;
   cursor: pointer;
-  border-radius: 6px;
-  transition: background-color 0.2s;
+  border-radius: 8px;
+  transition: all 0.2s;
   opacity: 0.6;
 }
 
 .settings-cat-delete-btn:hover {
   opacity: 1;
-  background: var(--danger-hover);
+  background: var(--danger);
+  transform: scale(1.1);
+  color: white;
 }
 
 /* ── Info section ────────────────────────────────────────────────── */
@@ -294,8 +318,8 @@
 }
 
 .settings-app-name {
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-size: 1.2rem;
+  font-weight: 800;
   color: var(--text-primary);
   margin-bottom: 0.1rem;
 }

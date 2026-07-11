@@ -2,6 +2,7 @@ import type { ListItem, ItemCategory } from '../types'
 import type { PointerEvent as ReactPointerEvent } from 'react'
 import ItemRow from './ItemRow'
 import AddItemForm from './AddItemForm'
+import CategoryManager from './CategoryManager'
 import { useDragReorder } from '../hooks/useDragReorder'
 import './ListScreen.css'
 
@@ -12,6 +13,7 @@ interface ListScreenProps {
   userName: string
   onItemChange?: () => void
   onReorder?: (listType: 'shopping', newOrder: string[]) => void
+  onCategoriesChange?: () => void
 }
 
 /** Wraps one category's items with independent drag-reorder. */
@@ -65,9 +67,15 @@ function DraggableCategorySection({
   )
 }
 
-export default function ListScreen({ items, categories, listId, userName, onItemChange, onReorder }: ListScreenProps) {
+export default function ListScreen({ items, categories, listId, userName, onItemChange, onReorder, onCategoriesChange }: ListScreenProps) {
   return (
     <div className="list-screen">
+      <CategoryManager
+        categories={categories}
+        listId={listId}
+        listType="shopping"
+        onCategoriesChange={onCategoriesChange}
+      />
       <AddItemForm
         listId={listId}
         userName={userName}
