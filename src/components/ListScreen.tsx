@@ -41,7 +41,6 @@ function DraggableCategorySection({
   return (
     <div className="cat-section">
       <div className="cat-header" style={{ background: cat.bg }} data-cat={cat.name}>
-        <span className="cat-icon">{cat.icon}</span>
         <span className="cat-title" style={{ color: cat.color }}>{cat.name}</span>
         <span className="cat-count">
           {checkedCount}/{catItems.length} erledigt
@@ -52,7 +51,6 @@ function DraggableCategorySection({
           key={item.id}
           item={item}
           onChange={onItemChange}
-          categoryMeta={{ icon: cat.icon, color: cat.color, bg: cat.bg }}
           dragHandleProps={{
             onPointerDown: (e: ReactPointerEvent) => handlePointerDown(e, item.id),
             onPointerMove: handlePointerMove,

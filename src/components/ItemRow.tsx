@@ -6,7 +6,6 @@ import './ItemRow.css'
 interface ItemRowProps {
   item: ListItem
   onChange?: () => void
-  categoryMeta?: { icon: string; color: string; bg: string }
   dragHandleProps?: {
     onPointerDown: (e: ReactPointerEvent) => void
     onPointerMove: (e: ReactPointerEvent) => void
@@ -17,10 +16,7 @@ interface ItemRowProps {
   registerRef?: (el: HTMLDivElement | null) => void
 }
 
-const FALLBACK_META = { icon: '📦', color: '#9b6dd9', bg: '#e8dcf7' }
-
-export default function ItemRow({ item, onChange, categoryMeta, dragHandleProps, isDragging, isDragOver, registerRef }: ItemRowProps) {
-  const meta = categoryMeta ?? FALLBACK_META
+export default function ItemRow({ item, onChange, dragHandleProps, isDragging, isDragOver, registerRef }: ItemRowProps) {
 
   const toggleChecked = async () => {
     await supabase.from('items').update({ is_checked: !item.is_checked }).eq('id', item.id)
@@ -65,9 +61,6 @@ export default function ItemRow({ item, onChange, categoryMeta, dragHandleProps,
           {item.assigned_to && <span className="item-assigned">→ {item.assigned_to}</span>}
         </div>
       </div>
-      <span className="item-cat-badge" style={{ background: meta.bg, color: meta.color }} data-cat={item.category}>
-        {meta.icon}
-      </span>
       <button className="item-delete" onClick={deleteItem} aria-label="Löschen">
         🗑
       </button>

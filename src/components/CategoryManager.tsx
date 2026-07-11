@@ -29,7 +29,6 @@ export default function CategoryManager({ categories, listId, listType, onCatego
       list_id: listId,
       list_type: listType,
       name: 'Neue Kategorie',
-      icon: '📦',
       color: '#9b6dd9',
       bg: '#e8dcf7',
       sort_order: sortOrder,
@@ -55,13 +54,6 @@ export default function CategoryManager({ categories, listId, listType, onCatego
           )}
           {categories.map((cat) => (
             <div key={cat.id} className="cat-manager-row">
-              <input
-                className="cat-manager-icon-input"
-                type="text"
-                value={cat.icon}
-                maxLength={4}
-                onChange={(e) => updateCategory(cat.id, { icon: e.target.value })}
-              />
               <input
                 className="cat-manager-name-input"
                 type="text"

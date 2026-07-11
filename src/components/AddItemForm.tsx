@@ -90,7 +90,7 @@ export default function AddItemForm({
               ) : (
                 categories.map((cat) => (
                   <option key={cat.id} value={cat.name}>
-                    {cat.icon} {cat.name}
+                    {cat.name}
                   </option>
                 ))
               )}

@@ -63,7 +63,6 @@ export default function SettingsScreen({
       list_id: listId,
       list_type: listType,
       name: 'Neue Kategorie',
-      icon: '📦',
       color: '#9b6dd9',
       bg: '#e8dcf7',
       sort_order: sortOrder,
@@ -89,13 +88,6 @@ export default function SettingsScreen({
         )}
         {cats.map((cat) => (
           <div key={cat.id} className="settings-cat-item">
-            <input
-              className="settings-cat-icon-input"
-              type="text"
-              value={cat.icon}
-              maxLength={4}
-              onChange={(e) => updateCategory(cat.id, { icon: e.target.value })}
-            />
             <input
               className="settings-cat-name-input"
               type="text"

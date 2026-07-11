@@ -5,7 +5,6 @@ export interface ItemCategory {
   list_id: string
   list_type: ListType
   name: string
-  icon: string
   color: string
   bg: string
   sort_order: number
