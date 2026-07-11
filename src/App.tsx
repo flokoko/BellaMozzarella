@@ -6,6 +6,7 @@ import JoinScreen from './components/JoinScreen'
 import ListScreen from './components/ListScreen'
 import BringScreen from './components/BringScreen'
 import SettingsScreen from './components/SettingsScreen'
+import { MozzarellaIcon } from './components/MozzarellaIcon'
 import './App.css'
 
 export default function App() {
@@ -150,7 +151,7 @@ export default function App() {
       <header className="app-header">
         <div className="header-top">
           <div className="header-info">
-            <span className="header-name">📋 {list.name}</span>
+            <span className="header-name"><MozzarellaIcon size={20} className="inline-mozzarella" /> {list.name}</span>
             <span className="header-user">
               Angemeldet als: <strong>{userName}</strong>
             </span>
@@ -167,7 +168,7 @@ export default function App() {
             className={`header-tab ${tab === 'list' ? 'active' : ''}`}
             onClick={() => setTab('list')}
           >
-            🛒 Einkaufsliste
+            <MozzarellaIcon size={18} className="inline-mozzarella" /> Einkaufsliste
             {checkedCount > 0 && <span className="tab-badge">{checkedCount}/{shoppingItems.length}</span>}
           </button>
           <button

@@ -191,8 +191,8 @@ export default function SettingsScreen({
       <div className="settings-section">
         <h3 className="settings-section-title">Kategorien</h3>
         <p className="settings-cat-hint">Kategorien für Einkaufsliste und Mitbringen getrennt verwalten.</p>
-        {renderCategoryEditor('shopping', '🛒 Einkaufsliste')}
-        {renderCategoryEditor('bring', '🎒 Mitbringen')}
+        {renderCategoryEditor('shopping', 'Einkaufsliste')}
+        {renderCategoryEditor('bring', 'Mitbringen')}
       </div>
 
       {/* ── Info ─────────────────────────────────────────────────────── */}

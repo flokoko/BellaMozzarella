@@ -92,6 +92,12 @@ body {
   min-height: 100vh;
 }
 
+/* ── Inline Mozzarella Icon ──────────────────────────────────────── */
+.inline-mozzarella {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
 /* ── Keyframe Animations ──────────────────────────────────────────── */
 @keyframes slideIn {
   from {
