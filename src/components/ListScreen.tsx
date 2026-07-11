@@ -3,7 +3,7 @@ import type { PointerEvent as ReactPointerEvent } from 'react'
 import ItemRow from './ItemRow'
 import AddItemForm from './AddItemForm'
 import CategoryManager from './CategoryManager'
-import { MozzarellaIcon } from './MozzarellaIcon'
+
 import { useDragReorder } from '../hooks/useDragReorder'
 import './ListScreen.css'
 
@@ -84,7 +84,7 @@ export default function ListScreen({ items, categories, listId, userName, onItem
       />
 
       {items.length === 0 && (
-        <p className="list-empty"><MozzarellaIcon size={32} className="inline-mozzarella" /><br/>Noch keine Items — füge welche hinzu!</p>
+        <p className="list-empty">🍕<br/>Noch keine Items — füge welche hinzu!</p>
       )}
 
       {categories.map((cat) => {

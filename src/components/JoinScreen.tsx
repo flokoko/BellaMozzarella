@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { ShoppingList } from '../types'
 import { supabase } from '../lib/supabase'
-import { MozzarellaIcon } from './MozzarellaIcon'
+
 import './JoinScreen.css'
 
 interface JoinScreenProps {
@@ -44,7 +44,7 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
   return (
     <div className="join-screen">
       <div className="join-card">
-        <div className="join-icon"><MozzarellaIcon size={64} /></div>
+        <div className="join-icon">🇮🇹</div>
         <h1>Bella Mozzarella</h1>
         <p className="join-subtitle">Gemeinsam planen, zusammenpacken.</p>
 

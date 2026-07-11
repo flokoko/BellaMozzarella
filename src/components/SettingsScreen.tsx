@@ -3,7 +3,7 @@ import type { ItemCategory, ListType } from '../types'
 import type { ThemeMode } from '../lib/theme'
 import { getTheme, setTheme } from '../lib/theme'
 import { supabase } from '../lib/supabase'
-import { MozzarellaIcon } from './MozzarellaIcon'
+
 import './SettingsScreen.css'
 
 interface SettingsScreenProps {
@@ -199,7 +199,7 @@ export default function SettingsScreen({
       <div className="settings-section">
         <h3 className="settings-section-title">Info</h3>
         <div className="settings-info-block">
-          <div className="settings-app-name"><MozzarellaIcon size={32} /> Bella Mozzarella</div>
+          <div className="settings-app-name">🇮🇹 Bella Mozzarella</div>
           <div className="settings-app-version">Version 1.0.0</div>
           <p className="settings-app-desc">
             Gemeinsame Einkaufsliste mit Realtime-Sync. Built with React, Supabase &amp; Vite.

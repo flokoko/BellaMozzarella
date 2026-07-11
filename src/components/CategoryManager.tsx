@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { ItemCategory, ListType } from '../types'
 import { supabase } from '../lib/supabase'
-import { MozzarellaIcon } from './MozzarellaIcon'
+
 import './CategoryManager.css'
 
 interface CategoryManagerProps {
@@ -43,7 +43,7 @@ export default function CategoryManager({ categories, listId, listType, onCatego
         className="cat-manager-toggle"
         onClick={() => setExpanded((v) => !v)}
       >
-        <span className="cat-manager-toggle-icon"><MozzarellaIcon size={16} className="inline-mozzarella" /></span>
+        <span className="cat-manager-toggle-icon">🍝</span>
         <span className="cat-manager-toggle-text">Kategorien</span>
         <span className="cat-manager-toggle-count">{categories.length}</span>
         <span className={`cat-manager-chevron ${expanded ? 'open' : ''}`}>▾</span>
