@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react'
 import type { PointerEvent as ReactPointerEvent } from 'react'
 import type { BringFilter, ListItem, ItemCategory, ListType } from '../types'
-import { supabase } from '../lib/supabase'
 import AddItemForm from './AddItemForm'
 import CategoryManager from './CategoryManager'
 import { useDragReorder } from '../hooks/useDragReorder'
@@ -12,6 +11,8 @@ interface BringScreenProps {
   categories: ItemCategory[]
   listId: string
   userName: string
+  onItemToggle?: (item: ListItem) => void
+  onItemDelete?: (item: ListItem) => void
   onItemChange?: () => void
   onReorder?: (listType: ListType, newOrder: string[]) => void
   onCategoriesChange?: () => void
@@ -94,7 +95,7 @@ function DraggableBringGroup({
   )
 }
 
-export default function BringScreen({ items, categories, listId, userName, onItemChange, onReorder, onCategoriesChange }: BringScreenProps) {
+export default function BringScreen({ items, categories, listId, userName, onItemToggle, onItemDelete, onItemChange, onReorder, onCategoriesChange }: BringScreenProps) {
   const [filter, setFilter] = useState<BringFilter>('all')
 
   const filtered = useMemo(() => {
@@ -118,16 +119,6 @@ export default function BringScreen({ items, categories, listId, userName, onIte
     })
     return sorted
   }, [filtered, userName])
-
-  const toggleBrought = async (item: ListItem) => {
-    await supabase.from('items').update({ is_brought: !item.is_brought }).eq('id', item.id)
-    onItemChange?.()
-  }
-
-  const deleteItem = async (item: ListItem) => {
-    await supabase.from('items').delete().eq('id', item.id)
-    onItemChange?.()
-  }
 
   return (
     <div className="bring-screen">
@@ -181,8 +172,8 @@ export default function BringScreen({ items, categories, listId, userName, onIte
             person={person}
             personItems={personItems}
             isMe={isMe}
-            onToggleBrought={toggleBrought}
-            onDelete={deleteItem}
+            onToggleBrought={onItemToggle ?? (() => {})}
+            onDelete={onItemDelete ?? (() => {})}
             onReorder={(newOrder) => onReorder?.('bring', newOrder)}
           />
         )

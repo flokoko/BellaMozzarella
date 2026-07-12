@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react'
-import type { ListItem, ShoppingList, TabView, ItemCategory, ListType, Meal, MealIdea, QuickNote } from './types'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import type { ListItem, ItemCategory, ListType, ShoppingList, TabView, Meal, MealIdea, QuickNote } from './types'
 import { supabase, setJoinCode } from './lib/supabase'
 import { getResolvedTheme, toggleTheme, applyTheme, initThemeListener } from './lib/theme'
 import JoinScreen from './components/JoinScreen'
@@ -36,6 +36,7 @@ export default function App() {
     }
   }, [])
 
+  // ── Fetch functions ──────────────────────────────────────────────
   const fetchItems = useCallback(async (listId: string, listType: ListType) => {
     const { data, error: err } = await supabase
       .from('items')
@@ -44,7 +45,7 @@ export default function App() {
       .eq('list_type', listType)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true })
-    if (err) return
+    if (err) { console.error('fetchItems error:', err); return }
     const items = (data || []) as ListItem[]
     if (listType === 'shopping') setShoppingItems(items)
     else setBringItems(items)
@@ -56,7 +57,7 @@ export default function App() {
       .select('*')
       .eq('list_id', listId)
       .order('sort_order', { ascending: true })
-    if (err) return
+    if (err) { console.error('fetchCategories error:', err); return }
     setCategories((data || []) as ItemCategory[])
   }, [])
 
@@ -66,7 +67,7 @@ export default function App() {
       .select('*')
       .eq('list_id', listId)
       .order('created_at', { ascending: true })
-    if (err) return
+    if (err) { console.error('fetchMeals error:', err); return }
     setMeals((data || []) as Meal[])
   }, [])
 
@@ -76,7 +77,7 @@ export default function App() {
       .select('*')
       .eq('list_id', listId)
       .order('created_at', { ascending: true })
-    if (err) return
+    if (err) { console.error('fetchMealIdeas error:', err); return }
     setMealIdeas((data || []) as MealIdea[])
   }, [])
 
@@ -86,7 +87,7 @@ export default function App() {
       .select('*')
       .eq('list_id', listId)
       .order('created_at', { ascending: false })
-    if (err) return
+    if (err) { console.error('fetchNotes error:', err); return }
     setNotes((data || []) as QuickNote[])
   }, [])
 
@@ -101,30 +102,42 @@ export default function App() {
     ])
   }, [fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes])
 
-  const handleJoin = (name: string, l: ShoppingList) => {
-    setJoinCode(l.join_code)
-    setUserName(name)
-    setList(l)
-    fetchAll(l.id)
-  }
+  // ── Polling (5000ms, only when visible) ───────────────────────────
+  const lastFetchTime = useRef(0)
 
   useEffect(() => {
     if (!list) return
-    const interval = setInterval(() => {
-      fetchAll(list.id)
-    }, 3000)
-    return () => clearInterval(interval)
-  }, [list, fetchAll])
-
-  useEffect(() => {
-    if (!list) return
-    const onVisible = () => {
-      if (!document.hidden) fetchAll(list.id)
+    let interval: ReturnType<typeof setInterval> | null = null
+    const start = () => {
+      if (interval) clearInterval(interval)
+      interval = setInterval(() => {
+        fetchAll(list.id)
+      }, 5000)
     }
-    document.addEventListener('visibilitychange', onVisible)
-    return () => document.removeEventListener('visibilitychange', onVisible)
+    const stop = () => {
+      if (interval) { clearInterval(interval); interval = null }
+    }
+    if (!document.hidden) start()
+    const onVisibility = () => {
+      if (document.hidden) {
+        stop()
+      } else {
+        const now = Date.now()
+        if (now - lastFetchTime.current > 3000) {
+          lastFetchTime.current = now
+          fetchAll(list.id)
+        }
+        start()
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      stop()
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
   }, [list, fetchAll])
 
+  // ── Auto-restore session ──────────────────────────────────────────
   useEffect(() => {
     const savedName = localStorage.getItem('user_name')
     const savedCode = localStorage.getItem('join_code')
@@ -143,18 +156,67 @@ export default function App() {
     }
   }, [fetchAll])
 
+  // ── Optimistic update helpers ────────────────────────────────────
+  const toggleShoppingItem = useCallback((item: ListItem) => {
+    setShoppingItems(prev => prev.map(i => i.id === item.id ? { ...i, is_checked: !i.is_checked } : i))
+    supabase.from('items').update({ is_checked: !item.is_checked }).eq('id', item.id).then()
+  }, [])
+
+  const deleteShoppingItem = useCallback((item: ListItem) => {
+    setShoppingItems(prev => prev.filter(i => i.id !== item.id))
+    supabase.from('items').delete().eq('id', item.id).then()
+  }, [])
+
+  const toggleBringItem = useCallback((item: ListItem) => {
+    setBringItems(prev => prev.map(i => i.id === item.id ? { ...i, is_brought: !i.is_brought } : i))
+    supabase.from('items').update({ is_brought: !item.is_brought }).eq('id', item.id).then()
+  }, [])
+
+  const deleteBringItem = useCallback((item: ListItem) => {
+    setBringItems(prev => prev.filter(i => i.id !== item.id))
+    supabase.from('items').delete().eq('id', item.id).then()
+  }, [])
+
+  // ── Batch reorder (single RPC) ────────────────────────────────────
   const reorderItems = useCallback(async (listType: ListType, newOrder: string[]) => {
     if (!list) return
-    const updates = newOrder.map((id, index) =>
-      supabase.from('items').update({ sort_order: index }).eq('id', id)
-    )
-    await Promise.all(updates)
-    await fetchItems(list.id, listType)
-  }, [list, fetchItems])
+    // Optimistic: update local state immediately
+    if (listType === 'shopping') {
+      setShoppingItems(prev => {
+        const map = new Map(prev.map(i => [i.id, i]))
+        return newOrder.map((id, idx) => {
+          const item = map.get(id)
+          return item ? { ...item, sort_order: idx } : item!
+        }).filter(Boolean)
+      })
+    } else {
+      setBringItems(prev => {
+        const map = new Map(prev.map(i => [i.id, i]))
+        return newOrder.map((id, idx) => {
+          const item = map.get(id)
+          return item ? { ...item, sort_order: idx } : item!
+        }).filter(Boolean)
+      })
+    }
+    await supabase.rpc('batch_reorder_items', { item_ids: newOrder })
+  }, [list])
+
+  // ── Memoized category filters ────────────────────────────────────
+  const shoppingCategories = useMemo(() => categories.filter((c) => c.list_type === 'shopping'), [categories])
+  const bringCategories = useMemo(() => categories.filter((c) => c.list_type === 'bring'), [categories])
+
+  const handleJoin = (name: string, l: ShoppingList) => {
+    setJoinCode(l.join_code)
+    setUserName(name)
+    setList(l)
+    fetchAll(l.id)
+  }
 
   if (!userName || !list) {
     return <JoinScreen onJoin={handleJoin} />
   }
+
+  // ── Event handlers (after hooks, before JSX) ─────────────────────
 
   const handleLeave = () => {
     setJoinCode('')
@@ -235,9 +297,11 @@ export default function App() {
         {tab === 'list' && (
           <ListScreen
             items={shoppingItems}
-            categories={categories.filter((c) => c.list_type === 'shopping')}
+            categories={shoppingCategories}
             listId={list.id}
             userName={userName}
+            onItemToggle={toggleShoppingItem}
+            onItemDelete={deleteShoppingItem}
             onItemChange={() => fetchItems(list.id, 'shopping')}
             onReorder={reorderItems}
             onCategoriesChange={() => fetchCategories(list.id)}
@@ -246,9 +310,11 @@ export default function App() {
         {tab === 'bring' && (
           <BringScreen
             items={bringItems}
-            categories={categories.filter((c) => c.list_type === 'bring')}
+            categories={bringCategories}
             listId={list.id}
             userName={userName}
+            onItemToggle={toggleBringItem}
+            onItemDelete={deleteBringItem}
             onItemChange={() => fetchItems(list.id, 'bring')}
             onReorder={reorderItems}
             onCategoriesChange={() => fetchCategories(list.id)}

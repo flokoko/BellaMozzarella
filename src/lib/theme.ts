@@ -43,10 +43,10 @@ export function initThemeListener(): () => void {
   return () => mql.removeEventListener('change', handler)
 }
 
-/** Convenience: cycle auto → dark → light → dark … */
+/** Convenience: cycle auto → dark → light → auto … */
 export function toggleTheme(): ThemeMode {
   const current = getTheme()
-  const next: ThemeMode = current === 'auto' ? 'dark' : current === 'dark' ? 'light' : 'dark'
+  const next: ThemeMode = current === 'auto' ? 'dark' : current === 'dark' ? 'light' : 'auto'
   setTheme(next)
   return next
 }

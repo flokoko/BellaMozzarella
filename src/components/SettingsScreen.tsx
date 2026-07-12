@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import type { ItemCategory, ListType } from '../types'
 import type { ThemeMode } from '../lib/theme'
 import { getTheme, setTheme } from '../lib/theme'
-import { supabase } from '../lib/supabase'
+import { useCategories } from '../hooks/useCategories'
 
 import './SettingsScreen.css'
 
@@ -31,6 +31,8 @@ export default function SettingsScreen({
   const [editingName, setEditingName] = useState(false)
   const [newName, setNewName] = useState(userName)
 
+  const { updateCategory, deleteCategory, addCategory } = useCategories(onCategoriesChange)
+
   useEffect(() => {
     setThemeState(getTheme())
   }, [])
@@ -48,27 +50,9 @@ export default function SettingsScreen({
     setEditingName(false)
   }
 
-  const updateCategory = async (id: string, fields: Partial<ItemCategory>) => {
-    await supabase.from('categories').update(fields).eq('id', id)
-    onCategoriesChange()
-  }
-
-  const deleteCategory = async (id: string) => {
-    await supabase.from('categories').delete().eq('id', id)
-    onCategoriesChange()
-  }
-
-  const addCategory = async (listType: ListType) => {
+  const handleAddCategory = (listType: ListType) => {
     const sortOrder = categories.filter((c) => c.list_type === listType).length + 1
-    await supabase.from('categories').insert({
-      list_id: listId,
-      list_type: listType,
-      name: 'Neue Kategorie',
-      color: '#9b6dd9',
-      bg: '#e8dcf7',
-      sort_order: sortOrder,
-    })
-    onCategoriesChange()
+    addCategory(listId, listType, sortOrder)
   }
 
   const renderCategoryEditor = (listType: ListType, title: string) => {
@@ -79,7 +63,7 @@ export default function SettingsScreen({
           <span className="settings-cat-subsection-title">{title}</span>
           <button
             className="settings-cat-add-btn"
-            onClick={() => addCategory(listType)}
+            onClick={() => handleAddCategory(listType)}
           >
             + Kategorie
           </button>

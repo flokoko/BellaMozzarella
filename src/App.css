@@ -138,70 +138,7 @@
   white-space: nowrap;
 }
 
-/* Tab bar hidden — replaced by dashboard navigation */
-.header-tabs {
-  display: none;
-}
-
-.header-tab {
-  flex: 1;
-  padding: 0.6rem 0.5rem;
-  border: none;
-  background: none;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  cursor: pointer;
-  position: relative;
-  border-bottom: 3px solid transparent;
-  transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.3rem;
-}
-
-.header-tab:hover {
-  color: var(--text-secondary);
-  transform: translateY(-1px);
-}
-
-.header-tab:active {
-  transform: scale(0.97);
-}
-
-.header-tab::after {
-  content: '';
-  position: absolute;
-  bottom: -3px;
-  left: 50%;
-  right: 50%;
-  height: 3px;
-  background: var(--accent-gradient);
-  border-radius: 3px 3px 0 0;
-  opacity: 0;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.header-tab.active {
-  color: var(--accent);
-  font-weight: 700;
-}
-
-.header-tab.active::after {
-  opacity: 1;
-  left: 0;
-  right: 0;
-}
-
-.tab-badge {
-  font-size: 0.68rem;
-  font-weight: 700;
-  background: var(--accent);
-  color: white;
-  padding: 0.12rem 0.4rem;
-  border-radius: 999px;
-}
+/* Tab bar removed — replaced by dashboard navigation */
 
 .app-main {
   flex: 1;

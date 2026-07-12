@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { ItemCategory, ListType } from '../types'
-import { supabase } from '../lib/supabase'
+import { useCategories } from '../hooks/useCategories'
 
 import './CategoryManager.css'
 
@@ -13,28 +13,11 @@ interface CategoryManagerProps {
 
 export default function CategoryManager({ categories, listId, listType, onCategoriesChange }: CategoryManagerProps) {
   const [expanded, setExpanded] = useState(false)
+  const { updateCategory, deleteCategory, addCategory } = useCategories(() => onCategoriesChange?.())
 
-  const updateCategory = async (id: string, fields: Partial<ItemCategory>) => {
-    await supabase.from('categories').update(fields).eq('id', id)
-    onCategoriesChange?.()
-  }
-
-  const deleteCategory = async (id: string) => {
-    await supabase.from('categories').delete().eq('id', id)
-    onCategoriesChange?.()
-  }
-
-  const addCategory = async () => {
+  const handleAdd = () => {
     const sortOrder = categories.length + 1
-    await supabase.from('categories').insert({
-      list_id: listId,
-      list_type: listType,
-      name: 'Neue Kategorie',
-      color: '#9b6dd9',
-      bg: '#e8dcf7',
-      sort_order: sortOrder,
-    })
-    onCategoriesChange?.()
+    addCategory(listId, listType, sortOrder)
   }
 
   return (
@@ -70,7 +53,7 @@ export default function CategoryManager({ categories, listId, listType, onCatego
               </button>
             </div>
           ))}
-          <button className="cat-manager-add-btn" onClick={addCategory}>
+          <button className="cat-manager-add-btn" onClick={handleAdd}>
             + Kategorie hinzufügen
           </button>
         </div>

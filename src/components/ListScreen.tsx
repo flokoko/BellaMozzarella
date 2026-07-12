@@ -1,4 +1,4 @@
-import type { ListItem, ItemCategory } from '../types'
+import type { ListItem, ItemCategory, ListType } from '../types'
 import type { PointerEvent as ReactPointerEvent } from 'react'
 import ItemRow from './ItemRow'
 import AddItemForm from './AddItemForm'
@@ -12,8 +12,10 @@ interface ListScreenProps {
   categories: ItemCategory[]
   listId: string
   userName: string
+  onItemToggle?: (item: ListItem) => void
+  onItemDelete?: (item: ListItem) => void
   onItemChange?: () => void
-  onReorder?: (listType: 'shopping', newOrder: string[]) => void
+  onReorder?: (listType: ListType, newOrder: string[]) => void
   onCategoriesChange?: () => void
 }
 
@@ -21,12 +23,14 @@ interface ListScreenProps {
 function DraggableCategorySection({
   catItems,
   cat,
-  onItemChange,
+  onItemToggle,
+  onItemDelete,
   onReorder,
 }: {
   catItems: ListItem[]
   cat: ItemCategory
-  onItemChange?: () => void
+  onItemToggle?: (item: ListItem) => void
+  onItemDelete?: (item: ListItem) => void
   onReorder?: (newOrder: string[]) => void
 }) {
   const {
@@ -51,7 +55,8 @@ function DraggableCategorySection({
         <ItemRow
           key={item.id}
           item={item}
-          onChange={onItemChange}
+          onToggle={onItemToggle}
+          onDelete={onItemDelete}
           dragHandleProps={{
             onPointerDown: (e: ReactPointerEvent) => handlePointerDown(e, item.id),
             onPointerMove: handlePointerMove,
@@ -66,7 +71,7 @@ function DraggableCategorySection({
   )
 }
 
-export default function ListScreen({ items, categories, listId, userName, onItemChange, onReorder, onCategoriesChange }: ListScreenProps) {
+export default function ListScreen({ items, categories, listId, userName, onItemToggle, onItemDelete, onItemChange, onReorder, onCategoriesChange }: ListScreenProps) {
   return (
     <div className="list-screen">
       <CategoryManager
@@ -95,7 +100,8 @@ export default function ListScreen({ items, categories, listId, userName, onItem
             key={cat.id}
             catItems={catItems}
             cat={cat}
-            onItemChange={onItemChange}
+            onItemToggle={onItemToggle}
+            onItemDelete={onItemDelete}
             onReorder={(newOrder) => onReorder?.('shopping', newOrder)}
           />
         )

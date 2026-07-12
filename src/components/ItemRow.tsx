@@ -1,11 +1,11 @@
 import type { ListItem } from '../types'
 import type { PointerEvent as ReactPointerEvent } from 'react'
-import { supabase } from '../lib/supabase'
 import './ItemRow.css'
 
 interface ItemRowProps {
   item: ListItem
-  onChange?: () => void
+  onToggle?: (item: ListItem) => void
+  onDelete?: (item: ListItem) => void
   dragHandleProps?: {
     onPointerDown: (e: ReactPointerEvent) => void
     onPointerMove: (e: ReactPointerEvent) => void
@@ -16,16 +16,14 @@ interface ItemRowProps {
   registerRef?: (el: HTMLDivElement | null) => void
 }
 
-export default function ItemRow({ item, onChange, dragHandleProps, isDragging, isDragOver, registerRef }: ItemRowProps) {
+export default function ItemRow({ item, onToggle, onDelete, dragHandleProps, isDragging, isDragOver, registerRef }: ItemRowProps) {
 
-  const toggleChecked = async () => {
-    await supabase.from('items').update({ is_checked: !item.is_checked }).eq('id', item.id)
-    onChange?.()
+  const toggleChecked = () => {
+    onToggle?.(item)
   }
 
-  const deleteItem = async () => {
-    await supabase.from('items').delete().eq('id', item.id)
-    onChange?.()
+  const deleteItem = () => {
+    onDelete?.(item)
   }
 
   const rowClass = [
