@@ -70,7 +70,9 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
   const [loading, setLoading] = useState(false)
 
   const subtitle = useMemo(
-    () => ROY_BIANCO_QUOTES[Math.floor(Math.random() * ROY_BIANCO_QUOTES.length)],
+    () => Math.random() < 0.1
+      ? 'Gebiss'
+      : ROY_BIANCO_QUOTES[Math.floor(Math.random() * ROY_BIANCO_QUOTES.length)],
     []
   )
 
