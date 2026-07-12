@@ -1,0 +1,401 @@
+.mealplan-screen {
+  padding: 0.75rem 0;
+  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mealplan-section {
+  margin-bottom: 1.5rem;
+}
+
+.mealplan-section-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid var(--accent-light);
+}
+
+/* ── Wochenplan ── */
+.mealplan-week {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.meal-day-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.meal-day-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.meal-day-header {
+  padding: 0.5rem 0.85rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  background: var(--cat-header-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.meal-day-body {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+  gap: 0.4rem;
+}
+
+/* ── Meal cells ── */
+.meal-cell {
+  border-radius: 12px;
+  padding: 0.5rem 0.75rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.meal-cell-type {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.15rem;
+}
+
+.meal-cell-filled {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+}
+
+.meal-cell-filled:hover {
+  border-color: var(--accent-light);
+}
+
+.meal-cell-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.meal-cell-buttons {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.meal-cell-btn {
+  border: none;
+  background: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 6px;
+  opacity: 0.3;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.meal-cell-btn:hover {
+  opacity: 1;
+  background: var(--accent-light);
+  transform: scale(1.15);
+}
+
+.meal-cell-btn:active {
+  transform: scale(0.9);
+}
+
+.meal-cell-name {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.meal-cell-note {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-top: 0.15rem;
+}
+
+.meal-cell-by {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+.meal-cell-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border: 2px dashed var(--dashed-border);
+  background: transparent;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  color: var(--text-muted);
+}
+
+.meal-cell-empty:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  transform: translateY(-1px);
+}
+
+.meal-cell-empty:active {
+  transform: scale(0.98);
+}
+
+.meal-cell-plus {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.meal-cell-editing {
+  background: var(--card-bg);
+  border: 2px solid var(--accent);
+}
+
+/* ── Inputs ── */
+.meal-input {
+  width: 100%;
+  padding: 0.5rem 0.7rem;
+  border: 2px solid var(--input-border);
+  border-radius: 10px;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 0.35rem;
+}
+
+.meal-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.meal-input-note {
+  font-size: 0.82rem;
+}
+
+.meal-input-tags {
+  font-size: 0.82rem;
+}
+
+.meal-select {
+  padding: 0.4rem 0.6rem;
+  border: 2px solid var(--input-border);
+  border-radius: 10px;
+  background: var(--select-bg);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.meal-select:focus {
+  border-color: var(--accent);
+}
+
+/* ── Buttons ── */
+.meal-cell-actions {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.meal-btn-save {
+  flex: 1;
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--accent-gradient);
+  color: white;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s;
+  box-shadow: 0 2px 12px rgba(0, 146, 70, 0.25);
+}
+
+.meal-btn-save:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 146, 70, 0.35);
+}
+
+.meal-btn-save:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.meal-btn-save:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.meal-btn-cancel {
+  padding: 0.4rem 0.8rem;
+  border: 2px solid var(--input-border);
+  border-radius: 999px;
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.meal-btn-cancel:hover {
+  border-color: var(--text-muted);
+  color: var(--text-primary);
+}
+
+.meal-btn-cancel:active {
+  transform: scale(0.96);
+}
+
+/* ── Idea form ── */
+.mealplan-idea-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+.mealplan-idea-form .meal-input {
+  margin-top: 0;
+}
+
+.mealplan-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 2rem 1rem;
+  font-size: 1rem;
+  border: 1px dashed var(--dashed-border);
+  border-radius: 20px;
+  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Idea list ── */
+.mealplan-idea-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.meal-idea-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 0.55rem 0.75rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.meal-idea-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.meal-idea-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.meal-idea-name {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  word-break: break-word;
+  flex: 1;
+}
+
+.meal-idea-buttons {
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.meal-idea-plan-btn {
+  padding: 0.25rem 0.65rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--accent-gradient);
+  color: white;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 146, 70, 0.2);
+}
+
+.meal-idea-plan-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 146, 70, 0.3);
+}
+
+.meal-idea-plan-btn:active {
+  transform: scale(0.95);
+}
+
+.meal-idea-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.35rem;
+}
+
+.meal-tag-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+/* ── Plan picker ── */
+.meal-plan-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-color);
+  animation: fadeIn 0.2s ease;
+}
+
+.meal-plan-picker .meal-cell-actions {
+  margin-top: 0;
+  flex: 1;
+}
+
+/* ── Desktop: day cards become wider, still stacked ── */
+@media (min-width: 480px) {
+  .meal-day-body {
+    gap: 0.5rem;
+  }
+}

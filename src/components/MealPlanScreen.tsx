@@ -1,0 +1,377 @@
+import { useState } from 'react'
+import type { Meal, MealIdea, DayOfWeek, MealType } from '../types'
+import { supabase } from '../lib/supabase'
+import './MealPlanScreen.css'
+
+interface MealPlanScreenProps {
+  meals: Meal[]
+  mealIdeas: MealIdea[]
+  listId: string
+  userName: string
+  onMealsChange: () => void
+  onIdeasChange: () => void
+}
+
+const DAYS: DayOfWeek[] = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
+const MEAL_TYPES: MealType[] = ['Frühstück', 'Mittagessen', 'Abendessen']
+const MEAL_ICONS: Record<MealType, string> = {
+  Frühstück: '☕',
+  Mittagessen: '🥪',
+  Abendessen: '🍝',
+}
+
+export default function MealPlanScreen({
+  meals,
+  mealIdeas,
+  listId,
+  userName,
+  onMealsChange,
+  onIdeasChange,
+}: MealPlanScreenProps) {
+  const [editingCell, setEditingCell] = useState<string | null>(null)
+  const [editName, setEditName] = useState('')
+  const [editNote, setEditNote] = useState('')
+  const [editingMealId, setEditingMealId] = useState<string | null>(null)
+  const [newIdeaName, setNewIdeaName] = useState('')
+  const [newIdeaTags, setNewIdeaTags] = useState('')
+  const [planPickerFor, setPlanPickerFor] = useState<string | null>(null)
+  const [planDay, setPlanDay] = useState<DayOfWeek>('Montag')
+  const [planMealType, setPlanMealType] = useState<MealType>('Abendessen')
+
+  const getMeal = (day: DayOfWeek, type: MealType) =>
+    meals.find((m) => m.day === day && m.meal_type === type)
+
+  const startAdd = (day: DayOfWeek, type: MealType) => {
+    const cellKey = `${day}-${type}`
+    setEditingCell(cellKey)
+    setEditName('')
+    setEditNote('')
+    setEditingMealId(null)
+  }
+
+  const startEdit = (meal: Meal) => {
+    const cellKey = `${meal.day}-${meal.meal_type}`
+    setEditingCell(cellKey)
+    setEditingMealId(meal.id)
+    setEditName(meal.name)
+    setEditNote(meal.note ?? '')
+  }
+
+  const cancelEdit = () => {
+    setEditingCell(null)
+    setEditingMealId(null)
+    setEditName('')
+    setEditNote('')
+  }
+
+  const saveMeal = async (day: DayOfWeek, type: MealType) => {
+    const n = editName.trim()
+    if (!n) return
+    if (editingMealId) {
+      const { error } = await supabase
+        .from('meals')
+        .update({ name: n, note: editNote.trim() || null })
+        .eq('id', editingMealId)
+      if (error) {
+        alert(`Fehler beim Speichern: ${error.message}`)
+        return
+      }
+    } else {
+      const { error } = await supabase.from('meals').insert({
+        list_id: listId,
+        day,
+        meal_type: type,
+        name: n,
+        note: editNote.trim() || null,
+        created_by: userName,
+      })
+      if (error) {
+        alert(`Fehler beim Speichern: ${error.message}`)
+        return
+      }
+    }
+    cancelEdit()
+    onMealsChange()
+  }
+
+  const deleteMeal = async (meal: Meal) => {
+    const { error } = await supabase.from('meals').delete().eq('id', meal.id)
+    if (error) {
+      alert(`Fehler beim Löschen: ${error.message}`)
+      return
+    }
+    onMealsChange()
+  }
+
+  const addIdea = async () => {
+    const n = newIdeaName.trim()
+    if (!n) return
+    const { error } = await supabase.from('meal_ideas').insert({
+      list_id: listId,
+      name: n,
+      tags: newIdeaTags.trim() || null,
+      created_by: userName,
+    })
+    if (error) {
+      alert(`Fehler beim Speichern: ${error.message}`)
+      return
+    }
+    setNewIdeaName('')
+    setNewIdeaTags('')
+    onIdeasChange()
+  }
+
+  const deleteIdea = async (idea: MealIdea) => {
+    const { error } = await supabase.from('meal_ideas').delete().eq('id', idea.id)
+    if (error) {
+      alert(`Fehler beim Löschen: ${error.message}`)
+      return
+    }
+    onIdeasChange()
+  }
+
+  const planIdea = async (idea: MealIdea) => {
+    const { error } = await supabase.from('meals').insert({
+      list_id: listId,
+      day: planDay,
+      meal_type: planMealType,
+      name: idea.name,
+      note: idea.tags ?? null,
+      created_by: userName,
+    })
+    if (error) {
+      alert(`Fehler beim Eintragen: ${error.message}`)
+      return
+    }
+    setPlanPickerFor(null)
+    onMealsChange()
+  }
+
+  const parseTags = (tags: string | null): string[] => {
+    if (!tags) return []
+    return tags.split(',').map((t) => t.trim()).filter(Boolean)
+  }
+
+  return (
+    <div className="mealplan-screen">
+      {/* ── Wochenplan ── */}
+      <section className="mealplan-section">
+        <h2 className="mealplan-section-title">📅 Wochenplan</h2>
+        <div className="mealplan-week">
+          {DAYS.map((day) => (
+            <div key={day} className="meal-day-card">
+              <div className="meal-day-header">{day}</div>
+              <div className="meal-day-body">
+                {MEAL_TYPES.map((type) => {
+                  const cellKey = `${day}-${type}`
+                  const meal = getMeal(day, type)
+                  const isEditing = editingCell === cellKey
+
+                  if (isEditing) {
+                    return (
+                      <div key={type} className="meal-cell meal-cell-editing">
+                        <div className="meal-cell-type">
+                          {MEAL_ICONS[type]} {type}
+                        </div>
+                        <input
+                          className="meal-input"
+                          type="text"
+                          placeholder="Gerichtname"
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') saveMeal(day, type)
+                            if (e.key === 'Escape') cancelEdit()
+                          }}
+                          autoFocus
+                        />
+                        <input
+                          className="meal-input meal-input-note"
+                          type="text"
+                          placeholder="Notiz (optional)"
+                          value={editNote}
+                          onChange={(e) => setEditNote(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') saveMeal(day, type)
+                            if (e.key === 'Escape') cancelEdit()
+                          }}
+                        />
+                        <div className="meal-cell-actions">
+                          <button className="meal-btn-cancel" onClick={cancelEdit}>
+                            Abbrechen
+                          </button>
+                          <button
+                            className="meal-btn-save"
+                            onClick={() => saveMeal(day, type)}
+                            disabled={!editName.trim()}
+                          >
+                            Speichern
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  }
+
+                  if (meal) {
+                    return (
+                      <div key={type} className="meal-cell meal-cell-filled">
+                        <div className="meal-cell-top">
+                          <span className="meal-cell-type">
+                            {MEAL_ICONS[type]} {type}
+                          </span>
+                          <div className="meal-cell-buttons">
+                            <button
+                              className="meal-cell-btn"
+                              onClick={() => startEdit(meal)}
+                              aria-label="Bearbeiten"
+                            >
+                              ✏️
+                            </button>
+                            <button
+                              className="meal-cell-btn"
+                              onClick={() => deleteMeal(meal)}
+                              aria-label="Löschen"
+                            >
+                              🗑
+                            </button>
+                          </div>
+                        </div>
+                        <div className="meal-cell-name">{meal.name}</div>
+                        {meal.note && <div className="meal-cell-note">{meal.note}</div>}
+                        {meal.created_by && (
+                          <div className="meal-cell-by">von {meal.created_by}</div>
+                        )}
+                      </div>
+                    )
+                  }
+
+                  return (
+                    <button
+                      key={type}
+                      className="meal-cell meal-cell-empty"
+                      onClick={() => startAdd(day, type)}
+                    >
+                      <span className="meal-cell-type">
+                        {MEAL_ICONS[type]} {type}
+                      </span>
+                      <span className="meal-cell-plus">+ hinzufügen</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Ideen ── */}
+      <section className="mealplan-section">
+        <h2 className="mealplan-section-title">💡 Ideen</h2>
+
+        <div className="mealplan-idea-form">
+          <input
+            className="meal-input"
+            type="text"
+            placeholder="Gerichtname"
+            value={newIdeaName}
+            onChange={(e) => setNewIdeaName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && addIdea()}
+          />
+          <input
+            className="meal-input meal-input-tags"
+            type="text"
+            placeholder="Tags (z.B. vegan, schnell, italienisch)"
+            value={newIdeaTags}
+            onChange={(e) => setNewIdeaTags(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && addIdea()}
+          />
+          <button className="meal-btn-save" onClick={addIdea} disabled={!newIdeaName.trim()}>
+            Hinzufügen
+          </button>
+        </div>
+
+        {mealIdeas.length === 0 && (
+          <p className="mealplan-empty">Noch keine Ideen — füge welche hinzu! 🍕</p>
+        )}
+
+        <div className="mealplan-idea-list">
+          {mealIdeas.map((idea) => {
+            const tags = parseTags(idea.tags)
+            const isPickerOpen = planPickerFor === idea.id
+            return (
+              <div key={idea.id} className="meal-idea-card">
+                <div className="meal-idea-top">
+                  <span className="meal-idea-name">{idea.name}</span>
+                  <div className="meal-idea-buttons">
+                    <button
+                      className="meal-idea-plan-btn"
+                      onClick={() => {
+                        setPlanPickerFor(isPickerOpen ? null : idea.id)
+                        setPlanDay('Montag')
+                        setPlanMealType('Abendessen')
+                      }}
+                    >
+                      → Plan
+                    </button>
+                    <button
+                      className="meal-cell-btn"
+                      onClick={() => deleteIdea(idea)}
+                      aria-label="Löschen"
+                    >
+                      🗑
+                    </button>
+                  </div>
+                </div>
+                {tags.length > 0 && (
+                  <div className="meal-idea-tags">
+                    {tags.map((tag, i) => (
+                      <span key={i} className="meal-tag-badge">{tag}</span>
+                    ))}
+                  </div>
+                )}
+                {idea.created_by && (
+                  <div className="meal-cell-by">von {idea.created_by}</div>
+                )}
+                {isPickerOpen && (
+                  <div className="meal-plan-picker">
+                    <select
+                      className="meal-select"
+                      value={planDay}
+                      onChange={(e) => setPlanDay(e.target.value as DayOfWeek)}
+                    >
+                      {DAYS.map((d) => (
+                        <option key={d} value={d}>{d}</option>
+                      ))}
+                    </select>
+                    <select
+                      className="meal-select"
+                      value={planMealType}
+                      onChange={(e) => setPlanMealType(e.target.value as MealType)}
+                    >
+                      {MEAL_TYPES.map((t) => (
+                        <option key={t} value={t}>
+                          {MEAL_ICONS[t]} {t}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="meal-cell-actions">
+                      <button
+                        className="meal-btn-cancel"
+                        onClick={() => setPlanPickerFor(null)}
+                      >
+                        Abbrechen
+                      </button>
+                      <button className="meal-btn-save" onClick={() => planIdea(idea)}>
+                        Speichern
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </section>
+    </div>
+  )
+}

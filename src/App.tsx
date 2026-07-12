@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { ListItem, ShoppingList, TabView, ItemCategory, ListType } from './types'
+import type { ListItem, ShoppingList, TabView, ItemCategory, ListType, Meal, MealIdea } from './types'
 import { supabase, setJoinCode } from './lib/supabase'
 import { getResolvedTheme, toggleTheme, applyTheme, initThemeListener } from './lib/theme'
 import JoinScreen from './components/JoinScreen'
 import ListScreen from './components/ListScreen'
 import BringScreen from './components/BringScreen'
+import MealPlanScreen from './components/MealPlanScreen'
 import SettingsScreen from './components/SettingsScreen'
 
 import './App.css'
@@ -15,15 +16,15 @@ export default function App() {
   const [shoppingItems, setShoppingItems] = useState<ListItem[]>([])
   const [bringItems, setBringItems] = useState<ListItem[]>([])
   const [categories, setCategories] = useState<ItemCategory[]>([])
+  const [meals, setMeals] = useState<Meal[]>([])
+  const [mealIdeas, setMealIdeas] = useState<MealIdea[]>([])
   const [tab, setTab] = useState<TabView>('list')
   const [isDark, setIsDark] = useState(false)
 
-  // ── Theme: apply on mount, listen for system changes ──────────────
   useEffect(() => {
     applyTheme()
     setIsDark(getResolvedTheme() === 'dark')
     const cleanup = initThemeListener()
-    // Update icon when system changes while in 'auto' mode
     const mql = window.matchMedia('(prefers-color-scheme: dark)')
     const handler = () => setIsDark(getResolvedTheme() === 'dark')
     mql.addEventListener('change', handler)
@@ -57,13 +58,35 @@ export default function App() {
     setCategories((data || []) as ItemCategory[])
   }, [])
 
+  const fetchMeals = useCallback(async (listId: string) => {
+    const { data, error: err } = await supabase
+      .from('meals')
+      .select('*')
+      .eq('list_id', listId)
+      .order('created_at', { ascending: true })
+    if (err) return
+    setMeals((data || []) as Meal[])
+  }, [])
+
+  const fetchMealIdeas = useCallback(async (listId: string) => {
+    const { data, error: err } = await supabase
+      .from('meal_ideas')
+      .select('*')
+      .eq('list_id', listId)
+      .order('created_at', { ascending: true })
+    if (err) return
+    setMealIdeas((data || []) as MealIdea[])
+  }, [])
+
   const fetchAll = useCallback(async (listId: string) => {
     await Promise.all([
       fetchItems(listId, 'shopping'),
       fetchItems(listId, 'bring'),
       fetchCategories(listId),
+      fetchMeals(listId),
+      fetchMealIdeas(listId),
     ])
-  }, [fetchItems, fetchCategories])
+  }, [fetchItems, fetchCategories, fetchMeals, fetchMealIdeas])
 
   const handleJoin = (name: string, l: ShoppingList) => {
     setJoinCode(l.join_code)
@@ -72,7 +95,6 @@ export default function App() {
     fetchAll(l.id)
   }
 
-  // Polling: fetch items and categories every 3 seconds
   useEffect(() => {
     if (!list) return
     const interval = setInterval(() => {
@@ -81,7 +103,6 @@ export default function App() {
     return () => clearInterval(interval)
   }, [list, fetchAll])
 
-  // Also re-fetch when the tab becomes visible again
   useEffect(() => {
     if (!list) return
     const onVisible = () => {
@@ -91,7 +112,6 @@ export default function App() {
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [list, fetchAll])
 
-  // Restore session from localStorage
   useEffect(() => {
     const savedName = localStorage.getItem('user_name')
     const savedCode = localStorage.getItem('join_code')
@@ -132,6 +152,8 @@ export default function App() {
     setShoppingItems([])
     setBringItems([])
     setCategories([])
+    setMeals([])
+    setMealIdeas([])
   }
 
   const handleRename = (newName: string) => {
@@ -178,6 +200,12 @@ export default function App() {
             🎒 Mitbringen
           </button>
           <button
+            className={`header-tab ${tab === 'mealplan' ? 'active' : ''}`}
+            onClick={() => setTab('mealplan')}
+          >
+            🍝 Essensplan
+          </button>
+          <button
             className={`header-tab ${tab === 'settings' ? 'active' : ''}`}
             onClick={() => setTab('settings')}
           >
@@ -207,6 +235,16 @@ export default function App() {
             onItemChange={() => fetchItems(list.id, 'bring')}
             onReorder={reorderItems}
             onCategoriesChange={() => fetchCategories(list.id)}
+          />
+        )}
+        {tab === 'mealplan' && (
+          <MealPlanScreen
+            meals={meals}
+            mealIdeas={mealIdeas}
+            listId={list.id}
+            userName={userName}
+            onMealsChange={() => fetchMeals(list.id)}
+            onIdeasChange={() => fetchMealIdeas(list.id)}
           />
         )}
         {tab === 'settings' && (
