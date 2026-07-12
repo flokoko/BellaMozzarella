@@ -23,6 +23,7 @@ export default function ItemRow({ item, onToggle, onDelete, dragHandleProps, isD
   }
 
   const deleteItem = () => {
+    if (!confirm('Dieses Element wirklich löschen?')) return
     onDelete?.(item)
   }
 
@@ -56,6 +57,7 @@ export default function ItemRow({ item, onToggle, onDelete, dragHandleProps, isD
         <span className="item-name">{item.name}</span>
         <div className="item-meta">
           <span className="item-qty">{item.quantity}</span>
+          {item.created_by && <span className="item-created-by">von {item.created_by}</span>}
         </div>
       </div>
       <button className="item-delete" onClick={deleteItem} aria-label="Löschen">

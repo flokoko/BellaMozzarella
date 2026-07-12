@@ -22,6 +22,7 @@ export default function App() {
   const [notes, setNotes] = useState<QuickNote[]>([])
   const [tab, setTab] = useState<TabView>('home')
   const [isDark, setIsDark] = useState(false)
+  const [isOnline, setIsOnline] = useState(navigator.onLine)
 
   useEffect(() => {
     applyTheme()
@@ -33,6 +34,17 @@ export default function App() {
     return () => {
       cleanup()
       mql.removeEventListener('change', handler)
+    }
+  }, [])
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true)
+    const handleOffline = () => setIsOnline(false)
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
     }
   }, [])
 
@@ -278,6 +290,12 @@ export default function App() {
           </div>
         </div>
       </header>
+
+      {!isOnline && (
+        <div className="offline-banner">
+          📡 Du bist offline — Änderungen werden synchronisiert wenn du wieder online bist.
+        </div>
+      )}
 
       <main className="app-main" key={tab}>
         {tab === 'home' && (

@@ -48,6 +48,8 @@ export default function MealPlanScreen({
   const [planDay, setPlanDay] = useState<DayOfWeek>('Montag')
   const [planMealType, setPlanMealType] = useState<MealType>('Abendessen')
 
+  const todayName = new Date().toLocaleDateString('de-DE', { weekday: 'long' }) as DayOfWeek
+
   const getMeal = (day: DayOfWeek, type: MealType) =>
     meals.find((m) => m.day === day && m.meal_type === type)
 
@@ -105,6 +107,7 @@ export default function MealPlanScreen({
   }
 
   const deleteMeal = async (meal: Meal) => {
+    if (!confirm('Dieses Element wirklich löschen?')) return
     const { error } = await supabase.from('meals').delete().eq('id', meal.id)
     if (error) {
       alert(`Fehler beim Löschen: ${error.message}`)
@@ -132,6 +135,7 @@ export default function MealPlanScreen({
   }
 
   const deleteIdea = async (idea: MealIdea) => {
+    if (!confirm('Dieses Element wirklich löschen?')) return
     const { error } = await supabase.from('meal_ideas').delete().eq('id', idea.id)
     if (error) {
       alert(`Fehler beim Löschen: ${error.message}`)
@@ -191,10 +195,11 @@ export default function MealPlanScreen({
               const dayMeals = MEAL_TYPES.map((t) => getMeal(day, t)).filter(Boolean)
               const hasMeals = dayMeals.length > 0
               return (
-                <div key={day} className={`meal-day-card ${hasMeals ? 'has-meals' : ''}`}>
+                <div key={day} className={`meal-day-card ${hasMeals ? 'has-meals' : ''} ${day === todayName ? 'today' : ''}`}>
                   <div className="meal-day-header">
                     <span className="meal-day-abbr">{DAY_SHORT[day]}</span>
                     <span className="meal-day-full">{day}</span>
+                    {day === todayName && <span className="meal-day-today-badge">Heute</span>}
                     {hasMeals && (
                       <span className="meal-day-count">{dayMeals.length}/3</span>
                     )}

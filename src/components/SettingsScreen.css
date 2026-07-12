@@ -117,6 +117,35 @@
   color: var(--text-primary);
 }
 
+.settings-join-code-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.settings-copy-btn {
+  border: 2px solid var(--input-border);
+  border-radius: 999px;
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.settings-copy-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.settings-copy-btn:active {
+  transform: scale(0.95);
+}
+
 /* ── Inline edit form ────────────────────────────────────────────── */
 .settings-inline-form {
   display: flex;

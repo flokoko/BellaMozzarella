@@ -46,7 +46,7 @@ export default function CategoryManager({ categories, listId, listType, onCatego
               />
               <button
                 className="cat-manager-delete-btn"
-                onClick={() => deleteCategory(cat.id)}
+                onClick={() => { if (confirm('Dieses Element wirklich löschen?')) deleteCategory(cat.id) }}
                 aria-label="Kategorie löschen"
               >
                 🗑

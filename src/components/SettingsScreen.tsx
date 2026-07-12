@@ -3,6 +3,7 @@ import type { ItemCategory, ListType } from '../types'
 import type { ThemeMode } from '../lib/theme'
 import { getTheme, setTheme } from '../lib/theme'
 import { useCategories } from '../hooks/useCategories'
+import { APP_VERSION } from '../version'
 
 import './SettingsScreen.css'
 
@@ -30,6 +31,7 @@ export default function SettingsScreen({
   const [theme, setThemeState] = useState<ThemeMode>('auto')
   const [editingName, setEditingName] = useState(false)
   const [newName, setNewName] = useState(userName)
+  const [copied, setCopied] = useState(false)
 
   const { updateCategory, deleteCategory, addCategory } = useCategories(onCategoriesChange)
 
@@ -48,6 +50,12 @@ export default function SettingsScreen({
       onRename(trimmed)
     }
     setEditingName(false)
+  }
+
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(joinCode)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   const handleAddCategory = (listType: ListType) => {
@@ -81,7 +89,7 @@ export default function SettingsScreen({
             />
             <button
               className="settings-cat-delete-btn"
-              onClick={() => deleteCategory(cat.id)}
+              onClick={() => { if (confirm('Dieses Element wirklich löschen?')) deleteCategory(cat.id) }}
               aria-label="Kategorie löschen"
             >
               🗑
@@ -136,7 +144,12 @@ export default function SettingsScreen({
         </div>
         <div className="settings-info-row">
           <span className="settings-info-label">Join-Code</span>
-          <span className="settings-info-value">{joinCode}</span>
+          <div className="settings-join-code-wrap">
+            <span className="settings-info-value">{joinCode}</span>
+            <button className="settings-copy-btn" onClick={handleCopyCode}>
+              {copied ? '✓ Kopiert!' : '📋 Kopieren'}
+            </button>
+          </div>
         </div>
 
         {editingName ? (
@@ -184,7 +197,7 @@ export default function SettingsScreen({
         <h3 className="settings-section-title">Info</h3>
         <div className="settings-info-block">
           <div className="settings-app-name">🇮🇹 Bella Mozzarella</div>
-          <div className="settings-app-version">Version 1.0.0</div>
+          <div className="settings-app-version">Version {APP_VERSION}</div>
           <p className="settings-app-desc">
             Gemeinsame Einkaufsliste mit Realtime-Sync. Built with React, Supabase &amp; Vite.
           </p>

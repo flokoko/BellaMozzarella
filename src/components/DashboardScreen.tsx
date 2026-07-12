@@ -54,6 +54,7 @@ export default function DashboardScreen({
   }
 
   const handleDelete = async (note: QuickNote) => {
+    if (!confirm('Dieses Element wirklich löschen?')) return
     const { error } = await supabase.from('notes').delete().eq('id', note.id)
     if (error) {
       alert(`Fehler beim Löschen: ${error.message}`)

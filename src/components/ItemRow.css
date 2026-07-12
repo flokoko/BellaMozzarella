@@ -96,6 +96,11 @@
   color: var(--text-secondary);
 }
 
+.item-created-by {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
 .item-cat-badge {
   display: flex;
   align-items: center;

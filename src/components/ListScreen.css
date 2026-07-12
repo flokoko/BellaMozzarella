@@ -2,6 +2,27 @@
   padding: 0.75rem 0;
 }
 
+.list-top-bar {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.list-top-bar .bring-filter-btn {
+  flex: none;
+}
+
+.list-delete-checked-btn {
+  border-color: var(--danger) !important;
+  color: var(--danger) !important;
+}
+
+.list-delete-checked-btn:hover {
+  background: var(--danger) !important;
+  color: white !important;
+  border-color: var(--danger) !important;
+}
+
 .list-empty {
   text-align: center;
   color: var(--text-muted);

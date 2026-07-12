@@ -85,7 +85,7 @@ function DraggableBringGroup({
             </label>
             <span className="bring-item-name">{item.name}</span>
             <span className="bring-item-qty">{item.quantity}</span>
-            <button className="bring-item-delete" onClick={() => onDelete(item)} aria-label="Löschen">
+            <button className="bring-item-delete" onClick={() => { if (confirm('Dieses Element wirklich löschen?')) onDelete(item) }} aria-label="Löschen">
               🗑
             </button>
           </div>

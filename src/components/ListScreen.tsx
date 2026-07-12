@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import type { ListItem, ItemCategory, ListType } from '../types'
 import type { PointerEvent as ReactPointerEvent } from 'react'
+import { supabase } from '../lib/supabase'
 import ItemRow from './ItemRow'
 import AddItemForm from './AddItemForm'
 import CategoryManager from './CategoryManager'
@@ -72,8 +74,44 @@ function DraggableCategorySection({
 }
 
 export default function ListScreen({ items, categories, listId, userName, onItemToggle, onItemDelete, onItemChange, onReorder, onCategoriesChange }: ListScreenProps) {
+  const [hideChecked, setHideChecked] = useState(() => localStorage.getItem('bella_hide_checked') === 'true')
+
+  const toggleHideChecked = () => {
+    const next = !hideChecked
+    setHideChecked(next)
+    localStorage.setItem('bella_hide_checked', String(next))
+  }
+
+  const checkedItems = items.filter((i) => i.is_checked)
+
+  const handleDeleteChecked = async () => {
+    if (checkedItems.length === 0) return
+    if (!confirm('Alle erledigten Items löschen?')) return
+    await Promise.all(checkedItems.map((item) => supabase.from('items').delete().eq('id', item.id)))
+    onItemChange?.()
+  }
+
+  const visibleItems = hideChecked ? items.filter((i) => !i.is_checked) : items
+
   return (
     <div className="list-screen">
+      <div className="list-top-bar">
+        <button
+          className={`bring-filter-btn ${hideChecked ? 'active' : ''}`}
+          onClick={toggleHideChecked}
+        >
+          {hideChecked ? 'Alle zeigen' : 'Erledigte ausblenden'}
+        </button>
+        {checkedItems.length > 0 && (
+          <button
+            className="bring-filter-btn list-delete-checked-btn"
+            onClick={handleDeleteChecked}
+          >
+            🗑 Erledigte löschen ({checkedItems.length})
+          </button>
+        )}
+      </div>
+
       <CategoryManager
         categories={categories}
         listId={listId}
@@ -88,12 +126,12 @@ export default function ListScreen({ items, categories, listId, userName, onItem
         listType="shopping"
       />
 
-      {items.length === 0 && (
-        <p className="list-empty">🍕<br/>Noch keine Items — füge welche hinzu!</p>
+      {visibleItems.length === 0 && (
+        <p className="list-empty">🍕<br/>{hideChecked ? 'Alle erledigten Items ausgeblendet!' : 'Noch keine Items — füge welche hinzu!'}</p>
       )}
 
       {categories.map((cat) => {
-        const catItems = items.filter((i) => i.category === cat.name)
+        const catItems = visibleItems.filter((i) => i.category === cat.name)
         if (catItems.length === 0) return null
         return (
           <DraggableCategorySection

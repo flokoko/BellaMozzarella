@@ -53,7 +53,8 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
           className="join-input"
           type="text"
           value={joinCode}
-          onChange={(e) => setJoinCode(e.target.value)}
+          onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+          autoCapitalize="characters"
           placeholder="Join-Code"
           onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
         />

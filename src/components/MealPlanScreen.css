@@ -82,6 +82,22 @@
   box-shadow: var(--shadow-md);
 }
 
+.meal-day-card.today {
+  border: 2px solid var(--accent);
+  box-shadow: 0 4px 20px rgba(0, 146, 70, 0.2);
+}
+
+.meal-day-today-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: white;
+  background: var(--accent-gradient);
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 .meal-day-header {
   display: flex;
   align-items: center;
