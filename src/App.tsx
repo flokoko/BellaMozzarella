@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { ListItem, ShoppingList, TabView, ItemCategory, ListType, Meal, MealIdea } from './types'
+import type { ListItem, ShoppingList, TabView, ItemCategory, ListType, Meal, MealIdea, QuickNote } from './types'
 import { supabase, setJoinCode } from './lib/supabase'
 import { getResolvedTheme, toggleTheme, applyTheme, initThemeListener } from './lib/theme'
 import JoinScreen from './components/JoinScreen'
@@ -7,6 +7,7 @@ import ListScreen from './components/ListScreen'
 import BringScreen from './components/BringScreen'
 import MealPlanScreen from './components/MealPlanScreen'
 import SettingsScreen from './components/SettingsScreen'
+import DashboardScreen from './components/DashboardScreen'
 
 import './App.css'
 
@@ -18,7 +19,8 @@ export default function App() {
   const [categories, setCategories] = useState<ItemCategory[]>([])
   const [meals, setMeals] = useState<Meal[]>([])
   const [mealIdeas, setMealIdeas] = useState<MealIdea[]>([])
-  const [tab, setTab] = useState<TabView>('list')
+  const [notes, setNotes] = useState<QuickNote[]>([])
+  const [tab, setTab] = useState<TabView>('home')
   const [isDark, setIsDark] = useState(false)
 
   useEffect(() => {
@@ -78,6 +80,16 @@ export default function App() {
     setMealIdeas((data || []) as MealIdea[])
   }, [])
 
+  const fetchNotes = useCallback(async (listId: string) => {
+    const { data, error: err } = await supabase
+      .from('notes')
+      .select('*')
+      .eq('list_id', listId)
+      .order('created_at', { ascending: false })
+    if (err) return
+    setNotes((data || []) as QuickNote[])
+  }, [])
+
   const fetchAll = useCallback(async (listId: string) => {
     await Promise.all([
       fetchItems(listId, 'shopping'),
@@ -85,8 +97,9 @@ export default function App() {
       fetchCategories(listId),
       fetchMeals(listId),
       fetchMealIdeas(listId),
+      fetchNotes(listId),
     ])
-  }, [fetchItems, fetchCategories, fetchMeals, fetchMealIdeas])
+  }, [fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes])
 
   const handleJoin = (name: string, l: ShoppingList) => {
     setJoinCode(l.join_code)
@@ -154,6 +167,7 @@ export default function App() {
     setCategories([])
     setMeals([])
     setMealIdeas([])
+    setNotes([])
   }
 
   const handleRename = (newName: string) => {
@@ -168,53 +182,56 @@ export default function App() {
 
   const checkedCount = shoppingItems.filter((i) => i.is_checked).length
 
+  const featureTitles: Record<Exclude<TabView, 'home'>, string> = {
+    list: '🛒 Einkaufsliste',
+    bring: '🎒 Mitbringen',
+    mealplan: '🍝 Essensplan',
+    settings: '⚙️ Einstellungen',
+  }
+
   return (
     <div className="app">
       <header className="app-header">
         <div className="header-top">
-          <div className="header-info">
-            <span className="header-name">🇮🇹 {list.name}</span>
-            <span className="header-user">
-              Angemeldet als: <strong>{userName}</strong>
-            </span>
-          </div>
+          {tab === 'home' ? (
+            <div className="header-info">
+              <span className="header-name">🇮🇹 {list.name}</span>
+              <span className="header-user">
+                Angemeldet als: <strong>{userName}</strong>
+              </span>
+            </div>
+          ) : (
+            <button className="header-back" onClick={() => setTab('home')}>
+              ← Zurück
+            </button>
+          )}
           <div className="header-actions">
+            {tab !== 'home' && (
+              <span className="header-feature-title">{featureTitles[tab as Exclude<TabView, 'home'>]}</span>
+            )}
             <button className="header-theme-toggle" onClick={handleToggleTheme} aria-label="Theme wechseln">
               {isDark ? '☀️' : '🌙'}
             </button>
             <button className="header-leave" onClick={handleLeave}>Verlassen</button>
           </div>
         </div>
-        <div className="header-tabs">
-          <button
-            className={`header-tab ${tab === 'list' ? 'active' : ''}`}
-            onClick={() => setTab('list')}
-          >
-            🛒 Einkaufsliste
-            {checkedCount > 0 && <span className="tab-badge">{checkedCount}/{shoppingItems.length}</span>}
-          </button>
-          <button
-            className={`header-tab ${tab === 'bring' ? 'active' : ''}`}
-            onClick={() => setTab('bring')}
-          >
-            🎒 Mitbringen
-          </button>
-          <button
-            className={`header-tab ${tab === 'mealplan' ? 'active' : ''}`}
-            onClick={() => setTab('mealplan')}
-          >
-            🍝 Essensplan
-          </button>
-          <button
-            className={`header-tab ${tab === 'settings' ? 'active' : ''}`}
-            onClick={() => setTab('settings')}
-          >
-            ⚙️
-          </button>
-        </div>
       </header>
 
       <main className="app-main" key={tab}>
+        {tab === 'home' && (
+          <DashboardScreen
+            listId={list.id}
+            userName={userName}
+            listName={list.name}
+            shoppingCount={shoppingItems.length}
+            shoppingChecked={checkedCount}
+            bringCount={bringItems.length}
+            mealCount={meals.length}
+            notes={notes}
+            onNavigate={setTab}
+            onNotesChange={() => fetchNotes(list.id)}
+          />
+        )}
         {tab === 'list' && (
           <ListScreen
             items={shoppingItems}

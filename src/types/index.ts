@@ -33,7 +33,7 @@ export interface ShoppingList {
   created_at: string
 }
 
-export type TabView = 'list' | 'bring' | 'mealplan' | 'settings'
+export type TabView = 'home' | 'list' | 'bring' | 'mealplan' | 'settings'
 export type BringFilter = 'all' | 'mine' | 'unfilled'
 
 export type DayOfWeek = 'Montag' | 'Dienstag' | 'Mittwoch' | 'Donnerstag' | 'Freitag' | 'Samstag' | 'Sonntag'
@@ -55,6 +55,15 @@ export interface MealIdea {
   list_id: string
   name: string
   tags: string | null
+  created_by: string | null
+  created_at: string
+}
+
+export interface QuickNote {
+  id: string
+  list_id: string
+  title: string | null
+  content: string
   created_by: string | null
   created_at: string
 }
