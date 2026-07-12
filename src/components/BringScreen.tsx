@@ -79,7 +79,7 @@ function DraggableBringGroup({
               <input
                 type="checkbox"
                 checked={item.is_brought}
-                onChange={() => onToggleBrought(item)}
+                onChange={() => { onToggleBrought(item); navigator.vibrate?.(10) }}
               />
               <span className="bring-checkmark" />
             </label>

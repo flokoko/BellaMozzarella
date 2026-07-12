@@ -102,6 +102,7 @@ export default function MealPlanScreen({
         return
       }
     }
+    navigator.vibrate?.(10)
     cancelEdit()
     onMealsChange()
   }
@@ -113,6 +114,7 @@ export default function MealPlanScreen({
       alert(`Fehler beim Löschen: ${error.message}`)
       return
     }
+    navigator.vibrate?.(10)
     onMealsChange()
   }
 
@@ -131,6 +133,7 @@ export default function MealPlanScreen({
     }
     setNewIdeaName('')
     setNewIdeaTags('')
+    navigator.vibrate?.(10)
     onIdeasChange()
   }
 
@@ -141,6 +144,7 @@ export default function MealPlanScreen({
       alert(`Fehler beim Löschen: ${error.message}`)
       return
     }
+    navigator.vibrate?.(10)
     onIdeasChange()
   }
 
@@ -158,6 +162,7 @@ export default function MealPlanScreen({
       return
     }
     setPlanPickerFor(null)
+    navigator.vibrate?.(10)
     onMealsChange()
   }
 

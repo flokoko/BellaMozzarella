@@ -23,6 +23,7 @@ export default function App() {
   const [tab, setTab] = useState<TabView>('home')
   const [isDark, setIsDark] = useState(false)
   const [isOnline, setIsOnline] = useState(navigator.onLine)
+  const [installPrompt, setInstallPrompt] = useState<any>(null)
 
   useEffect(() => {
     applyTheme()
@@ -46,6 +47,18 @@ export default function App() {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
     }
+  }, [])
+
+  // ── beforeinstallprompt: capture for custom install UI ──
+  useEffect(() => {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    if (isStandalone) return
+    const handler = (e: Event) => {
+      e.preventDefault()
+      setInstallPrompt(e)
+    }
+    window.addEventListener('beforeinstallprompt', handler)
+    return () => window.removeEventListener('beforeinstallprompt', handler)
   }, [])
 
   // ── Fetch functions ──────────────────────────────────────────────
@@ -254,6 +267,13 @@ export default function App() {
     setIsDark(getResolvedTheme() === 'dark')
   }
 
+  const handleInstall = async () => {
+    if (!installPrompt) return
+    installPrompt.prompt()
+    await installPrompt.userChoice
+    setInstallPrompt(null)
+  }
+
   const checkedCount = shoppingItems.filter((i) => i.is_checked).length
 
   const featureTitles: Record<Exclude<TabView, 'home'>, string> = {
@@ -310,6 +330,8 @@ export default function App() {
             notes={notes}
             onNavigate={setTab}
             onNotesChange={() => fetchNotes(list.id)}
+            installPrompt={installPrompt}
+            onInstall={handleInstall}
           />
         )}
         {tab === 'list' && (

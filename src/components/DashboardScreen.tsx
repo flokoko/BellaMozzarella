@@ -14,6 +14,8 @@ interface DashboardScreenProps {
   notes: QuickNote[]
   onNavigate: (tab: TabView) => void
   onNotesChange: () => void
+  installPrompt: any
+  onInstall: () => void
 }
 
 export default function DashboardScreen({
@@ -26,6 +28,8 @@ export default function DashboardScreen({
   notes,
   onNavigate,
   onNotesChange,
+  installPrompt,
+  onInstall,
 }: DashboardScreenProps) {
   const [showForm, setShowForm] = useState(false)
   const [formTitle, setFormTitle] = useState('')
@@ -60,6 +64,7 @@ export default function DashboardScreen({
       alert(`Fehler beim Löschen: ${error.message}`)
       return
     }
+    navigator.vibrate?.(15)
     onNotesChange()
   }
 
@@ -142,6 +147,14 @@ export default function DashboardScreen({
           </div>
         </button>
       </div>
+
+      {/* ── Install Banner ── */}
+      {installPrompt && (
+        <button className="dash-install-banner" onClick={onInstall}>
+          <span className="dash-install-icon">📱</span>
+          App installieren — für schnelleren Zugriff
+        </button>
+      )}
 
       {/* ── Quick Notes ── */}
       <section className="dash-notes-section">

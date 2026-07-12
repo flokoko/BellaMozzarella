@@ -20,11 +20,13 @@ export default function ItemRow({ item, onToggle, onDelete, dragHandleProps, isD
 
   const toggleChecked = () => {
     onToggle?.(item)
+    navigator.vibrate?.(10)
   }
 
   const deleteItem = () => {
     if (!confirm('Dieses Element wirklich löschen?')) return
     onDelete?.(item)
+    navigator.vibrate?.(15)
   }
 
   const rowClass = [
