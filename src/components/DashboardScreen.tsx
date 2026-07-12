@@ -180,7 +180,7 @@ export default function DashboardScreen({
         )}
 
         {notes.length === 0 && !showForm && (
-          <p className="dash-notes-empty">Noch keine Notizen — füre Infos wie die Hausadresse hinzu! 📝</p>
+          <p className="dash-notes-empty">Noch keine Notizen — füge Infos wie die Hausadresse hinzu! 📝</p>
         )}
 
         <div className="dash-notes-list">
