@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
-import type { ListItem, ItemCategory, ListType, ShoppingList, TabView, Meal, MealIdea, QuickNote } from './types'
+import type { ListItem, ItemCategory, ListType, ShoppingList, TabView, Meal, MealIdea, QuickNote, Expense, ExpenseSplit } from './types'
 import { supabase, setJoinCode } from './lib/supabase'
 import { getResolvedTheme, toggleTheme, applyTheme, initThemeListener } from './lib/theme'
 import JoinScreen from './components/JoinScreen'
@@ -8,6 +8,7 @@ import BringScreen from './components/BringScreen'
 import MealPlanScreen from './components/MealPlanScreen'
 import SettingsScreen from './components/SettingsScreen'
 import DashboardScreen from './components/DashboardScreen'
+import ExpenseScreen from './components/ExpenseScreen'
 
 import './App.css'
 
@@ -20,6 +21,8 @@ export default function App() {
   const [meals, setMeals] = useState<Meal[]>([])
   const [mealIdeas, setMealIdeas] = useState<MealIdea[]>([])
   const [notes, setNotes] = useState<QuickNote[]>([])
+  const [expenses, setExpenses] = useState<Expense[]>([])
+  const [expenseSplits, setExpenseSplits] = useState<ExpenseSplit[]>([])
   const [tab, setTab] = useState<TabView>('home')
   const [isDark, setIsDark] = useState(false)
   const [isOnline, setIsOnline] = useState(navigator.onLine)
@@ -116,6 +119,17 @@ export default function App() {
     setNotes((data || []) as QuickNote[])
   }, [])
 
+  const fetchExpenses = useCallback(async (listId: string) => {
+    const { data, error: err } = await supabase
+      .from('expenses')
+      .select('*')
+      .eq('list_id', listId)
+      .order('expense_date', { ascending: false })
+      .order('created_at', { ascending: false })
+    if (err) { console.error('fetchExpenses error:', err); return }
+    setExpenses((data || []) as Expense[])
+  }, [])
+
   const fetchAll = useCallback(async (listId: string) => {
     await Promise.all([
       fetchItems(listId, 'shopping'),
@@ -124,8 +138,9 @@ export default function App() {
       fetchMeals(listId),
       fetchMealIdeas(listId),
       fetchNotes(listId),
+      fetchExpenses(listId),
     ])
-  }, [fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes])
+  }, [fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes, fetchExpenses])
 
   // ── Polling (5000ms, only when visible) ───────────────────────────
   const lastFetchTime = useRef(0)
@@ -161,6 +176,20 @@ export default function App() {
       document.removeEventListener('visibilitychange', onVisibility)
     }
   }, [list, fetchAll])
+
+  // ── Fetch expense splits whenever expenses change ─────────────────
+  useEffect(() => {
+    if (expenses.length === 0) { setExpenseSplits([]); return }
+    const expenseIds = expenses.map(e => e.id)
+    supabase
+      .from('expense_splits')
+      .select('*')
+      .in('expense_id', expenseIds)
+      .then(({ data, error }) => {
+        if (error) { console.error('fetchSplits error:', error); return }
+        setExpenseSplits((data || []) as ExpenseSplit[])
+      })
+  }, [expenses])
 
   // ── Auto-restore session ──────────────────────────────────────────
   useEffect(() => {
@@ -230,6 +259,27 @@ export default function App() {
   const shoppingCategories = useMemo(() => categories.filter((c) => c.list_type === 'shopping'), [categories])
   const bringCategories = useMemo(() => categories.filter((c) => c.list_type === 'bring'), [categories])
 
+  const knownPersons = useMemo(() => {
+    const names = new Set<string>()
+    if (userName) names.add(userName)
+    expenses.forEach(e => { if (e.paid_by) names.add(e.paid_by) })
+    expenseSplits.forEach(s => { if (s.person_name) names.add(s.person_name) })
+    bringItems.forEach(i => { if (i.assigned_to) names.add(i.assigned_to) })
+    meals.forEach(m => { if (m.created_by) names.add(m.created_by) })
+    return Array.from(names).sort((a, b) => a.localeCompare(b))
+  }, [userName, expenses, expenseSplits, bringItems, meals])
+
+  const userBalance = useMemo(() => {
+    const paid = expenses.filter(e => e.paid_by === userName).reduce((s, e) => s + e.amount, 0)
+    const share = expenseSplits.filter(s => s.person_name === userName).reduce((s, s2) => s + s2.share_amount, 0)
+    return paid - share
+  }, [expenses, expenseSplits, userName])
+
+  const expenseTotal = useMemo(() =>
+    expenses.reduce((sum, e) => sum + e.amount, 0),
+    [expenses],
+  )
+
   const handleJoin = (name: string, l: ShoppingList) => {
     setJoinCode(l.join_code)
     setUserName(name)
@@ -255,6 +305,8 @@ export default function App() {
     setMeals([])
     setMealIdeas([])
     setNotes([])
+    setExpenses([])
+    setExpenseSplits([])
   }
 
   const handleRename = (newName: string) => {
@@ -280,6 +332,7 @@ export default function App() {
     list: '🛒 Einkaufsliste',
     bring: '🎒 Mitbringen',
     mealplan: '🍝 Essensplan',
+    expenses: '💰 Ausgaben',
     settings: '⚙️ Einstellungen',
   }
 
@@ -327,6 +380,9 @@ export default function App() {
             shoppingChecked={checkedCount}
             bringCount={bringItems.length}
             mealCount={meals.length}
+            expenseCount={expenses.length}
+            expenseTotal={expenseTotal}
+            userBalance={userBalance}
             notes={notes}
             onNavigate={setTab}
             onNotesChange={() => fetchNotes(list.id)}
@@ -368,6 +424,16 @@ export default function App() {
             userName={userName}
             onMealsChange={() => fetchMeals(list.id)}
             onIdeasChange={() => fetchMealIdeas(list.id)}
+          />
+        )}
+        {tab === 'expenses' && (
+          <ExpenseScreen
+            expenses={expenses}
+            expenseSplits={expenseSplits}
+            listId={list.id}
+            userName={userName}
+            knownPersons={knownPersons}
+            onExpensesChange={() => fetchExpenses(list.id)}
           />
         )}
         {tab === 'settings' && (

@@ -11,6 +11,9 @@ interface DashboardScreenProps {
   shoppingChecked: number
   bringCount: number
   mealCount: number
+  expenseCount: number
+  expenseTotal: number
+  userBalance: number
   notes: QuickNote[]
   onNavigate: (tab: TabView) => void
   onNotesChange: () => void
@@ -25,6 +28,9 @@ export default function DashboardScreen({
   shoppingChecked,
   bringCount,
   mealCount,
+  expenseCount,
+  expenseTotal,
+  userBalance,
   notes,
   onNavigate,
   onNotesChange,
@@ -101,6 +107,10 @@ export default function DashboardScreen({
   const shoppingStatus = shoppingCount > 0 ? `${shoppingChecked}/${shoppingCount} erledigt` : 'Keine Items'
   const bringStatus = bringCount > 0 ? `${bringCount} Items` : 'Nichts zu mitbringen'
   const mealStatus = mealCount > 0 ? `${mealCount} Gerichte` : 'Noch nichts geplant'
+  const expenseStatus = expenseCount > 0
+    ? `${expenseCount} Ausgaben — Du: ${userBalance >= 0 ? 'bekommst' : 'schuldest'} €${Math.abs(userBalance).toFixed(2)}`
+    : 'Noch keine Ausgaben'
+  const expenseTotalFmt = expenseTotal.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })
 
   return (
     <div className="dashboard-screen">
@@ -136,6 +146,17 @@ export default function DashboardScreen({
           </div>
           {mealCount > 0 && (
             <span className="dash-card-badge">{mealCount}</span>
+          )}
+        </button>
+
+        <button className="dash-card dash-card-expenses" onClick={() => onNavigate('expenses')}>
+          <div className="dash-card-icon">💰</div>
+          <div className="dash-card-body">
+            <div className="dash-card-title">Ausgaben</div>
+            <div className="dash-card-sub">{expenseStatus}</div>
+          </div>
+          {expenseCount > 0 && (
+            <span className="dash-card-badge">{expenseTotalFmt}</span>
           )}
         </button>
 

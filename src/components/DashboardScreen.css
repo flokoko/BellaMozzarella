@@ -83,6 +83,22 @@
   animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ── Expenses card: full-width on dashboard ── */
+.dash-card-expenses {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: center;
+  border-left: 3px solid #009246;
+}
+
+.dash-card-expenses .dash-card-icon {
+  font-size: 1.6rem;
+}
+
+.dash-card-expenses .dash-card-body {
+  flex: 1;
+}
+
 .dash-section-title {
   font-size: 1rem;
   font-weight: 800;

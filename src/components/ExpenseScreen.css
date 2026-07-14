@@ -1,0 +1,564 @@
+.expense-screen {
+  padding: 0.5rem 0;
+  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Sub-Toggle ── */
+.expense-toggle {
+  display: flex;
+  gap: 0;
+  margin-bottom: 0.75rem;
+  background: var(--button-bg);
+  border-radius: 999px;
+  padding: 3px;
+}
+
+.expense-toggle-btn {
+  flex: 1;
+  padding: 0.45rem 0.6rem;
+  border: none;
+  background: none;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 999px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+}
+
+.expense-toggle-btn.active {
+  background: var(--accent-gradient);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 146, 70, 0.2);
+}
+
+.expense-toggle-btn:active {
+  transform: scale(0.97);
+}
+
+.expense-toggle-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: var(--accent);
+  color: white;
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+  min-width: 1.1rem;
+  text-align: center;
+}
+
+/* ── Add Expense Form ── */
+.expense-add-trigger {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 2px dashed var(--dashed-border);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 0.75rem;
+}
+
+.expense-add-trigger:hover {
+  background: var(--accent-light);
+  border-color: var(--accent);
+}
+
+.expense-add-trigger:active {
+  transform: scale(0.97);
+}
+
+.expense-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.7rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 0.75rem;
+  animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.expense-form-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.expense-input {
+  flex: 1;
+  padding: 0.45rem 0.6rem;
+  border: 2px solid var(--input-border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.expense-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.expense-select {
+  padding: 0.45rem 0.6rem;
+  border: 2px solid var(--input-border);
+  border-radius: 8px;
+  background: var(--select-bg);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.expense-select:focus {
+  border-color: var(--accent);
+}
+
+/* ── Split Chips ── */
+.expense-chips-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+.expense-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.expense-chip {
+  padding: 0.25rem 0.6rem;
+  border: 2px solid var(--input-border);
+  border-radius: 999px;
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  user-select: none;
+}
+
+.expense-chip.active {
+  background: var(--accent-light);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.expense-chip:active {
+  transform: scale(0.95);
+}
+
+/* ── Split Mode Toggle ── */
+.expense-mode-toggle {
+  display: flex;
+  gap: 0;
+  background: var(--button-bg);
+  border-radius: 999px;
+  padding: 3px;
+}
+
+.expense-mode-btn {
+  flex: 1;
+  padding: 0.3rem 0.5rem;
+  border: none;
+  background: none;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 999px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.expense-mode-btn.active {
+  background: var(--accent-gradient);
+  color: white;
+}
+
+/* ── Exact split inputs ── */
+.expense-exact-splits {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.expense-exact-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.expense-exact-name {
+  flex: 1;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.expense-exact-input {
+  width: 5.5rem;
+  padding: 0.3rem 0.5rem;
+  border: 2px solid var(--input-border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-family: inherit;
+  outline: none;
+  text-align: right;
+  transition: border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.expense-exact-input:focus {
+  border-color: var(--accent);
+}
+
+.expense-exact-sum {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  display: flex;
+  justify-content: space-between;
+  padding: 0.25rem 0.1rem;
+}
+
+.expense-exact-sum.ok {
+  color: #009246;
+}
+
+.expense-exact-sum.warn {
+  color: var(--danger);
+}
+
+/* ── Form preview ── */
+.expense-form-preview {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  padding: 0.35rem 0.5rem;
+  background: var(--accent-light);
+  border-radius: 8px;
+}
+
+/* ── Form actions ── */
+.expense-form-actions {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+
+.expense-btn-save {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--accent-gradient);
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 146, 70, 0.2);
+}
+
+.expense-btn-save:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 146, 70, 0.3);
+}
+
+.expense-btn-save:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.expense-btn-save:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.expense-btn-cancel {
+  padding: 0.4rem 0.7rem;
+  border: 2px solid var(--input-border);
+  border-radius: 999px;
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.expense-btn-cancel:hover {
+  border-color: var(--text-muted);
+  color: var(--text-primary);
+}
+
+.expense-btn-cancel:active {
+  transform: scale(0.96);
+}
+
+/* ── Expense Cards grouped by date ── */
+.expense-date-group {
+  margin-bottom: 0.75rem;
+}
+
+.expense-date-header {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+  text-transform: capitalize;
+}
+
+.expense-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.expense-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 0.6rem 0.7rem;
+  box-shadow: var(--shadow-sm);
+  animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-left: 3px solid #009246;
+}
+
+.expense-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.expense-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.expense-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.expense-card-desc {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.1rem;
+}
+
+.expense-card-amount {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #009246;
+}
+
+.expense-card-buttons {
+  display: flex;
+  gap: 0.2rem;
+  flex-shrink: 0;
+}
+
+.expense-card-btn {
+  border: none;
+  background: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 6px;
+  opacity: 0.5;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.expense-card-btn:hover {
+  opacity: 1;
+  background: var(--accent-light);
+  transform: scale(1.15);
+}
+
+.expense-card-btn:active {
+  transform: scale(0.9);
+}
+
+.expense-card-meta {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+.expense-card-split {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+}
+
+.expense-card-by {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+/* ── Empty state ── */
+.expense-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 1.5rem 1rem;
+  font-size: 0.85rem;
+  border: 1px dashed var(--dashed-border);
+  border-radius: 14px;
+  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Abrechnung Section ── */
+.expense-total-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: 14px;
+  background: var(--accent-light);
+  border: 1px solid var(--accent);
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #009246;
+  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.expense-balance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.expense-balance-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.7rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.expense-balance-card.positive {
+  border-left: 3px solid #009246;
+}
+
+.expense-balance-card.negative {
+  border-left: 3px solid var(--danger);
+}
+
+.expense-balance-card.neutral {
+  border-left: 3px solid var(--text-muted);
+}
+
+.expense-balance-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.expense-balance-amount {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.expense-balance-amount.positive {
+  color: #009246;
+}
+
+.expense-balance-amount.negative {
+  color: var(--danger);
+}
+
+.expense-balance-amount.neutral {
+  color: var(--text-muted);
+}
+
+/* ── Settlement transactions ── */
+.expense-settlement-title {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0.5rem 0 0.4rem 0;
+}
+
+.expense-settlement-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.expense-txn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 10px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  font-size: 0.82rem;
+  animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.expense-txn-from {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.expense-txn-arrow {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.expense-txn-to {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.expense-txn-amount {
+  margin-left: auto;
+  font-weight: 800;
+  color: #009246;
+}
+
+.expense-settlement-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 0.8rem;
+  font-size: 0.82rem;
+  border: 1px dashed var(--dashed-border);
+  border-radius: 12px;
+  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}

@@ -33,7 +33,7 @@ export interface ShoppingList {
   created_at: string
 }
 
-export type TabView = 'home' | 'list' | 'bring' | 'mealplan' | 'settings'
+export type TabView = 'home' | 'list' | 'bring' | 'mealplan' | 'expenses' | 'settings'
 export type BringFilter = 'all' | 'mine' | 'unfilled'
 
 export type DayOfWeek = 'Montag' | 'Dienstag' | 'Mittwoch' | 'Donnerstag' | 'Freitag' | 'Samstag' | 'Sonntag'
@@ -65,5 +65,25 @@ export interface QuickNote {
   title: string | null
   content: string
   created_by: string | null
+  created_at: string
+}
+
+export interface Expense {
+  id: string
+  list_id: string
+  description: string
+  amount: number
+  paid_by: string
+  expense_date: string
+  split_mode: 'equal' | 'exact'
+  created_by: string | null
+  created_at: string
+}
+
+export interface ExpenseSplit {
+  id: string
+  expense_id: string
+  person_name: string
+  share_amount: number
   created_at: string
 }
