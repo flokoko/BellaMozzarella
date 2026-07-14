@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import type { ShoppingList } from '../types'
-import { supabase } from '../lib/supabase'
+import { supabase, setJoinCode as setSupabaseJoinCode } from '../lib/supabase'
 
 import './JoinScreen.css'
 
@@ -93,6 +93,8 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
         return
       }
       const listData = data[0] as ShoppingList
+      // Set join code header BEFORE any table queries (RLS needs it)
+      setSupabaseJoinCode(listData.join_code)
       // Fetch existing participants for this list
       const { data: participants } = await supabase
         .from('participants')
