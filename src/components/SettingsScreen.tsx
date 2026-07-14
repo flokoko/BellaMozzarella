@@ -24,7 +24,7 @@ interface SettingsScreenProps {
   hasAdminPassword: boolean
   onSetAdminPassword: (password: string) => void
   onUnlockAdmin: (password: string) => Promise<boolean>
-  onResetAdminPassword: () => void
+  onChangeAdminPassword: (oldPassword: string, newPassword: string) => Promise<boolean>
 }
 
 export default function SettingsScreen({
@@ -43,7 +43,7 @@ export default function SettingsScreen({
   hasAdminPassword,
   onSetAdminPassword,
   onUnlockAdmin,
-  onResetAdminPassword,
+  onChangeAdminPassword,
 }: SettingsScreenProps) {
   const [theme, setThemeState] = useState<ThemeMode>('auto')
   const [editingName, setEditingName] = useState(false)
@@ -55,6 +55,9 @@ export default function SettingsScreen({
   const [showSetPassword, setShowSetPassword] = useState(false)
   const [newAdminPassword, setNewAdminPassword] = useState('')
   const [adminError, setAdminError] = useState('')
+  const [showChangePassword, setShowChangePassword] = useState(false)
+  const [oldPassword, setOldPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
 
   const { updateCategory, deleteCategory, addCategory } = useCategories(onCategoriesChange)
 
@@ -121,11 +124,26 @@ export default function SettingsScreen({
     setAdminPasswordInput('')
   }
 
-  const handleForgotPassword = () => {
-    if (!confirm('Passwort zurücksetzen? Du kannst danach ein neues Admin-Passwort festlegen.')) return
-    onResetAdminPassword()
+  const handleChangePassword = async () => {
     setAdminError('')
-    setAdminPasswordInput('')
+    const oldPw = oldPassword.trim()
+    const newPw = newPassword.trim()
+    if (!oldPw || !newPw) {
+      setAdminError('Bitte altes und neues Passwort eingeben.')
+      return
+    }
+    if (newPw.length < 3) {
+      setAdminError('Neues Passwort muss mindestens 3 Zeichen lang sein.')
+      return
+    }
+    const ok = await onChangeAdminPassword(oldPw, newPw)
+    if (!ok) {
+      setAdminError('Altes Passwort falsch.')
+    } else {
+      setOldPassword('')
+      setNewPassword('')
+      setShowChangePassword(false)
+    }
   }
 
   const handleSavePassword = () => {
@@ -353,9 +371,6 @@ export default function SettingsScreen({
             <button className="settings-btn settings-btn-primary" onClick={handleUnlock} style={{ width: '100%' }}>
               Entsperren
             </button>
-            <button className="settings-forgot-link" onClick={handleForgotPassword}>
-              Passwort vergessen?
-            </button>
           </div>
         )}
 
@@ -387,6 +402,45 @@ export default function SettingsScreen({
                 onClick={() => setShowAddParticipant(true)}
               >
                 + Teilnehmer hinzufügen
+              </button>
+            )}
+
+            {/* Passwort ändern */}
+            {showChangePassword ? (
+              <div className="settings-inline-form" style={{ flexDirection: 'column', gap: '0.5rem', marginTop: '0.6rem' }}>
+                <input
+                  className="settings-inline-input"
+                  type="password"
+                  placeholder="Altes Passwort"
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                  autoFocus
+                />
+                <input
+                  className="settings-inline-input"
+                  type="password"
+                  placeholder="Neues Passwort"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleChangePassword()}
+                />
+                {adminError && <p className="settings-admin-error">{adminError}</p>}
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button className="settings-btn settings-btn-secondary" onClick={() => { setShowChangePassword(false); setOldPassword(''); setNewPassword(''); setAdminError('') }}>
+                    Abbrechen
+                  </button>
+                  <button className="settings-btn settings-btn-primary" onClick={handleChangePassword}>
+                    Speichern
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                className="settings-btn settings-btn-secondary"
+                style={{ marginTop: '0.6rem', width: '100%' }}
+                onClick={() => setShowChangePassword(true)}
+              >
+                🔑 Passwort ändern
               </button>
             )}
           </>

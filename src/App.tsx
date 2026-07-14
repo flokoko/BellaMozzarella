@@ -377,19 +377,25 @@ export default function App() {
     navigator.vibrate?.(10)
   }
 
-  const handleResetAdminPassword = async () => {
-    if (!list) return
-    const { error } = await supabase
+  const handleChangeAdminPassword = async (oldPassword: string, newPassword: string): Promise<boolean> => {
+    if (!list) return false
+    // Verify old password against DB
+    const { data, error } = await supabase
       .from('lists')
-      .update({ admin_password: null })
+      .select('admin_password')
       .eq('id', list.id)
-    if (error) {
-      alert(`Fehler beim Zurücksetzen: ${error.message}`)
-      return
-    }
-    setList({ ...list, admin_password: null })
-    setAdminUnlocked(false)
+      .single()
+    if (error || !data || !data.admin_password) return false
+    if (oldPassword !== data.admin_password) return false
+    // Update to new password
+    const { error: updateError } = await supabase
+      .from('lists')
+      .update({ admin_password: newPassword })
+      .eq('id', list.id)
+    if (updateError) return false
+    setList({ ...list, admin_password: newPassword })
     navigator.vibrate?.(10)
+    return true
   }
 
   const handleUnlockAdmin = async (password: string): Promise<boolean> => {
@@ -553,7 +559,7 @@ export default function App() {
             hasAdminPassword={!!list.admin_password}
             onSetAdminPassword={handleSetAdminPassword}
             onUnlockAdmin={handleUnlockAdmin}
-            onResetAdminPassword={handleResetAdminPassword}
+            onChangeAdminPassword={handleChangeAdminPassword}
           />
         )}
       </main>
