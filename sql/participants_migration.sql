@@ -8,6 +8,9 @@ CREATE TABLE IF NOT EXISTS participants (
   UNIQUE(list_id, name)
 );
 
+-- Block 1b: admin_password Spalte zur lists-Tabelle hinzufügen
+ALTER TABLE lists ADD COLUMN IF NOT EXISTS admin_password TEXT;
+
 -- Block 2: RLS
 ALTER TABLE participants ENABLE ROW LEVEL SECURITY;
 

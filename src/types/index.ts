@@ -30,6 +30,7 @@ export interface ShoppingList {
   id: string
   name: string
   join_code: string
+  admin_password: string | null
   created_at: string
 }
 

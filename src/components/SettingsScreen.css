@@ -314,6 +314,12 @@
   vertical-align: middle;
 }
 
+.settings-admin-error {
+  font-size: 0.8rem;
+  color: var(--danger);
+  margin: 0;
+}
+
 .settings-cat-icon-input {
   width: 42px;
   text-align: center;

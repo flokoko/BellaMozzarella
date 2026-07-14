@@ -20,6 +20,10 @@ interface SettingsScreenProps {
   participants: Participant[]
   onParticipantsChange: () => void
   isAdmin: boolean
+  adminUnlocked: boolean
+  hasAdminPassword: boolean
+  onSetAdminPassword: (password: string) => void
+  onUnlockAdmin: (password: string) => boolean
 }
 
 export default function SettingsScreen({
@@ -34,6 +38,10 @@ export default function SettingsScreen({
   participants,
   onParticipantsChange,
   isAdmin,
+  adminUnlocked,
+  hasAdminPassword,
+  onSetAdminPassword,
+  onUnlockAdmin,
 }: SettingsScreenProps) {
   const [theme, setThemeState] = useState<ThemeMode>('auto')
   const [editingName, setEditingName] = useState(false)
@@ -41,6 +49,10 @@ export default function SettingsScreen({
   const [copied, setCopied] = useState(false)
   const [showAddParticipant, setShowAddParticipant] = useState(false)
   const [newParticipantName, setNewParticipantName] = useState('')
+  const [adminPasswordInput, setAdminPasswordInput] = useState('')
+  const [showSetPassword, setShowSetPassword] = useState(false)
+  const [newAdminPassword, setNewAdminPassword] = useState('')
+  const [adminError, setAdminError] = useState('')
 
   const { updateCategory, deleteCategory, addCategory } = useCategories(onCategoriesChange)
 
@@ -96,6 +108,27 @@ export default function SettingsScreen({
     }
     navigator.vibrate?.(10)
     onParticipantsChange()
+  }
+
+  const handleUnlock = () => {
+    setAdminError('')
+    const ok = onUnlockAdmin(adminPasswordInput)
+    if (!ok) {
+      setAdminError('Falsches Passwort.')
+    }
+    setAdminPasswordInput('')
+  }
+
+  const handleSavePassword = () => {
+    const pw = newAdminPassword.trim()
+    if (pw.length < 3) {
+      setAdminError('Passwort muss mindestens 3 Zeichen lang sein.')
+      return
+    }
+    onSetAdminPassword(pw)
+    setNewAdminPassword('')
+    setShowSetPassword(false)
+    setAdminError('')
   }
 
   const handleAddCategory = (listType: ListType) => {
@@ -228,16 +261,18 @@ export default function SettingsScreen({
       <div className="settings-section">
         <h3 className="settings-section-title">
           Teilnehmer
-          {isAdmin && <span className="settings-admin-badge">👑 Admin</span>}
+          {isAdmin && adminUnlocked && <span className="settings-admin-badge">👑 Admin</span>}
         </h3>
         <p className="settings-cat-hint">{participants.length} {participants.length === 1 ? 'Person' : 'Personen'} in dieser Liste.</p>
+
+        {/* Teilnehmer-Liste (immer sichtbar) */}
         {participants.map((p) => (
           <div key={p.id} className="settings-cat-item">
             <span className="settings-participant-name">
               {p.name}
               {p.is_admin && <span className="settings-participant-admin"> 👑</span>}
             </span>
-            {isAdmin && (
+            {isAdmin && adminUnlocked && (
               <button
                 className="settings-cat-delete-btn"
                 onClick={() => handleDeleteParticipant(p)}
@@ -251,7 +286,69 @@ export default function SettingsScreen({
         {participants.length === 0 && (
           <p className="settings-cat-empty">Noch keine Teilnehmer</p>
         )}
-        {isAdmin ? (
+
+        {/* Admin-Bereich: Passwort-Protecte Teilnehmer-Verwaltung */}
+        {isAdmin && !hasAdminPassword && !showSetPassword && (
+          <button
+            className="settings-btn settings-btn-secondary"
+            style={{ marginTop: '0.6rem', width: '100%' }}
+            onClick={() => setShowSetPassword(true)}
+          >
+            🔒 Admin-Passwort festlegen
+          </button>
+        )}
+
+        {/* Passwort setzen (noch keins vorhanden) */}
+        {isAdmin && !hasAdminPassword && showSetPassword && (
+          <div className="settings-inline-form" style={{ flexDirection: 'column', gap: '0.5rem' }}>
+            <p className="settings-cat-hint" style={{ marginBottom: 0 }}>
+              Lege ein Passwort fest, um die Teilnehmer-Verwaltung zu schützen.
+            </p>
+            <input
+              className="settings-inline-input"
+              type="password"
+              placeholder="Admin-Passwort"
+              value={newAdminPassword}
+              onChange={(e) => setNewAdminPassword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSavePassword()}
+              autoFocus
+            />
+            {adminError && <p className="settings-admin-error">{adminError}</p>}
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button className="settings-btn settings-btn-secondary" onClick={() => { setShowSetPassword(false); setNewAdminPassword(''); setAdminError('') }}>
+                Abbrechen
+              </button>
+              <button className="settings-btn settings-btn-primary" onClick={handleSavePassword}>
+                Speichern
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Passwort-Eingabe zum Entsperren (Passwort gesetzt, noch nicht entsperrt) */}
+        {isAdmin && hasAdminPassword && !adminUnlocked && (
+          <div className="settings-inline-form" style={{ flexDirection: 'column', gap: '0.5rem' }}>
+            <p className="settings-cat-hint" style={{ marginBottom: 0 }}>
+              🔒 Gib das Admin-Passwort ein, um Teilnehmer zu verwalten.
+            </p>
+            <input
+              className="settings-inline-input"
+              type="password"
+              placeholder="Admin-Passwort"
+              value={adminPasswordInput}
+              onChange={(e) => setAdminPasswordInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleUnlock()}
+              autoFocus
+            />
+            {adminError && <p className="settings-admin-error">{adminError}</p>}
+            <button className="settings-btn settings-btn-primary" onClick={handleUnlock} style={{ width: '100%' }}>
+              Entsperren
+            </button>
+          </div>
+        )}
+
+        {/* Entsperter Admin: Teilnehmer hinzufügen */}
+        {isAdmin && adminUnlocked && (
           <>
             {showAddParticipant ? (
               <div className="settings-inline-form">
@@ -281,7 +378,10 @@ export default function SettingsScreen({
               </button>
             )}
           </>
-        ) : (
+        )}
+
+        {/* Non-Admin Hinweis */}
+        {!isAdmin && (
           <p className="settings-cat-hint" style={{ marginTop: '0.5rem' }}>
             Nur der Admin kann Teilnehmer verwalten.
           </p>

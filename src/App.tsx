@@ -24,6 +24,7 @@ export default function App() {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [expenseSplits, setExpenseSplits] = useState<ExpenseSplit[]>([])
   const [participants, setParticipants] = useState<Participant[]>([])
+  const [adminUnlocked, setAdminUnlocked] = useState(false)
   const [tab, setTab] = useState<TabView>('home')
   const [isDark, setIsDark] = useState(false)
   const [isOnline, setIsOnline] = useState(navigator.onLine)
@@ -322,6 +323,7 @@ export default function App() {
     setExpenses([])
     setExpenseSplits([])
     setParticipants([])
+    setAdminUnlocked(false)
   }
 
   const handleRename = async (newName: string) => {
@@ -345,6 +347,31 @@ export default function App() {
   const handleToggleTheme = () => {
     toggleTheme()
     setIsDark(getResolvedTheme() === 'dark')
+  }
+
+  const handleSetAdminPassword = async (password: string) => {
+    if (!list) return
+    const { error } = await supabase
+      .from('lists')
+      .update({ admin_password: password })
+      .eq('id', list.id)
+    if (error) {
+      alert(`Fehler beim Speichern: ${error.message}`)
+      return
+    }
+    setList({ ...list, admin_password: password })
+    setAdminUnlocked(true)
+    navigator.vibrate?.(10)
+  }
+
+  const handleUnlockAdmin = (password: string): boolean => {
+    if (!list || !list.admin_password) return false
+    if (password === list.admin_password) {
+      setAdminUnlocked(true)
+      navigator.vibrate?.(10)
+      return true
+    }
+    return false
   }
 
   const handleInstall = async () => {
@@ -478,6 +505,10 @@ export default function App() {
             participants={participants}
             onParticipantsChange={() => fetchParticipants(list.id)}
             isAdmin={isAdmin}
+            adminUnlocked={adminUnlocked}
+            hasAdminPassword={!!list.admin_password}
+            onSetAdminPassword={handleSetAdminPassword}
+            onUnlockAdmin={handleUnlockAdmin}
           />
         )}
       </main>
