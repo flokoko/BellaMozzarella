@@ -300,6 +300,20 @@
   color: var(--text-primary);
 }
 
+.settings-admin-badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+  background: var(--accent);
+  color: white;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  vertical-align: middle;
+}
+
 .settings-cat-icon-input {
   width: 42px;
   text-align: center;

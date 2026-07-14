@@ -92,5 +92,6 @@ export interface Participant {
   id: string
   list_id: string
   name: string
+  is_admin: boolean
   joined_at: string
 }

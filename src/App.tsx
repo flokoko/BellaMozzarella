@@ -289,6 +289,11 @@ export default function App() {
     [expenses],
   )
 
+  const isAdmin = useMemo(() =>
+    participants.some(p => p.name === userName && p.is_admin),
+    [participants, userName],
+  )
+
   const handleJoin = (name: string, l: ShoppingList) => {
     setJoinCode(l.join_code)
     setUserName(name)
@@ -472,6 +477,7 @@ export default function App() {
             onCategoriesChange={() => fetchCategories(list.id)}
             participants={participants}
             onParticipantsChange={() => fetchParticipants(list.id)}
+            isAdmin={isAdmin}
           />
         )}
       </main>

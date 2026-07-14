@@ -96,15 +96,21 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
       // Fetch existing participants for this list
       const { data: participants } = await supabase
         .from('participants')
-        .select('name')
+        .select('name, is_admin')
         .eq('list_id', listData.id)
-      const existingNames = (participants || []).map(p => p.name)
+      const existing = (participants || []) as { name: string; is_admin: boolean }[]
       // Case-insensitive match: use exact stored name if one exists
-      const match = existingNames.find(en => en.toLowerCase() === n.toLowerCase())
-      const finalName = match || n
+      const match = existing.find(en => en.name.toLowerCase() === n.toLowerCase())
+      const finalName = match ? match.name : n
       // If no match, insert new participant
       if (!match) {
-        await supabase.from('participants').insert({ list_id: listData.id, name: finalName })
+        // First participant becomes admin
+        const isFirst = existing.length === 0
+        await supabase.from('participants').insert({
+          list_id: listData.id,
+          name: finalName,
+          is_admin: isFirst,
+        })
       }
       localStorage.setItem('user_name', finalName)
       localStorage.setItem('join_code', code)

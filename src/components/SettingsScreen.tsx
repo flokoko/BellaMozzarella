@@ -19,6 +19,7 @@ interface SettingsScreenProps {
   onCategoriesChange: () => void
   participants: Participant[]
   onParticipantsChange: () => void
+  isAdmin: boolean
 }
 
 export default function SettingsScreen({
@@ -32,6 +33,7 @@ export default function SettingsScreen({
   onCategoriesChange,
   participants,
   onParticipantsChange,
+  isAdmin,
 }: SettingsScreenProps) {
   const [theme, setThemeState] = useState<ThemeMode>('auto')
   const [editingName, setEditingName] = useState(false)
@@ -224,49 +226,65 @@ export default function SettingsScreen({
 
       {/* ── Teilnehmer ─────────────────────────────────────────────────── */}
       <div className="settings-section">
-        <h3 className="settings-section-title">Teilnehmer</h3>
+        <h3 className="settings-section-title">
+          Teilnehmer
+          {isAdmin && <span className="settings-admin-badge">👑 Admin</span>}
+        </h3>
         <p className="settings-cat-hint">{participants.length} {participants.length === 1 ? 'Person' : 'Personen'} in dieser Liste.</p>
         {participants.map((p) => (
           <div key={p.id} className="settings-cat-item">
-            <span className="settings-participant-name">{p.name}</span>
-            <button
-              className="settings-cat-delete-btn"
-              onClick={() => handleDeleteParticipant(p)}
-              aria-label="Teilnehmer entfernen"
-            >
-              🗑
-            </button>
+            <span className="settings-participant-name">
+              {p.name}
+              {p.is_admin && <span className="settings-participant-admin"> 👑</span>}
+            </span>
+            {isAdmin && (
+              <button
+                className="settings-cat-delete-btn"
+                onClick={() => handleDeleteParticipant(p)}
+                aria-label="Teilnehmer entfernen"
+              >
+                🗑
+              </button>
+            )}
           </div>
         ))}
         {participants.length === 0 && (
           <p className="settings-cat-empty">Noch keine Teilnehmer</p>
         )}
-        {showAddParticipant ? (
-          <div className="settings-inline-form">
-            <input
-              className="settings-inline-input"
-              type="text"
-              placeholder="Name"
-              value={newParticipantName}
-              onChange={(e) => setNewParticipantName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAddParticipant()}
-              autoFocus
-            />
-            <button className="settings-btn settings-btn-primary" onClick={handleAddParticipant}>
-              Hinzufügen
-            </button>
-            <button className="settings-btn settings-btn-secondary" onClick={() => { setShowAddParticipant(false); setNewParticipantName('') }}>
-              Abbrechen
-            </button>
-          </div>
+        {isAdmin ? (
+          <>
+            {showAddParticipant ? (
+              <div className="settings-inline-form">
+                <input
+                  className="settings-inline-input"
+                  type="text"
+                  placeholder="Name"
+                  value={newParticipantName}
+                  onChange={(e) => setNewParticipantName(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddParticipant()}
+                  autoFocus
+                />
+                <button className="settings-btn settings-btn-primary" onClick={handleAddParticipant}>
+                  Hinzufügen
+                </button>
+                <button className="settings-btn settings-btn-secondary" onClick={() => { setShowAddParticipant(false); setNewParticipantName('') }}>
+                  Abbrechen
+                </button>
+              </div>
+            ) : (
+              <button
+                className="settings-btn settings-btn-secondary"
+                style={{ marginTop: '0.6rem', width: '100%' }}
+                onClick={() => setShowAddParticipant(true)}
+              >
+                + Teilnehmer hinzufügen
+              </button>
+            )}
+          </>
         ) : (
-          <button
-            className="settings-btn settings-btn-secondary"
-            style={{ marginTop: '0.6rem', width: '100%' }}
-            onClick={() => setShowAddParticipant(true)}
-          >
-            + Teilnehmer hinzufügen
-          </button>
+          <p className="settings-cat-hint" style={{ marginTop: '0.5rem' }}>
+            Nur der Admin kann Teilnehmer verwalten.
+          </p>
         )}
       </div>
 

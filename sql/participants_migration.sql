@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS participants (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   list_id UUID NOT NULL REFERENCES lists(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
+  is_admin BOOLEAN NOT NULL DEFAULT false,
   joined_at TIMESTAMPTZ DEFAULT now(),
   UNIQUE(list_id, name)
 );
