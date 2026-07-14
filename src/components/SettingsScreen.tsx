@@ -112,7 +112,9 @@ export default function SettingsScreen({
 
   const handleUnlock = async () => {
     setAdminError('')
+    console.log('[DEBUG] handleUnlock called, password:', adminPasswordInput)
     const ok = await onUnlockAdmin(adminPasswordInput)
+    console.log('[DEBUG] onUnlockAdmin returned:', ok)
     if (!ok) {
       setAdminError('Falsches Passwort.')
     }

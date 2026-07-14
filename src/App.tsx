@@ -386,13 +386,14 @@ export default function App() {
       .select('admin_password')
       .eq('id', list.id)
       .single()
+    console.log('[DEBUG] handleUnlockAdmin query result:', { data, error, listId: list.id })
     if (error || !data) {
       alert('Fehler beim Prüfen des Passworts.')
       return false
     }
+    console.log('[DEBUG] comparing:', password, '===', data.admin_password)
     if (data.admin_password && password === data.admin_password) {
       setAdminUnlocked(true)
-      // Also update list state so hasAdminPassword is correct
       setList(prev => prev ? { ...prev, admin_password: data.admin_password } : prev)
       navigator.vibrate?.(10)
       return true
