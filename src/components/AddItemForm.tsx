@@ -11,6 +11,7 @@ interface AddItemFormProps {
   placeholder?: string
   categories: ItemCategory[]
   listType: ListType
+  persons?: string[]
 }
 
 export default function AddItemForm({
@@ -21,6 +22,7 @@ export default function AddItemForm({
   placeholder,
   categories,
   listType,
+  persons,
 }: AddItemFormProps) {
   const [name, setName] = useState('')
   const [quantity, setQuantity] = useState('')
@@ -101,14 +103,27 @@ export default function AddItemForm({
             </select>
           </div>
           {listType === 'bring' && (
-            <input
-              className="add-input"
-              type="text"
-              placeholder="Zuweisen an (optional)"
-              value={assignedTo}
-              onChange={(e) => setAssignedTo(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-            />
+            persons && persons.length > 0 ? (
+              <select
+                className="add-select"
+                value={assignedTo}
+                onChange={(e) => setAssignedTo(e.target.value)}
+              >
+                <option value="">— Niemand —</option>
+                {persons.map((p) => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
+              </select>
+            ) : (
+              <input
+                className="add-input"
+                type="text"
+                placeholder="Zuweisen an (optional)"
+                value={assignedTo}
+                onChange={(e) => setAssignedTo(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+              />
+            )
           )}
           <div className="add-actions">
             <button className="add-btn-cancel" onClick={() => setExpanded(false)}>

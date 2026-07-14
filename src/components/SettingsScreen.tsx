@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import type { ItemCategory, ListType } from '../types'
+import type { ItemCategory, ListType, Participant } from '../types'
 import type { ThemeMode } from '../lib/theme'
 import { getTheme, setTheme } from '../lib/theme'
+import { supabase } from '../lib/supabase'
 import { useCategories } from '../hooks/useCategories'
 import { APP_VERSION } from '../version'
 
@@ -16,6 +17,8 @@ interface SettingsScreenProps {
   categories: ItemCategory[]
   listId: string
   onCategoriesChange: () => void
+  participants: Participant[]
+  onParticipantsChange: () => void
 }
 
 export default function SettingsScreen({
@@ -27,11 +30,15 @@ export default function SettingsScreen({
   categories,
   listId,
   onCategoriesChange,
+  participants,
+  onParticipantsChange,
 }: SettingsScreenProps) {
   const [theme, setThemeState] = useState<ThemeMode>('auto')
   const [editingName, setEditingName] = useState(false)
   const [newName, setNewName] = useState(userName)
   const [copied, setCopied] = useState(false)
+  const [showAddParticipant, setShowAddParticipant] = useState(false)
+  const [newParticipantName, setNewParticipantName] = useState('')
 
   const { updateCategory, deleteCategory, addCategory } = useCategories(onCategoriesChange)
 
@@ -56,6 +63,37 @@ export default function SettingsScreen({
     navigator.clipboard.writeText(joinCode)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleAddParticipant = async () => {
+    const n = newParticipantName.trim()
+    if (!n) return
+    // Case-insensitive duplicate check
+    const exists = participants.find(p => p.name.toLowerCase() === n.toLowerCase())
+    if (exists) {
+      alert(`Teilnehmer "${exists.name}" existiert bereits!`)
+      return
+    }
+    const { error } = await supabase.from('participants').insert({ list_id: listId, name: n })
+    if (error) {
+      alert(`Fehler: ${error.message}`)
+      return
+    }
+    navigator.vibrate?.(10)
+    setNewParticipantName('')
+    setShowAddParticipant(false)
+    onParticipantsChange()
+  }
+
+  const handleDeleteParticipant = async (p: Participant) => {
+    if (!confirm(`Teilnehmer "${p.name}" entfernen?`)) return
+    const { error } = await supabase.from('participants').delete().eq('id', p.id)
+    if (error) {
+      alert(`Fehler: ${error.message}`)
+      return
+    }
+    navigator.vibrate?.(10)
+    onParticipantsChange()
   }
 
   const handleAddCategory = (listType: ListType) => {
@@ -182,6 +220,54 @@ export default function SettingsScreen({
         <button className="settings-btn-danger" onClick={onLeave}>
           Liste verlassen
         </button>
+      </div>
+
+      {/* ── Teilnehmer ─────────────────────────────────────────────────── */}
+      <div className="settings-section">
+        <h3 className="settings-section-title">Teilnehmer</h3>
+        <p className="settings-cat-hint">{participants.length} {participants.length === 1 ? 'Person' : 'Personen'} in dieser Liste.</p>
+        {participants.map((p) => (
+          <div key={p.id} className="settings-cat-item">
+            <span className="settings-participant-name">{p.name}</span>
+            <button
+              className="settings-cat-delete-btn"
+              onClick={() => handleDeleteParticipant(p)}
+              aria-label="Teilnehmer entfernen"
+            >
+              🗑
+            </button>
+          </div>
+        ))}
+        {participants.length === 0 && (
+          <p className="settings-cat-empty">Noch keine Teilnehmer</p>
+        )}
+        {showAddParticipant ? (
+          <div className="settings-inline-form">
+            <input
+              className="settings-inline-input"
+              type="text"
+              placeholder="Name"
+              value={newParticipantName}
+              onChange={(e) => setNewParticipantName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddParticipant()}
+              autoFocus
+            />
+            <button className="settings-btn settings-btn-primary" onClick={handleAddParticipant}>
+              Hinzufügen
+            </button>
+            <button className="settings-btn settings-btn-secondary" onClick={() => { setShowAddParticipant(false); setNewParticipantName('') }}>
+              Abbrechen
+            </button>
+          </div>
+        ) : (
+          <button
+            className="settings-btn settings-btn-secondary"
+            style={{ marginTop: '0.6rem', width: '100%' }}
+            onClick={() => setShowAddParticipant(true)}
+          >
+            + Teilnehmer hinzufügen
+          </button>
+        )}
       </div>
 
       {/* ── Kategorien ──────────────────────────────────────────────── */}

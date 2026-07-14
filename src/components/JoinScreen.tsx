@@ -93,9 +93,22 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
         return
       }
       const listData = data[0] as ShoppingList
-      localStorage.setItem('user_name', n)
+      // Fetch existing participants for this list
+      const { data: participants } = await supabase
+        .from('participants')
+        .select('name')
+        .eq('list_id', listData.id)
+      const existingNames = (participants || []).map(p => p.name)
+      // Case-insensitive match: use exact stored name if one exists
+      const match = existingNames.find(en => en.toLowerCase() === n.toLowerCase())
+      const finalName = match || n
+      // If no match, insert new participant
+      if (!match) {
+        await supabase.from('participants').insert({ list_id: listData.id, name: finalName })
+      }
+      localStorage.setItem('user_name', finalName)
       localStorage.setItem('join_code', code)
-      onJoin(n, listData)
+      onJoin(finalName, listData)
     } catch {
       setError('Verbindung fehlgeschlagen.')
     } finally {
@@ -130,6 +143,7 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
           placeholder="z.B. Florian"
           onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
         />
+        <p className="join-hint">Tipp: Gib deinen exakten Namen ein, damit du in der Abrechnung richtig zugeordnet wirst.</p>
 
         {error && <p className="join-error">{error}</p>}
 

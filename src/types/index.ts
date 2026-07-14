@@ -87,3 +87,10 @@ export interface ExpenseSplit {
   share_amount: number
   created_at: string
 }
+
+export interface Participant {
+  id: string
+  list_id: string
+  name: string
+  joined_at: string
+}

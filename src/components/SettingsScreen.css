@@ -294,6 +294,12 @@
   border-top: 1px solid var(--border-color);
 }
 
+.settings-participant-name {
+  flex: 1;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
 .settings-cat-icon-input {
   width: 42px;
   text-align: center;

@@ -16,6 +16,7 @@ interface BringScreenProps {
   onItemChange?: () => void
   onReorder?: (listType: ListType, newOrder: string[]) => void
   onCategoriesChange?: () => void
+  persons?: string[]
 }
 
 /** Wraps one person's bring items with independent drag-reorder. */
@@ -95,7 +96,7 @@ function DraggableBringGroup({
   )
 }
 
-export default function BringScreen({ items, categories, listId, userName, onItemToggle, onItemDelete, onItemChange, onReorder, onCategoriesChange }: BringScreenProps) {
+export default function BringScreen({ items, categories, listId, userName, onItemToggle, onItemDelete, onItemChange, onReorder, onCategoriesChange, persons }: BringScreenProps) {
   const [filter, setFilter] = useState<BringFilter>('all')
 
   const filtered = useMemo(() => {
@@ -158,6 +159,7 @@ export default function BringScreen({ items, categories, listId, userName, onIte
         placeholder="Was bringst du mit?"
         categories={categories}
         listType="bring"
+        persons={persons}
       />
 
       {grouped.length === 0 && (

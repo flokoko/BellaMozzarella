@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
-import type { ListItem, ItemCategory, ListType, ShoppingList, TabView, Meal, MealIdea, QuickNote, Expense, ExpenseSplit } from './types'
+import type { ListItem, ItemCategory, ListType, ShoppingList, TabView, Meal, MealIdea, QuickNote, Expense, ExpenseSplit, Participant } from './types'
 import { supabase, setJoinCode } from './lib/supabase'
 import { getResolvedTheme, toggleTheme, applyTheme, initThemeListener } from './lib/theme'
 import JoinScreen from './components/JoinScreen'
@@ -23,6 +23,7 @@ export default function App() {
   const [notes, setNotes] = useState<QuickNote[]>([])
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [expenseSplits, setExpenseSplits] = useState<ExpenseSplit[]>([])
+  const [participants, setParticipants] = useState<Participant[]>([])
   const [tab, setTab] = useState<TabView>('home')
   const [isDark, setIsDark] = useState(false)
   const [isOnline, setIsOnline] = useState(navigator.onLine)
@@ -130,6 +131,16 @@ export default function App() {
     setExpenses((data || []) as Expense[])
   }, [])
 
+  const fetchParticipants = useCallback(async (listId: string) => {
+    const { data, error: err } = await supabase
+      .from('participants')
+      .select('*')
+      .eq('list_id', listId)
+      .order('name', { ascending: true })
+    if (err) { console.error('fetchParticipants error:', err); return }
+    setParticipants((data || []) as Participant[])
+  }, [])
+
   const fetchAll = useCallback(async (listId: string) => {
     await Promise.all([
       fetchItems(listId, 'shopping'),
@@ -139,8 +150,9 @@ export default function App() {
       fetchMealIdeas(listId),
       fetchNotes(listId),
       fetchExpenses(listId),
+      fetchParticipants(listId),
     ])
-  }, [fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes, fetchExpenses])
+  }, [fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes, fetchExpenses, fetchParticipants])
 
   // ── Polling (5000ms, only when visible) ───────────────────────────
   const lastFetchTime = useRef(0)
@@ -262,12 +274,9 @@ export default function App() {
   const knownPersons = useMemo(() => {
     const names = new Set<string>()
     if (userName) names.add(userName)
-    expenses.forEach(e => { if (e.paid_by) names.add(e.paid_by) })
-    expenseSplits.forEach(s => { if (s.person_name) names.add(s.person_name) })
-    bringItems.forEach(i => { if (i.assigned_to) names.add(i.assigned_to) })
-    meals.forEach(m => { if (m.created_by) names.add(m.created_by) })
+    participants.forEach(p => names.add(p.name))
     return Array.from(names).sort((a, b) => a.localeCompare(b))
-  }, [userName, expenses, expenseSplits, bringItems, meals])
+  }, [userName, participants])
 
   const userBalance = useMemo(() => {
     const paid = expenses.filter(e => e.paid_by === userName).reduce((s, e) => s + e.amount, 0)
@@ -307,11 +316,25 @@ export default function App() {
     setNotes([])
     setExpenses([])
     setExpenseSplits([])
+    setParticipants([])
   }
 
-  const handleRename = (newName: string) => {
-    localStorage.setItem('user_name', newName)
-    setUserName(newName)
+  const handleRename = async (newName: string) => {
+    const trimmed = newName.trim()
+    if (!trimmed || !list || trimmed === userName) return
+    // Check if new name already exists (case-insensitive)
+    const existing = participants.find(p => p.name.toLowerCase() === trimmed.toLowerCase())
+    if (existing) {
+      // Just switch to the existing participant name
+      localStorage.setItem('user_name', existing.name)
+      setUserName(existing.name)
+      return
+    }
+    // Insert new participant with new name, keep old one for data integrity
+    await supabase.from('participants').insert({ list_id: list.id, name: trimmed })
+    localStorage.setItem('user_name', trimmed)
+    setUserName(trimmed)
+    fetchParticipants(list.id)
   }
 
   const handleToggleTheme = () => {
@@ -414,6 +437,7 @@ export default function App() {
             onItemChange={() => fetchItems(list.id, 'bring')}
             onReorder={reorderItems}
             onCategoriesChange={() => fetchCategories(list.id)}
+            persons={participants.map(p => p.name)}
           />
         )}
         {tab === 'mealplan' && (
@@ -446,6 +470,8 @@ export default function App() {
             categories={categories}
             listId={list.id}
             onCategoriesChange={() => fetchCategories(list.id)}
+            participants={participants}
+            onParticipantsChange={() => fetchParticipants(list.id)}
           />
         )}
       </main>

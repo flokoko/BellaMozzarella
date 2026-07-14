@@ -77,6 +77,15 @@
   border-color: var(--accent);
 }
 
+.join-hint {
+  text-align: left;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin: 0.4rem 0 0;
+  opacity: 0.8;
+  line-height: 1.4;
+}
+
 .join-error {
   color: var(--error-color);
   font-size: 0.85rem;
