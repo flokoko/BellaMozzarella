@@ -23,7 +23,7 @@ interface SettingsScreenProps {
   adminUnlocked: boolean
   hasAdminPassword: boolean
   onSetAdminPassword: (password: string) => void
-  onUnlockAdmin: (password: string) => boolean
+  onUnlockAdmin: (password: string) => Promise<boolean>
 }
 
 export default function SettingsScreen({
@@ -110,9 +110,9 @@ export default function SettingsScreen({
     onParticipantsChange()
   }
 
-  const handleUnlock = () => {
+  const handleUnlock = async () => {
     setAdminError('')
-    const ok = onUnlockAdmin(adminPasswordInput)
+    const ok = await onUnlockAdmin(adminPasswordInput)
     if (!ok) {
       setAdminError('Falsches Passwort.')
     }

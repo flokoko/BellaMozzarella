@@ -377,10 +377,23 @@ export default function App() {
     navigator.vibrate?.(10)
   }
 
-  const handleUnlockAdmin = (password: string): boolean => {
-    if (!list || !list.admin_password) return false
-    if (password === list.admin_password) {
+  const handleUnlockAdmin = async (password: string): Promise<boolean> => {
+    if (!list) return false
+    // Query admin_password directly from DB — don't rely on list state
+    // (which may not have admin_password loaded yet)
+    const { data, error } = await supabase
+      .from('lists')
+      .select('admin_password')
+      .eq('id', list.id)
+      .single()
+    if (error || !data) {
+      alert('Fehler beim Prüfen des Passworts.')
+      return false
+    }
+    if (data.admin_password && password === data.admin_password) {
       setAdminUnlocked(true)
+      // Also update list state so hasAdminPassword is correct
+      setList(prev => prev ? { ...prev, admin_password: data.admin_password } : prev)
       navigator.vibrate?.(10)
       return true
     }
