@@ -24,6 +24,7 @@ interface SettingsScreenProps {
   hasAdminPassword: boolean
   onSetAdminPassword: (password: string) => void
   onUnlockAdmin: (password: string) => Promise<boolean>
+  onResetAdminPassword: () => void
 }
 
 export default function SettingsScreen({
@@ -42,6 +43,7 @@ export default function SettingsScreen({
   hasAdminPassword,
   onSetAdminPassword,
   onUnlockAdmin,
+  onResetAdminPassword,
 }: SettingsScreenProps) {
   const [theme, setThemeState] = useState<ThemeMode>('auto')
   const [editingName, setEditingName] = useState(false)
@@ -116,6 +118,13 @@ export default function SettingsScreen({
     if (!ok) {
       setAdminError('Falsches Passwort.')
     }
+    setAdminPasswordInput('')
+  }
+
+  const handleForgotPassword = () => {
+    if (!confirm('Passwort zurücksetzen? Du kannst danach ein neues Admin-Passwort festlegen.')) return
+    onResetAdminPassword()
+    setAdminError('')
     setAdminPasswordInput('')
   }
 
@@ -343,6 +352,9 @@ export default function SettingsScreen({
             {adminError && <p className="settings-admin-error">{adminError}</p>}
             <button className="settings-btn settings-btn-primary" onClick={handleUnlock} style={{ width: '100%' }}>
               Entsperren
+            </button>
+            <button className="settings-forgot-link" onClick={handleForgotPassword}>
+              Passwort vergessen?
             </button>
           </div>
         )}

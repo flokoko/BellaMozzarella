@@ -320,6 +320,22 @@
   margin: 0;
 }
 
+.settings-forgot-link {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0.3rem 0;
+  align-self: center;
+  transition: color 0.2s;
+}
+
+.settings-forgot-link:hover {
+  color: var(--accent);
+}
+
 .settings-cat-icon-input {
   width: 42px;
   text-align: center;
