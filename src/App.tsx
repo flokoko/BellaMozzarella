@@ -304,20 +304,18 @@ export default function App() {
     [participants, userName],
   )
 
-  const handleJoin = (name: string, l: ShoppingList) => {
+  const handleJoin = async (name: string, l: ShoppingList) => {
     setJoinCode(l.join_code)
     setUserName(name)
     setList(l)
     fetchAll(l.id)
     // Fetch full list data (including admin_password) — RPC doesn't return it
-    supabase
+    const { data: fullList } = await supabase
       .from('lists')
       .select('*')
       .eq('id', l.id)
       .single()
-      .then(({ data: fullList }) => {
-        if (fullList) setList(fullList as ShoppingList)
-      })
+    if (fullList) setList(fullList as ShoppingList)
   }
 
   if (!userName || !list) {
