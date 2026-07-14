@@ -218,6 +218,15 @@ export default function App() {
             setUserName(savedName)
             setList(listData)
             fetchAll(listData.id)
+            // Fetch full list data (including admin_password) now that header is set
+            supabase
+              .from('lists')
+              .select('*')
+              .eq('id', listData.id)
+              .single()
+              .then(({ data: fullList }) => {
+                if (fullList) setList(fullList as ShoppingList)
+              })
           }
         })
     }
@@ -300,6 +309,15 @@ export default function App() {
     setUserName(name)
     setList(l)
     fetchAll(l.id)
+    // Fetch full list data (including admin_password) — RPC doesn't return it
+    supabase
+      .from('lists')
+      .select('*')
+      .eq('id', l.id)
+      .single()
+      .then(({ data: fullList }) => {
+        if (fullList) setList(fullList as ShoppingList)
+      })
   }
 
   if (!userName || !list) {
