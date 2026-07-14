@@ -379,19 +379,21 @@ export default function App() {
 
   const handleUnlockAdmin = async (password: string): Promise<boolean> => {
     if (!list) return false
-    // Query admin_password directly from DB — don't rely on list state
-    // (which may not have admin_password loaded yet)
+    // Try list state first (should be loaded by now)
+    if (list.admin_password && password === list.admin_password) {
+      setAdminUnlocked(true)
+      navigator.vibrate?.(10)
+      return true
+    }
+    // Fallback: query from DB
     const { data, error } = await supabase
       .from('lists')
       .select('admin_password')
       .eq('id', list.id)
       .single()
-    console.log('[DEBUG] handleUnlockAdmin query result:', { data, error, listId: list.id })
     if (error || !data) {
-      alert('Fehler beim Prüfen des Passworts.')
       return false
     }
-    console.log('[DEBUG] comparing:', password, '===', data.admin_password)
     if (data.admin_password && password === data.admin_password) {
       setAdminUnlocked(true)
       setList(prev => prev ? { ...prev, admin_password: data.admin_password } : prev)
