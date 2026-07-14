@@ -211,22 +211,19 @@ export default function App() {
     if (savedName && savedCode) {
       supabase
         .rpc('verify_join_code', { code: savedCode })
-        .then(({ data }) => {
+        .then(async ({ data }) => {
           if (data && data.length > 0) {
             const listData = data[0] as ShoppingList
             setJoinCode(listData.join_code)
             setUserName(savedName)
-            setList(listData)
-            fetchAll(listData.id)
-            // Fetch full list data (including admin_password) now that header is set
-            supabase
+            // Fetch full list data (including admin_password) before setting list
+            const { data: fullList } = await supabase
               .from('lists')
               .select('*')
               .eq('id', listData.id)
               .single()
-              .then(({ data: fullList }) => {
-                if (fullList) setList(fullList as ShoppingList)
-              })
+            setList((fullList as ShoppingList) ?? listData)
+            fetchAll(listData.id)
           }
         })
     }
