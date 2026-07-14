@@ -104,8 +104,12 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
       // Case-insensitive match: use exact stored name if one exists
       const match = existing.find(en => en.name.toLowerCase() === n.toLowerCase())
       const finalName = match ? match.name : n
-      // If no match, insert new participant
+      // If no match, insert new participant (max 14)
       if (!match) {
+        if (existing.length >= 14) {
+          setError('Maximum von 14 Teilnehmern erreicht.')
+          return
+        }
         // First participant becomes admin
         const isFirst = existing.length === 0
         await supabase.from('participants').insert({

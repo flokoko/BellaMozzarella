@@ -84,9 +84,15 @@ export default function SettingsScreen({
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const MAX_PARTICIPANTS = 14
+
   const handleAddParticipant = async () => {
     const n = newParticipantName.trim()
     if (!n) return
+    if (participants.length >= MAX_PARTICIPANTS) {
+      alert(`Maximal ${MAX_PARTICIPANTS} Teilnehmer erreicht.`)
+      return
+    }
     // Case-insensitive duplicate check
     const exists = participants.find(p => p.name.toLowerCase() === n.toLowerCase())
     if (exists) {
@@ -395,7 +401,7 @@ export default function SettingsScreen({
                   Abbrechen
                 </button>
               </div>
-            ) : (
+            ) : participants.length < MAX_PARTICIPANTS ? (
               <button
                 className="settings-btn settings-btn-secondary"
                 style={{ marginTop: '0.6rem', width: '100%' }}
@@ -403,6 +409,10 @@ export default function SettingsScreen({
               >
                 + Teilnehmer hinzufügen
               </button>
+            ) : (
+              <p className="settings-cat-hint" style={{ marginTop: '0.5rem' }}>
+                Maximum von {MAX_PARTICIPANTS} Teilnehmern erreicht.
+              </p>
             )}
 
             {/* Passwort ändern */}
