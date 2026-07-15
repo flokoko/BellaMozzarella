@@ -410,7 +410,22 @@
   font-weight: 800;
   color: var(--text-primary);
   margin-bottom: 0.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
 }
+
+.settings-flag-bar {
+  display: inline-block;
+  width: 4px;
+  height: 18px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.settings-flag-bar.green { background: #009246; }
+.settings-flag-bar.white { background: #f0f0f0; border: 1px solid rgba(0,0,0,0.08); }
+.settings-flag-bar.red { background: #ce2b37; margin-right: 0.4rem; }
 
 .settings-app-version {
   font-size: 0.78rem;

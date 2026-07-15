@@ -27,12 +27,44 @@
   box-shadow: 0 28px 90px rgba(0, 0, 0, 0.2);
 }
 
+.join-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  width: 88px;
+  height: 88px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+}
+
+.join-flag-bar {
+  width: 100%;
+  height: calc(100% / 3);
+}
+
+.join-flag-bar.green { background: #009246; }
+.join-flag-bar.white { background: #ffffff; }
+.join-flag-bar.red { background: #ce2b37; }
+
 .join-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 0.75rem;
-  color: var(--accent);
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 50%;
+  width: 52px;
+  height: 52px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  color: #009246;
 }
 
 .join-card h1 {

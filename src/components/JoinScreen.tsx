@@ -132,7 +132,12 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
   return (
     <div className="join-screen">
       <div className="join-card">
-        <div className="join-icon"><ChefHat size={56} strokeWidth={2} /></div>
+        <div className="join-logo">
+          <div className="join-flag-bar green"></div>
+          <div className="join-flag-bar white"></div>
+          <div className="join-flag-bar red"></div>
+          <div className="join-icon"><ChefHat size={48} strokeWidth={2} /></div>
+        </div>
         <h1>Bella Mozzarella</h1>
         <p className="join-subtitle">{subtitle}</p>
 

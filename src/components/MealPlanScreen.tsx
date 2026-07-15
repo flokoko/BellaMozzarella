@@ -245,7 +245,7 @@ export default function MealPlanScreen({
                       if (isEditing) {
                         return (
                           <div key={type} className="meal-cell meal-cell-editing">
-                            <div className="meal-cell-icon">{(() => { const Icon = MEAL_ICONS[type]; return <Icon size={14} strokeWidth={2} /> })()}</div>
+                            <div className={`meal-cell-icon meal-icon-${type}`}>{(() => { const Icon = MEAL_ICONS[type]; return <Icon size={14} strokeWidth={2} /> })()}</div>
                             <input
                               className="meal-input"
                               type="text"
@@ -289,7 +289,7 @@ export default function MealPlanScreen({
                         return (
                           <div key={type} className="meal-cell meal-cell-filled">
                             <div className="meal-cell-top">
-                              <span className="meal-cell-icon" title={type}>{(() => { const Icon = MEAL_ICONS[type]; return <Icon size={14} strokeWidth={2} /> })()}</span>
+                              <span className={`meal-cell-icon meal-icon-${type}`} title={type}>{(() => { const Icon = MEAL_ICONS[type]; return <Icon size={14} strokeWidth={2} /> })()}</span>
                               <div className="meal-cell-buttons">
                                 <button
                                   className="meal-cell-btn"
@@ -320,7 +320,7 @@ export default function MealPlanScreen({
                           onClick={() => startAdd(day, type)}
                           title={`${type} hinzufügen`}
                         >
-                          <span className="meal-cell-icon">{(() => { const Icon = MEAL_ICONS[type]; return <Icon size={14} strokeWidth={2} /> })()}</span>
+                          <span className={`meal-cell-icon meal-icon-${type}`}>{(() => { const Icon = MEAL_ICONS[type]; return <Icon size={14} strokeWidth={2} /> })()}</span>
                           <span className="meal-cell-type-short">{MEAL_SHORT[type]}</span>
                         </button>
                       )

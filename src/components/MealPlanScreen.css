@@ -156,6 +156,17 @@
   color: var(--text-muted);
 }
 
+/* Italian color accents per meal type */
+.meal-icon-Frühstück {
+  color: #d97706;
+}
+.meal-icon-Mittagessen {
+  color: #009246;
+}
+.meal-icon-Abendessen {
+  color: #ce2b37;
+}
+
 .meal-cell-type-short {
   font-size: 0.68rem;
   font-weight: 600;

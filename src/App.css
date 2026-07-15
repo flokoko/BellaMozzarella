@@ -41,7 +41,22 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 0.12rem;
 }
+
+.header-flag-bar {
+  display: inline-block;
+  width: 3px;
+  height: 14px;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+
+.header-flag-bar.green { background: #009246; }
+.header-flag-bar.white { background: #e8e8e8; border: 1px solid rgba(0,0,0,0.06); }
+.header-flag-bar.red { background: #ce2b37; margin-right: 0.3rem; }
 
 .header-user {
   font-size: 0.72rem;

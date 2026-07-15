@@ -490,7 +490,12 @@ export default function SettingsScreen({
       <div className="settings-section">
         <h3 className="settings-section-title">Info</h3>
         <div className="settings-info-block">
-          <div className="settings-app-name">Bella Mozzarella</div>
+          <div className="settings-app-name">
+            <span className="settings-flag-bar green"></span>
+            <span className="settings-flag-bar white"></span>
+            <span className="settings-flag-bar red"></span>
+            Bella Mozzarella
+          </div>
           <div className="settings-app-version">Version {APP_VERSION}</div>
           <p className="settings-app-desc">
             Gemeinsame Einkaufsliste mit Realtime-Sync. Built with React, Supabase &amp; Vite.

@@ -482,7 +482,12 @@ export default function App() {
         <div className="header-top">
           {tab === 'home' ? (
             <div className="header-info">
-              <span className="header-name">{list.name}</span>
+              <span className="header-name">
+                <span className="header-flag-bar green"></span>
+                <span className="header-flag-bar white"></span>
+                <span className="header-flag-bar red"></span>
+                {list.name}
+              </span>
               <span className="header-user">
                 Angemeldet als: <strong>{userName}</strong>
               </span>
