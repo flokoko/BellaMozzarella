@@ -2,76 +2,40 @@ import { useRef, useMemo } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
-/** Procedural texture for mozzarella: fibrous cheese strands + smooth white surface */
+/** Procedural texture for mozzarella: smooth, very subtle cheese grain */
 function useMozzarellaTexture() {
   return useMemo(() => {
-    const size = 512
+    const size = 256
     const canvas = document.createElement('canvas')
     canvas.width = size
     canvas.height = size
     const ctx = canvas.getContext('2d')!
 
-    // Base: pure white (fresh mozzarella)
-    ctx.fillStyle = '#fefefb'
+    // Base: pure white
+    ctx.fillStyle = '#ffffff'
     ctx.fillRect(0, 0, size, size)
 
-    // Subtle warm undertone patches (cheese body variation)
-    for (let i = 0; i < 25; i++) {
+    // Very subtle warm undertone — barely visible cheese body variation
+    for (let i = 0; i < 15; i++) {
       const x = Math.random() * size
       const y = Math.random() * size
-      const r = 30 + Math.random() * 60
+      const r = 40 + Math.random() * 80
       const grad = ctx.createRadialGradient(x, y, 0, x, y, r)
-      grad.addColorStop(0, 'rgba(248,243,228,0.3)')
-      grad.addColorStop(1, 'rgba(0,0,0,0)')
+      grad.addColorStop(0, 'rgba(250,247,238,0.15)')
+      grad.addColorStop(1, 'rgba(255,255,255,0)')
       ctx.fillStyle = grad
       ctx.beginPath()
       ctx.arc(x, y, r, 0, Math.PI * 2)
       ctx.fill()
     }
 
-    // Fibrous cheese strands — the signature mozzarella pull texture
-    ctx.lineCap = 'round'
-    for (let i = 0; i < 80; i++) {
-      const x1 = Math.random() * size
-      const y1 = Math.random() * size
-      const angle = Math.random() * Math.PI * 2
-      const len = 20 + Math.random() * 60
-      const x2 = x1 + Math.cos(angle) * len
-      const y2 = y1 + Math.sin(angle) * len
-      const opacity = 0.08 + Math.random() * 0.12
-      ctx.strokeStyle = `rgba(235,228,205,${opacity})`
-      ctx.lineWidth = 1 + Math.random() * 2.5
-      ctx.beginPath()
-      // Slight curve for organic fiber look
-      const cx = (x1 + x2) / 2 + (Math.random() - 0.5) * 15
-      const cy = (y1 + y2) / 2 + (Math.random() - 0.5) * 15
-      ctx.moveTo(x1, y1)
-      ctx.quadraticCurveTo(cx, cy, x2, y2)
-      ctx.stroke()
-    }
-
-    // Fine grain texture (tiny cheese particles)
-    for (let i = 0; i < 200; i++) {
+    // Very faint smooth grain — NOT craters, just subtle surface variation
+    for (let i = 0; i < 100; i++) {
       const x = Math.random() * size
       const y = Math.random() * size
-      const r = 0.5 + Math.random() * 1.5
-      const v = Math.random()
-      ctx.fillStyle = v > 0.6
-        ? `rgba(240,235,220,${0.1 + Math.random() * 0.15})`
-        : `rgba(252,250,245,${0.15 + Math.random() * 0.2})`
-      ctx.beginPath()
-      ctx.arc(x, y, r, 0, Math.PI * 2)
-      ctx.fill()
-    }
-
-    // Soft glossy highlights (wet mozzarella surface from brine)
-    for (let i = 0; i < 8; i++) {
-      const x = Math.random() * size
-      const y = Math.random() * size
-      const r = 15 + Math.random() * 30
+      const r = 2 + Math.random() * 5
       const grad = ctx.createRadialGradient(x, y, 0, x, y, r)
-      grad.addColorStop(0, 'rgba(255,255,255,0.5)')
-      grad.addColorStop(0.5, 'rgba(255,255,255,0.15)')
+      grad.addColorStop(0, 'rgba(248,245,235,0.08)')
       grad.addColorStop(1, 'rgba(255,255,255,0)')
       ctx.fillStyle = grad
       ctx.beginPath()
@@ -86,6 +50,36 @@ function useMozzarellaTexture() {
   }, [])
 }
 
+/** Deformed sphere geometry — irregular, lumpy like real mozzarella */
+function useMozzarellaGeometry(radius: number) {
+  return useMemo(() => {
+    const geo = new THREE.SphereGeometry(radius, 64, 64)
+    const pos = geo.attributes.position as THREE.BufferAttribute
+    const v = new THREE.Vector3()
+
+    // Pseudo-random with seed for consistent deformation
+    let seed = 42
+    const rand = () => {
+      seed = (seed * 9301 + 49297) % 233280
+      return seed / 233280
+    }
+
+    for (let i = 0; i < pos.count; i++) {
+      v.fromBufferAttribute(pos, i)
+      // Multiple frequency noise for organic lumpy shape
+      const n1 = Math.sin(v.x * 8 + v.y * 6) * Math.cos(v.z * 7) * 0.025
+      const n2 = Math.sin(v.y * 12 + v.z * 10) * Math.cos(v.x * 9) * 0.015
+      const n3 = (rand() - 0.5) * 0.02
+      const deform = 1 + n1 + n2 + n3
+      v.multiplyScalar(deform)
+      pos.setXYZ(i, v.x, v.y, v.z)
+    }
+
+    geo.computeVertexNormals()
+    return geo
+  }, [radius])
+}
+
 /** Single 3D mozzarella ball with realistic material */
 function MozzarellaBall({
   radius = 0.35,
@@ -94,6 +88,7 @@ function MozzarellaBall({
 }) {
   const meshRef = useRef<THREE.Mesh>(null)
   const texture = useMozzarellaTexture()
+  const geometry = useMozzarellaGeometry(radius)
 
   useFrame((_, delta) => {
     if (meshRef.current) {
@@ -102,22 +97,20 @@ function MozzarellaBall({
   })
 
   return (
-    <mesh ref={meshRef} castShadow receiveShadow>
-      <sphereGeometry args={[radius, 64, 64]} />
+    <mesh ref={meshRef} geometry={geometry} castShadow receiveShadow>
       <meshPhysicalMaterial
-        color="#fdfdf9"
-        roughness={0.55}
+        color="#ffffff"
+        roughness={0.35}
         metalness={0.0}
-        clearcoat={0.3}
-        clearcoatRoughness={0.6}
-        sheen={0.8}
+        clearcoat={0.5}
+        clearcoatRoughness={0.3}
+        sheen={1.0}
         sheenColor="#ffffff"
-        sheenRoughness={0.3}
+        sheenRoughness={0.2}
         map={texture}
-        bumpMap={texture}
-        bumpScale={0.015}
         transparent
-        opacity={0.95}
+        opacity={0.97}
+        envMapIntensity={0.8}
       />
     </mesh>
   )
