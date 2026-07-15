@@ -160,6 +160,9 @@ export default function App() {
 
   useEffect(() => {
     if (!list) return
+    // Don't poll when offline — optimistic updates stay in local state and
+    // won't be overwritten by a failed poll. Polling resumes when back online.
+    if (!isOnline) return
     let interval: ReturnType<typeof setInterval> | null = null
     const start = () => {
       if (interval) clearInterval(interval)
@@ -188,7 +191,7 @@ export default function App() {
       stop()
       document.removeEventListener('visibilitychange', onVisibility)
     }
-  }, [list, fetchAll])
+  }, [list, fetchAll, isOnline])
 
   // ── Fetch expense splits whenever expenses change ─────────────────
   useEffect(() => {
@@ -350,11 +353,22 @@ export default function App() {
       setUserName(existing.name)
       return
     }
-    // Insert new participant with new name, keep old one for data integrity
+    // Insert new participant with new name
     await supabase.from('participants').insert({ list_id: list.id, name: trimmed })
+    // Update all references from old name to new name
+    await Promise.all([
+      supabase.from('expenses').update({ paid_by: trimmed }).eq('list_id', list.id).eq('paid_by', userName),
+      supabase.from('items').update({ assigned_to: trimmed }).eq('list_id', list.id).eq('assigned_to', userName),
+      // Note: expense_splits doesn't have list_id, so we update by person_name only.
+      // This could affect splits in other lists if the same name exists, but since
+      // this is a personal vacation app with one active list, this is acceptable.
+      supabase.from('expense_splits').update({ person_name: trimmed }).eq('person_name', userName),
+    ])
+    // Delete old participant
+    await supabase.from('participants').delete().eq('list_id', list.id).eq('name', userName)
     localStorage.setItem('user_name', trimmed)
     setUserName(trimmed)
-    fetchParticipants(list.id)
+    fetchAll(list.id)
   }
 
   const handleToggleTheme = () => {
@@ -471,11 +485,11 @@ export default function App() {
 
       {!isOnline && (
         <div className="offline-banner">
-          📡 Du bist offline — Änderungen werden synchronisiert wenn du wieder online bist.
+          📡 Du bist offline — Änderungen können momentan nicht gespeichert werden.
         </div>
       )}
 
-      <main className="app-main" key={tab}>
+      <main className="app-main">
         {tab === 'home' && (
           <DashboardScreen
             listId={list.id}

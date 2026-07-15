@@ -144,6 +144,34 @@ export default function ListScreen({ items, categories, listId, userName, onItem
           />
         )
       })}
+
+      {/* Fallback: items whose category was deleted or doesn't match any existing category */}
+      {(() => {
+        const orphanItems = categories.length === 0
+          ? visibleItems
+          : visibleItems.filter(item => !categories.some(cat => cat.name === item.category))
+        if (orphanItems.length === 0) return null
+        const fallbackCat: ItemCategory = {
+          id: '__uncategorized__',
+          list_id: listId,
+          name: 'Ohne Kategorie',
+          color: '#888',
+          bg: '#f0f0f0',
+          sort_order: 9999,
+          list_type: 'shopping',
+          created_at: '',
+        }
+        return (
+          <DraggableCategorySection
+            key="__uncategorized__"
+            catItems={orphanItems}
+            cat={fallbackCat}
+            onItemToggle={onItemToggle}
+            onItemDelete={onItemDelete}
+            onReorder={(newOrder) => onReorder?.('shopping', newOrder)}
+          />
+        )
+      })()}
     </div>
   )
 }

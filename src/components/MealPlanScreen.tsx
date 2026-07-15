@@ -149,6 +149,16 @@ export default function MealPlanScreen({
   }
 
   const planIdea = async (idea: MealIdea) => {
+    const existing = getMeal(planDay, planMealType)
+    if (existing) {
+      if (!confirm(`Für ${planDay} ${planMealType} gibt es schon "${existing.name}". Ersetzen?`)) return
+      // Delete existing meal first
+      const { error: delErr } = await supabase.from('meals').delete().eq('id', existing.id)
+      if (delErr) {
+        alert(`Fehler: ${delErr.message}`)
+        return
+      }
+    }
     const { error } = await supabase.from('meals').insert({
       list_id: listId,
       day: planDay,
