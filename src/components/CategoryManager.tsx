@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Tag, Trash2 } from 'lucide-react'
 import type { ItemCategory, ListType } from '../types'
 import { useCategories } from '../hooks/useCategories'
 
@@ -26,7 +27,7 @@ export default function CategoryManager({ categories, listId, listType, onCatego
         className="cat-manager-toggle"
         onClick={() => setExpanded((v) => !v)}
       >
-        <span className="cat-manager-toggle-icon">🍝</span>
+        <span className="cat-manager-toggle-icon"><Tag size={16} strokeWidth={2} /></span>
         <span className="cat-manager-toggle-text">Kategorien</span>
         <span className="cat-manager-toggle-count">{categories.length}</span>
         <span className={`cat-manager-chevron ${expanded ? 'open' : ''}`}>▾</span>
@@ -49,7 +50,7 @@ export default function CategoryManager({ categories, listId, listType, onCatego
                 onClick={() => { if (confirm('Dieses Element wirklich löschen?')) deleteCategory(cat.id) }}
                 aria-label="Kategorie löschen"
               >
-                🗑
+                <Trash2 size={16} strokeWidth={2} />
               </button>
             </div>
           ))}

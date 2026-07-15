@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Trash2, Palette, Sun, Moon, Check, Copy, Pencil, Crown, Lock, KeyRound } from 'lucide-react'
 import type { ItemCategory, ListType, Participant } from '../types'
 import type { ThemeMode } from '../lib/theme'
 import { getTheme, setTheme } from '../lib/theme'
@@ -211,7 +212,7 @@ export default function SettingsScreen({
               onClick={() => { if (confirm('Dieses Element wirklich löschen?')) deleteCategory(cat.id) }}
               aria-label="Kategorie löschen"
             >
-              🗑
+              <Trash2 size={16} strokeWidth={2} />
             </button>
           </div>
         ))}
@@ -225,7 +226,7 @@ export default function SettingsScreen({
       <div className="settings-section">
         <h3 className="settings-section-title">Erscheinungsbild</h3>
         <div className="settings-item">
-          <span className="settings-item-icon">🎨</span>
+          <span className="settings-item-icon"><Palette size={18} strokeWidth={2} /></span>
           <span className="settings-item-label">Design</span>
           <div className="settings-item-control theme-toggle-group">
             <button
@@ -238,13 +239,13 @@ export default function SettingsScreen({
               className={`theme-toggle-btn ${theme === 'light' ? 'active' : ''}`}
               onClick={() => handleThemeChange('light')}
             >
-              ☀️ Hell
+              <Sun size={14} strokeWidth={2} /> Hell
             </button>
             <button
               className={`theme-toggle-btn ${theme === 'dark' ? 'active' : ''}`}
               onClick={() => handleThemeChange('dark')}
             >
-              🌙 Dunkel
+              <Moon size={14} strokeWidth={2} /> Dunkel
             </button>
           </div>
         </div>
@@ -266,7 +267,7 @@ export default function SettingsScreen({
           <div className="settings-join-code-wrap">
             <span className="settings-info-value">{joinCode}</span>
             <button className="settings-copy-btn" onClick={handleCopyCode}>
-              {copied ? '✓ Kopiert!' : '📋 Kopieren'}
+              {copied ? <><Check size={14} strokeWidth={2} /> Kopiert!</> : <><Copy size={14} strokeWidth={2} /> Kopieren</>}
             </button>
           </div>
         </div>
@@ -294,7 +295,7 @@ export default function SettingsScreen({
             style={{ marginTop: '0.6rem', width: '100%' }}
             onClick={() => { setNewName(userName); setEditingName(true) }}
           >
-            ✏️ Namen ändern
+            <Pencil size={16} strokeWidth={2} /> Namen ändern
           </button>
         )}
 
@@ -307,7 +308,7 @@ export default function SettingsScreen({
       <div className="settings-section">
         <h3 className="settings-section-title">
           Teilnehmer
-          {isAdmin && adminUnlocked && <span className="settings-admin-badge">👑 Admin</span>}
+          {isAdmin && adminUnlocked && <span className="settings-admin-badge"><Crown size={12} strokeWidth={2} /> Admin</span>}
         </h3>
         <p className="settings-cat-hint">{participants.length} {participants.length === 1 ? 'Person' : 'Personen'} in dieser Liste.</p>
 
@@ -316,7 +317,7 @@ export default function SettingsScreen({
           <div key={p.id} className="settings-cat-item">
             <span className="settings-participant-name">
               {p.name}
-              {p.is_admin && <span className="settings-participant-admin"> 👑</span>}
+              {p.is_admin && <span className="settings-participant-admin"><Crown size={12} strokeWidth={2} /></span>}
             </span>
             {isAdmin && adminUnlocked && (
               <button
@@ -324,7 +325,7 @@ export default function SettingsScreen({
                 onClick={() => handleDeleteParticipant(p)}
                 aria-label="Teilnehmer entfernen"
               >
-                🗑
+              <Trash2 size={16} strokeWidth={2} />
               </button>
             )}
           </div>
@@ -340,7 +341,7 @@ export default function SettingsScreen({
             style={{ marginTop: '0.6rem', width: '100%' }}
             onClick={() => setShowSetPassword(true)}
           >
-            🔒 Admin-Passwort festlegen
+            <Lock size={16} strokeWidth={2} /> Admin-Passwort festlegen
           </button>
         )}
 
@@ -375,7 +376,7 @@ export default function SettingsScreen({
         {isAdmin && hasAdminPassword && !adminUnlocked && (
           <div className="settings-inline-form" style={{ flexDirection: 'column', gap: '0.5rem' }}>
             <p className="settings-cat-hint" style={{ marginBottom: 0 }}>
-              🔒 Gib das Admin-Passwort ein, um Teilnehmer zu verwalten.
+              <Lock size={16} strokeWidth={2} /> Gib das Admin-Passwort ein, um Teilnehmer zu verwalten.
             </p>
             <input
               className="settings-inline-input"
@@ -463,7 +464,7 @@ export default function SettingsScreen({
                 style={{ marginTop: '0.6rem', width: '100%' }}
                 onClick={() => setShowChangePassword(true)}
               >
-                🔑 Passwort ändern
+                <KeyRound size={16} strokeWidth={2} /> Passwort ändern
               </button>
             )}
           </>
@@ -489,7 +490,7 @@ export default function SettingsScreen({
       <div className="settings-section">
         <h3 className="settings-section-title">Info</h3>
         <div className="settings-info-block">
-          <div className="settings-app-name">🇮🇹 Bella Mozzarella</div>
+          <div className="settings-app-name">Bella Mozzarella</div>
           <div className="settings-app-version">Version {APP_VERSION}</div>
           <p className="settings-app-desc">
             Gemeinsame Einkaufsliste mit Realtime-Sync. Built with React, Supabase &amp; Vite.

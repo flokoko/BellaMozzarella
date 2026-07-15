@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Trash2 } from 'lucide-react'
 import type { ListItem, ItemCategory, ListType } from '../types'
 import type { PointerEvent as ReactPointerEvent } from 'react'
 import { supabase } from '../lib/supabase'
@@ -107,7 +108,7 @@ export default function ListScreen({ items, categories, listId, userName, onItem
             className="bring-filter-btn list-delete-checked-btn"
             onClick={handleDeleteChecked}
           >
-            🗑 Erledigte löschen ({checkedItems.length})
+            <Trash2 size={16} strokeWidth={2} /> Erledigte löschen ({checkedItems.length})
           </button>
         )}
       </div>
@@ -127,7 +128,7 @@ export default function ListScreen({ items, categories, listId, userName, onItem
       />
 
       {visibleItems.length === 0 && (
-        <p className="list-empty">🍕<br/>{hideChecked ? 'Alle erledigten Items ausgeblendet!' : 'Noch keine Items — füge welche hinzu!'}</p>
+        <p className="list-empty">{hideChecked ? 'Alle erledigten Items ausgeblendet!' : 'Noch keine Items — füge welche hinzu!'}</p>
       )}
 
       {categories.map((cat) => {

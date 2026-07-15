@@ -28,8 +28,11 @@
 }
 
 .join-icon {
-  font-size: 3.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin-bottom: 0.75rem;
+  color: var(--accent);
 }
 
 .join-card h1 {

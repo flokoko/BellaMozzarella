@@ -63,11 +63,13 @@
   border: none;
   background: var(--button-bg);
   color: var(--button-text);
-  font-size: 1.05rem;
   padding: 0.35rem 0.55rem;
   border-radius: 999px;
   cursor: pointer;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -116,6 +118,9 @@
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
               background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
               box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -136,17 +141,22 @@
   font-weight: 700;
   color: var(--text-primary);
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 .header-settings-btn {
   border: none;
   background: var(--button-bg);
   color: var(--button-text);
-  font-size: 1.05rem;
   padding: 0.35rem 0.55rem;
   border-radius: 999px;
   cursor: pointer;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -181,5 +191,9 @@
   font-size: 0.78rem;
   font-weight: 600;
   padding: 0.5rem 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
   animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }

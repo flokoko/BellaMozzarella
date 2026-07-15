@@ -1,5 +1,6 @@
 import type { ListItem } from '../types'
 import type { PointerEvent as ReactPointerEvent } from 'react'
+import { Trash2, GripVertical } from 'lucide-react'
 import './ItemRow.css'
 
 interface ItemRowProps {
@@ -48,7 +49,7 @@ export default function ItemRow({ item, onToggle, onDelete, dragHandleProps, isD
           className="item-drag-handle"
           onPointerDown={dragHandleProps.onPointerDown}
         >
-          ☰
+          <GripVertical size={16} strokeWidth={2} />
         </span>
       )}
       <label className="item-checkbox-wrap">
@@ -63,7 +64,7 @@ export default function ItemRow({ item, onToggle, onDelete, dragHandleProps, isD
         </div>
       </div>
       <button className="item-delete" onClick={deleteItem} aria-label="Löschen">
-        🗑
+        <Trash2 size={16} strokeWidth={2} />
       </button>
     </div>
   )

@@ -177,13 +177,15 @@
 .bring-item-delete {
   border: none;
   background: none;
-  font-size: 1.1rem;
   cursor: pointer;
   padding: 4px 6px;
   border-radius: 8px;
+  display: flex;
+  align-items: center;
+  color: var(--text-secondary);
   opacity: 0.25;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   flex-shrink: 0;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .bring-item-delete:hover {
@@ -198,7 +200,9 @@
 
 .bring-drag-handle {
   cursor: grab;
-  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
   opacity: 0.25;
   padding: 4px 2px;
   flex-shrink: 0;

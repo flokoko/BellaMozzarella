@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react'
+import { Wallet, Receipt, Pencil, Trash2, ArrowRight } from 'lucide-react'
 import type { Expense, ExpenseSplit } from '../types'
 import { supabase } from '../lib/supabase'
 import './ExpenseScreen.css'
@@ -349,13 +350,13 @@ export default function ExpenseScreen({
           className={`expense-toggle-btn ${section === 'expenses' ? 'active' : ''}`}
           onClick={() => setSection('expenses')}
         >
-          💸 Ausgaben{expenses.length > 0 && <span className="expense-toggle-badge">{expenses.length}</span>}
+          <Wallet size={16} strokeWidth={2} /> Ausgaben{expenses.length > 0 && <span className="expense-toggle-badge">{expenses.length}</span>}
         </button>
         <button
           className={`expense-toggle-btn ${section === 'settlement' ? 'active' : ''}`}
           onClick={() => setSection('settlement')}
         >
-          🧾 Abrechnung
+          <Receipt size={16} strokeWidth={2} /> Abrechnung
         </button>
       </div>
 
@@ -459,7 +460,7 @@ export default function ExpenseScreen({
 
               {/* Equal preview */}
               {equalPreview && (
-                <div className="expense-form-preview">📋 {equalPreview}</div>
+                <div className="expense-form-preview">{equalPreview}</div>
               )}
 
               {/* Actions */}
@@ -480,7 +481,7 @@ export default function ExpenseScreen({
 
           {/* Expense list grouped by date */}
           {expenses.length === 0 && !formExpanded && (
-            <p className="expense-empty">Noch keine Ausgaben — füge die erste hinzu! 💸</p>
+            <p className="expense-empty">Noch keine Ausgaben — füge die erste hinzu!</p>
           )}
 
           <div className="expense-list">
@@ -500,14 +501,14 @@ export default function ExpenseScreen({
                           onClick={() => startEdit(expense)}
                           aria-label="Bearbeiten"
                         >
-                          ✏️
+                          <Pencil size={16} strokeWidth={2} />
                         </button>
                         <button
                           className="expense-card-btn"
                           onClick={() => handleDelete(expense)}
                           aria-label="Löschen"
                         >
-                          🗑
+                          <Trash2 size={16} strokeWidth={2} />
                         </button>
                       </div>
                     </div>
@@ -530,11 +531,11 @@ export default function ExpenseScreen({
       {section === 'settlement' && (
         <div key="settlement">
           <div className="expense-total-banner">
-            💰 Gesamtausgaben: {fmtEUR(totalExpenses)}
+            <Wallet size={18} strokeWidth={2} /> Gesamtausgaben: {fmtEUR(totalExpenses)}
           </div>
 
           {expenses.length === 0 ? (
-            <p className="expense-empty">Noch keine Ausgaben zur Abrechnung. 💸</p>
+            <p className="expense-empty">Noch keine Ausgaben zur Abrechnung.</p>
           ) : (
             <>
               {/* Per-person balances */}
@@ -557,10 +558,10 @@ export default function ExpenseScreen({
               </div>
 
               {/* Settlement transactions */}
-              <h3 className="expense-settlement-title">💳 Ausgleichszahlungen</h3>
+              <h3 className="expense-settlement-title"><ArrowRight size={16} strokeWidth={2} /> Ausgleichszahlungen</h3>
               {settlement.length === 0 ? (
                 <p className="expense-settlement-empty">
-                  Alle ausgeglichen — nichts zu überweisen! 🎉
+                  Alle ausgeglichen — nichts zu überweisen!
                 </p>
               ) : (
                 <div className="expense-settlement-list">

@@ -1,4 +1,5 @@
 import { Component, type ReactNode } from 'react'
+import { AlertCircle } from 'lucide-react'
 
 interface Props {
   children: ReactNode
@@ -41,7 +42,9 @@ export default class ErrorBoundary extends Component<Props, State> {
             background: 'linear-gradient(160deg, #f0fff4 0%, #fafff0 50%, #fff0f0 100%)',
           }}
         >
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🧀</div>
+          <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center', color: '#009246' }}>
+            <AlertCircle size={48} strokeWidth={2} />
+          </div>
           <h1
             style={{
               fontSize: '1.4rem',

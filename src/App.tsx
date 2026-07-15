@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { ArrowLeft, Settings, Sun, Moon, WifiOff, ShoppingCart, Backpack, UtensilsCrossed, Wallet, type LucideIcon } from 'lucide-react'
 import type { ListItem, ItemCategory, ListType, ShoppingList, TabView, Meal, MealIdea, QuickNote, Expense, ExpenseSplit, Participant } from './types'
 import { supabase, setJoinCode } from './lib/supabase'
 import { getResolvedTheme, toggleTheme, applyTheme, initThemeListener } from './lib/theme'
@@ -467,12 +468,12 @@ export default function App() {
 
   const checkedCount = shoppingItems.filter((i) => i.is_checked).length
 
-  const featureTitles: Record<Exclude<TabView, 'home'>, string> = {
-    list: '🛒 Einkaufsliste',
-    bring: '🎒 Mitbringen',
-    mealplan: '🍝 Essensplan',
-    expenses: '💰 Ausgaben',
-    settings: '⚙️ Einstellungen',
+  const featureTitles: Record<Exclude<TabView, 'home'>, { icon: LucideIcon; label: string }> = {
+    list: { icon: ShoppingCart, label: 'Einkaufsliste' },
+    bring: { icon: Backpack, label: 'Mitbringen' },
+    mealplan: { icon: UtensilsCrossed, label: 'Essensplan' },
+    expenses: { icon: Wallet, label: 'Ausgaben' },
+    settings: { icon: Settings, label: 'Einstellungen' },
   }
 
   return (
@@ -481,25 +482,32 @@ export default function App() {
         <div className="header-top">
           {tab === 'home' ? (
             <div className="header-info">
-              <span className="header-name">🇮🇹 {list.name}</span>
+              <span className="header-name">{list.name}</span>
               <span className="header-user">
                 Angemeldet als: <strong>{userName}</strong>
               </span>
             </div>
           ) : (
             <button className="header-back" onClick={() => setTab('home')}>
-              ← Zurück
+              <ArrowLeft size={18} strokeWidth={2} /> Zurück
             </button>
           )}
           <div className="header-actions">
             {tab !== 'home' && tab !== 'settings' && (
-              <span className="header-feature-title">{featureTitles[tab as Exclude<TabView, 'home' | 'settings'>]}</span>
+              <span className="header-feature-title">
+                {(() => {
+                  const ft = featureTitles[tab as Exclude<TabView, 'home' | 'settings'>]
+                  const Icon = ft.icon
+                  return <Icon size={16} strokeWidth={2} />
+                })()}
+                {featureTitles[tab as Exclude<TabView, 'home' | 'settings'>].label}
+              </span>
             )}
             <button className="header-settings-btn" onClick={() => setTab('settings')} aria-label="Einstellungen">
-              ⚙️
+              <Settings size={20} strokeWidth={2} />
             </button>
             <button className="header-theme-toggle" onClick={handleToggleTheme} aria-label="Theme wechseln">
-              {isDark ? '☀️' : '🌙'}
+              {isDark ? <Sun size={20} strokeWidth={2} /> : <Moon size={20} strokeWidth={2} />}
             </button>
             <button className="header-leave" onClick={handleLeave}>Verlassen</button>
           </div>
@@ -508,7 +516,7 @@ export default function App() {
 
       {!isOnline && (
         <div className="offline-banner">
-          📡 Du bist offline — Änderungen können momentan nicht gespeichert werden.
+          <WifiOff size={16} strokeWidth={2} /> Du bist offline — Änderungen können momentan nicht gespeichert werden.
         </div>
       )}
 

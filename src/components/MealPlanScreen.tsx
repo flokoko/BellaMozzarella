@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Coffee, Sandwich, UtensilsCrossed, Calendar, Lightbulb, X, Check, Pencil, Trash2, type LucideIcon } from 'lucide-react'
 import type { Meal, MealIdea, DayOfWeek, MealType } from '../types'
 import { supabase } from '../lib/supabase'
 import './MealPlanScreen.css'
@@ -18,7 +19,12 @@ const DAY_SHORT: Record<DayOfWeek, string> = {
   Freitag: 'Fr', Samstag: 'Sa', Sonntag: 'So',
 }
 const MEAL_TYPES: MealType[] = ['Frühstück', 'Mittagessen', 'Abendessen']
-const MEAL_ICONS: Record<MealType, string> = {
+const MEAL_ICONS: Record<MealType, LucideIcon> = {
+  Frühstück: Coffee,
+  Mittagessen: Sandwich,
+  Abendessen: UtensilsCrossed,
+}
+const MEAL_EMOJI: Record<MealType, string> = {
   Frühstück: '☕',
   Mittagessen: '🥪',
   Abendessen: '🍝',
@@ -203,13 +209,13 @@ export default function MealPlanScreen({
           className={`mealplan-toggle-btn ${section === 'week' ? 'active' : ''}`}
           onClick={() => setSection('week')}
         >
-          📅 Wochenplan{mealCount > 0 && <span className="mealplan-toggle-badge">{mealCount}</span>}
+          <Calendar size={16} strokeWidth={2} /> Wochenplan{mealCount > 0 && <span className="mealplan-toggle-badge">{mealCount}</span>}
         </button>
         <button
           className={`mealplan-toggle-btn ${section === 'ideas' ? 'active' : ''}`}
           onClick={() => setSection('ideas')}
         >
-          💡 Ideen{ideaCount > 0 && <span className="mealplan-toggle-badge">{ideaCount}</span>}
+          <Lightbulb size={16} strokeWidth={2} /> Ideen{ideaCount > 0 && <span className="mealplan-toggle-badge">{ideaCount}</span>}
         </button>
       </div>
 
@@ -239,7 +245,7 @@ export default function MealPlanScreen({
                       if (isEditing) {
                         return (
                           <div key={type} className="meal-cell meal-cell-editing">
-                            <div className="meal-cell-icon">{MEAL_ICONS[type]}</div>
+                            <div className="meal-cell-icon">{(() => { const Icon = MEAL_ICONS[type]; return <Icon size={14} strokeWidth={2} /> })()}</div>
                             <input
                               className="meal-input"
                               type="text"
@@ -265,14 +271,14 @@ export default function MealPlanScreen({
                             />
                             <div className="meal-cell-actions">
                               <button className="meal-btn-cancel" onClick={cancelEdit}>
-                                ✕
+                                <X size={14} strokeWidth={2} />
                               </button>
                               <button
                                 className="meal-btn-save"
                                 onClick={() => saveMeal(day, type)}
                                 disabled={!editName.trim()}
                               >
-                                ✓
+                                <Check size={14} strokeWidth={2} />
                               </button>
                             </div>
                           </div>
@@ -283,21 +289,21 @@ export default function MealPlanScreen({
                         return (
                           <div key={type} className="meal-cell meal-cell-filled">
                             <div className="meal-cell-top">
-                              <span className="meal-cell-icon" title={type}>{MEAL_ICONS[type]}</span>
+                              <span className="meal-cell-icon" title={type}>{(() => { const Icon = MEAL_ICONS[type]; return <Icon size={14} strokeWidth={2} /> })()}</span>
                               <div className="meal-cell-buttons">
                                 <button
                                   className="meal-cell-btn"
                                   onClick={() => startEdit(meal)}
                                   aria-label="Bearbeiten"
                                 >
-                                  ✏️
+                                  <Pencil size={14} strokeWidth={2} />
                                 </button>
                                 <button
                                   className="meal-cell-btn"
                                   onClick={() => deleteMeal(meal)}
                                   aria-label="Löschen"
                                 >
-                                  🗑
+                                  <Trash2 size={14} strokeWidth={2} />
                                 </button>
                               </div>
                             </div>
@@ -314,7 +320,7 @@ export default function MealPlanScreen({
                           onClick={() => startAdd(day, type)}
                           title={`${type} hinzufügen`}
                         >
-                          <span className="meal-cell-icon">{MEAL_ICONS[type]}</span>
+                          <span className="meal-cell-icon">{(() => { const Icon = MEAL_ICONS[type]; return <Icon size={14} strokeWidth={2} /> })()}</span>
                           <span className="meal-cell-type-short">{MEAL_SHORT[type]}</span>
                         </button>
                       )
@@ -353,7 +359,7 @@ export default function MealPlanScreen({
           </div>
 
           {mealIdeas.length === 0 && (
-            <p className="mealplan-empty">Noch keine Ideen — füge welche hinzu! 🍕</p>
+            <p className="mealplan-empty">Noch keine Ideen — füge welche hinzu!</p>
           )}
 
           <div className="mealplan-idea-list">
@@ -380,7 +386,7 @@ export default function MealPlanScreen({
                         onClick={() => deleteIdea(idea)}
                         aria-label="Löschen"
                       >
-                        🗑
+                        <Trash2 size={14} strokeWidth={2} />
                       </button>
                     </div>
                   </div>
@@ -412,7 +418,7 @@ export default function MealPlanScreen({
                       >
                         {MEAL_TYPES.map((t) => (
                           <option key={t} value={t}>
-                            {MEAL_ICONS[t]} {t}
+                            {MEAL_EMOJI[t]} {t}
                           </option>
                         ))}
                       </select>
@@ -421,10 +427,10 @@ export default function MealPlanScreen({
                           className="meal-btn-cancel"
                           onClick={() => setPlanPickerFor(null)}
                         >
-                          ✕
+                          <X size={14} strokeWidth={2} />
                         </button>
                         <button className="meal-btn-save" onClick={() => planIdea(idea)}>
-                          ✓
+                          <Check size={14} strokeWidth={2} />
                         </button>
                       </div>
                     </div>

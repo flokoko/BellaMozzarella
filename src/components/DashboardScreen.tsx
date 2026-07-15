@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ShoppingCart, Backpack, UtensilsCrossed, Wallet, Smartphone, StickyNote, Trash2 } from 'lucide-react'
 import type { QuickNote, TabView } from '../types'
 import { supabase } from '../lib/supabase'
 import './DashboardScreen.css'
@@ -117,7 +118,7 @@ export default function DashboardScreen({
       {/* ── Feature Cards ── */}
       <div className="dashboard-cards">
         <button className="dash-card" onClick={() => onNavigate('list')}>
-          <div className="dash-card-icon">🛒</div>
+          <div className="dash-card-icon"><ShoppingCart size={28} strokeWidth={2} /></div>
           <div className="dash-card-body">
             <div className="dash-card-title">Einkaufsliste</div>
             <div className="dash-card-sub">{shoppingStatus}</div>
@@ -128,7 +129,7 @@ export default function DashboardScreen({
         </button>
 
         <button className="dash-card" onClick={() => onNavigate('bring')}>
-          <div className="dash-card-icon">🎒</div>
+          <div className="dash-card-icon"><Backpack size={28} strokeWidth={2} /></div>
           <div className="dash-card-body">
             <div className="dash-card-title">Mitbringen</div>
             <div className="dash-card-sub">{bringStatus}</div>
@@ -139,7 +140,7 @@ export default function DashboardScreen({
         </button>
 
         <button className="dash-card" onClick={() => onNavigate('mealplan')}>
-          <div className="dash-card-icon">🍝</div>
+          <div className="dash-card-icon"><UtensilsCrossed size={28} strokeWidth={2} /></div>
           <div className="dash-card-body">
             <div className="dash-card-title">Essensplan</div>
             <div className="dash-card-sub">{mealStatus}</div>
@@ -150,7 +151,7 @@ export default function DashboardScreen({
         </button>
 
         <button className="dash-card" onClick={() => onNavigate('expenses')}>
-          <div className="dash-card-icon">💰</div>
+          <div className="dash-card-icon"><Wallet size={28} strokeWidth={2} /></div>
           <div className="dash-card-body">
             <div className="dash-card-title">Ausgaben</div>
             <div className="dash-card-sub">{expenseStatus}</div>
@@ -164,14 +165,14 @@ export default function DashboardScreen({
       {/* ── Install Banner ── */}
       {installPrompt && (
         <button className="dash-install-banner" onClick={onInstall}>
-          <span className="dash-install-icon">📱</span>
+          <span className="dash-install-icon"><Smartphone size={22} strokeWidth={2} /></span>
           App installieren — für schnelleren Zugriff
         </button>
       )}
 
       {/* ── Quick Notes ── */}
       <section className="dash-notes-section">
-        <h2 className="dash-section-title">📝 Kurznotizen</h2>
+        <h2 className="dash-section-title"><StickyNote size={18} strokeWidth={2} /> Kurznotizen</h2>
 
         {!showForm && (
           <button className="dash-add-btn" onClick={() => setShowForm(true)}>
@@ -207,7 +208,7 @@ export default function DashboardScreen({
         )}
 
         {notes.length === 0 && !showForm && (
-          <p className="dash-notes-empty">Noch keine Notizen — füge Infos wie die Hausadresse hinzu! 📝</p>
+          <p className="dash-notes-empty">Noch keine Notizen — füge Infos wie die Hausadresse hinzu!</p>
         )}
 
         <div className="dash-notes-list">
@@ -251,7 +252,7 @@ export default function DashboardScreen({
                     onClick={(e) => { e.stopPropagation(); handleDelete(note) }}
                     aria-label="Löschen"
                   >
-                    🗑
+                    <Trash2 size={16} strokeWidth={2} />
                   </button>
                 </div>
                 {note.created_by && <div className="dash-note-by">von {note.created_by}</div>}

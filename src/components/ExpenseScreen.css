@@ -388,10 +388,12 @@
 .expense-card-btn {
   border: none;
   background: none;
-  font-size: 0.9rem;
   cursor: pointer;
   padding: 2px 4px;
   border-radius: 6px;
+  display: flex;
+  align-items: center;
+  color: var(--text-secondary);
   opacity: 0.5;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -512,6 +514,9 @@
   font-weight: 800;
   color: var(--text-primary);
   margin: 0.5rem 0 0.4rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 .expense-settlement-list {

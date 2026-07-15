@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import type { PointerEvent as ReactPointerEvent } from 'react'
+import { Trash2, GripVertical } from 'lucide-react'
 import type { BringFilter, ListItem, ItemCategory, ListType } from '../types'
 import AddItemForm from './AddItemForm'
 import CategoryManager from './CategoryManager'
@@ -74,7 +75,7 @@ function DraggableBringGroup({
               className="bring-drag-handle"
               onPointerDown={(e: ReactPointerEvent) => handlePointerDown(e, item.id)}
             >
-              ☰
+              <GripVertical size={16} strokeWidth={2} />
             </span>
             <label className="bring-checkbox-wrap">
               <input
@@ -87,7 +88,7 @@ function DraggableBringGroup({
             <span className="bring-item-name">{item.name}</span>
             <span className="bring-item-qty">{item.quantity}</span>
             <button className="bring-item-delete" onClick={() => { if (confirm('Dieses Element wirklich löschen?')) onDelete(item) }} aria-label="Löschen">
-              🗑
+              <Trash2 size={16} strokeWidth={2} />
             </button>
           </div>
         )
@@ -163,7 +164,7 @@ export default function BringScreen({ items, categories, listId, userName, onIte
       />
 
       {grouped.length === 0 && (
-        <p className="bring-empty">Nichts hier — vielleicht Filter ändern? 🧐</p>
+        <p className="bring-empty">Nichts hier — vielleicht Filter ändern?</p>
       )}
 
       {grouped.map(([person, personItems]) => {
