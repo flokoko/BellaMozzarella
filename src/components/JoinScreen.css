@@ -29,26 +29,31 @@
 
 .join-logo {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  margin-bottom: 1rem;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  width: 72px;
-  height: 96px;
+  margin-bottom: 1.25rem;
   margin-left: auto;
   margin-right: auto;
 }
 
-.join-flag-bar {
-  width: 100%;
-  height: calc(100% / 3);
+.join-flag-svg {
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.15));
+  animation: flagWave 4s ease-in-out infinite;
+  transform-origin: 42px 60px;
 }
 
-.join-flag-bar.green { background: #009246; }
-.join-flag-bar.white { background: #ffffff; }
-.join-flag-bar.red { background: #ce2b37; }
+@keyframes flagWave {
+  0%, 100% { transform: skewX(0deg) scale(1); }
+  25% { transform: skewX(-1.5deg) scale(1.01); }
+  50% { transform: skewX(0deg) scale(1); }
+  75% { transform: skewX(1.5deg) scale(1.01); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .join-flag-svg {
+    animation: none;
+  }
+}
 
 .join-card h1 {
   margin: 0 0 0.25rem;

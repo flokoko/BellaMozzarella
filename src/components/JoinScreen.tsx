@@ -132,9 +132,31 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
     <div className="join-screen">
       <div className="join-card">
         <div className="join-logo">
-          <div className="join-flag-bar green"></div>
-          <div className="join-flag-bar white"></div>
-          <div className="join-flag-bar red"></div>
+          <svg viewBox="0 0 200 120" width="180" height="108" className="join-flag-svg" aria-label="Italienische Flagge mit Mozzarellakugeln">
+            {/* ── Mozzarellakugel links ── */}
+            <ellipse cx="22" cy="78" rx="14" ry="13" fill="#f8f4e8" stroke="#e0d8c0" strokeWidth="0.8" />
+            <ellipse cx="18" cy="74" rx="4" ry="3" fill="#ffffff" opacity="0.7" />
+            <circle cx="25" cy="82" r="1.5" fill="#d4c9a8" opacity="0.4" />
+
+            {/* ── Flaggenmast ── */}
+            <line x1="42" y1="10" x2="42" y2="110" stroke="#8B7355" strokeWidth="2.5" strokeLinecap="round" />
+            <circle cx="42" cy="9" r="3" fill="#a08866" />
+
+            {/* ── Wehende Flagge: grün ── */}
+            <path d="M 42 20 Q 62 16 82 22 Q 102 28 122 22 L 122 52 Q 102 58 82 52 Q 62 46 42 50 Z"
+              fill="#009246" />
+            {/* ── Wehende Flagge: weiß ── */}
+            <path d="M 42 50 Q 62 46 82 52 Q 102 58 122 52 L 122 82 Q 102 88 82 82 Q 62 76 42 80 Z"
+              fill="#ffffff" />
+            {/* ── Wehende Flagge: rot ── */}
+            <path d="M 42 80 Q 62 76 82 82 Q 102 88 122 82 L 122 112 Q 102 118 82 112 Q 62 106 42 110 Z"
+              fill="#ce2b37" />
+
+            {/* ── Mozzarellakugel rechts ── */}
+            <ellipse cx="148" cy="78" rx="14" ry="13" fill="#f8f4e8" stroke="#e0d8c0" strokeWidth="0.8" />
+            <ellipse cx="144" cy="74" rx="4" ry="3" fill="#ffffff" opacity="0.7" />
+            <circle cx="151" cy="82" r="1.5" fill="#d4c9a8" opacity="0.4" />
+          </svg>
         </div>
         <h1>Bella Mozzarella</h1>
         <p className="join-subtitle">{subtitle}</p>
