@@ -86,18 +86,18 @@ function MozzarellaBall({
   return (
     <mesh ref={meshRef} geometry={geometry} castShadow receiveShadow>
       <meshPhysicalMaterial
-        color="#ffffff"
-        roughness={0.35}
+        color="#f8f9fb"
+        roughness={0.3}
         metalness={0.0}
-        clearcoat={0.5}
-        clearcoatRoughness={0.3}
+        clearcoat={0.6}
+        clearcoatRoughness={0.2}
         sheen={1.0}
         sheenColor="#ffffff"
-        sheenRoughness={0.2}
+        sheenRoughness={0.15}
         map={texture}
         transparent
         opacity={1.0}
-        envMapIntensity={0.8}
+        envMapIntensity={1.0}
       />
     </mesh>
   )
@@ -147,16 +147,18 @@ export default function MozzaScene() {
       shadows
       dpr={[1, 2]}
     >
-      {/* Lighting — neutral/cool white to keep mozzarella pure white */}
-      <ambientLight intensity={0.7} color="#ffffff" />
+      {/* Lighting — Alpinaweiß: high ambient for bright base, cool directional for crisp shadows */}
+      <ambientLight intensity={0.85} color="#f0f4ff" />
       <directionalLight
         position={[3, 4, 3]}
-        intensity={1.5}
+        intensity={1.2}
         color="#ffffff"
         castShadow
         shadow-mapSize-width={512}
         shadow-mapSize-height={512}
       />
+      {/* Fill light from opposite side — lifts shadows so balls stay bright */}
+      <directionalLight position={[-3, 2, -2]} intensity={0.5} color="#e8eeff" />
       <pointLight position={[-3, -2, 2]} intensity={0.3} color="#ffffff" />
 
       {/* Two orbiting mozzarella balls on different orbital planes */}
