@@ -112,14 +112,27 @@
   position: absolute;
   top: 0;
   left: 50%;
-  width: 34px;
-  height: 34px;
-  margin-left: -17px;
-  margin-top: -17px;
+  width: 36px;
+  height: 36px;
+  margin-left: -18px;
+  margin-top: -18px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #ffffff 0%, #f8f4e8 50%, #e8dcc4 100%);
-  border: 1px solid #d4c9a8;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  /* 3D-Kugel:多层Gradients für Tiefe, Glanzlicht, Schatten, Reflexion */
+  background:
+    /* oberes Glanzlicht (weiß, scharf) */
+    radial-gradient(circle at 32% 25%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 28%),
+    /* zweites weiches Glanzlicht */
+    radial-gradient(ellipse 60% 40% at 35% 30%, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 50%),
+    /* Hauptkörper mit tiefem 3D-Verlauf */
+    radial-gradient(circle at 38% 32%, #fffcf4 0%, #f8f4e8 35%, #e8dcc4 70%, #c9bd9e 100%),
+    /* unterer Rand-Schatten (Kugelkante) */
+    radial-gradient(circle at 50% 50%, transparent 85%, rgba(180,170,140,0.3) 100%);
+  border: 1px solid rgba(200,190,160,0.5);
+  /* Schlagschatten für 3D-Tiefe */
+  box-shadow:
+    0 2px 6px rgba(0,0,0,0.15),
+    inset 2px 2px 4px rgba(255,255,255,0.6),
+    inset -2px -3px 5px rgba(160,150,120,0.25);
   /* Counter-rotate against the spin so the ball doesn't tumble */
   transform: rotateX(-65deg);
 }
@@ -128,26 +141,7 @@
   transform: rotateX(-65deg) rotateZ(-90deg);
 }
 
-.mozza-shine {
-  position: absolute;
-  top: 5px;
-  left: 7px;
-  width: 11px;
-  height: 8px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.7);
-}
-
-.mozza-dot {
-  position: absolute;
-  bottom: 6px;
-  right: 7px;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #d4c9a8;
-  opacity: 0.4;
-}
+/* Glanzlicht und Punkt sind jetzt in den 3D-Gradients der Kugel enthalten */
 
 @media (prefers-reduced-motion: reduce) {
   .join-flag-svg,

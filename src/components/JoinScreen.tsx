@@ -162,17 +162,11 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
           <div className="join-orbit">
             {/* ── Mozzarellakugel 1 (kreist) ── */}
             <div className="mozza-orbit mozza-orbit-1">
-              <div className="mozza-ball">
-                <div className="mozza-shine"></div>
-                <div className="mozza-dot"></div>
-              </div>
+              <div className="mozza-ball"></div>
             </div>
             {/* ── Mozzarellakugel 2 (kreist, versetzt) ── */}
             <div className="mozza-orbit mozza-orbit-2">
-              <div className="mozza-ball">
-                <div className="mozza-shine"></div>
-                <div className="mozza-dot"></div>
-              </div>
+              <div className="mozza-ball"></div>
             </div>
 
             {/* ── Wehende Flagge als SVG ── */}
