@@ -36,26 +36,118 @@
   margin-right: auto;
 }
 
+.join-orbit {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ── Wehende Flagge ── */
 .join-flag-svg {
   filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.15));
-  animation: flagWave 2.5s ease-in-out infinite;
-  transform-origin: 56px 70px;
+  animation: flagWave 2s ease-in-out infinite;
+  transform-origin: 45px 70px;
+  z-index: 1;
+  position: relative;
 }
 
 @keyframes flagWave {
   0%, 100% { transform: skewX(0deg) scaleY(1) scaleX(1); }
-  15% { transform: skewX(-4deg) scaleY(1.04) scaleX(1.02); }
-  30% { transform: skewX(2deg) scaleY(0.97) scaleX(0.99); }
-  45% { transform: skewX(-3deg) scaleY(1.03) scaleX(1.01); }
-  60% { transform: skewX(3deg) scaleY(0.98) scaleX(1.02); }
-  75% { transform: skewX(-2deg) scaleY(1.02) scaleX(0.98); }
-  90% { transform: skewX(1deg) scaleY(1) scaleX(1); }
+  10% { transform: skewX(-5deg) scaleY(1.05) scaleX(1.03); }
+  20% { transform: skewX(3deg) scaleY(0.96) scaleX(0.98); }
+  30% { transform: skewX(-4deg) scaleY(1.04) scaleX(1.02); }
+  40% { transform: skewX(4deg) scaleY(0.97) scaleX(0.99); }
+  50% { transform: skewX(-3deg) scaleY(1.03) scaleX(1.01); }
+  60% { transform: skewX(4deg) scaleY(0.98) scaleX(1.03); }
+  70% { transform: skewX(-5deg) scaleY(1.04) scaleX(0.97); }
+  80% { transform: skewX(2deg) scaleY(0.97) scaleX(1.01); }
+  90% { transform: skewX(-2deg) scaleY(1.02) scaleX(1); }
+}
+
+/* ── Mozzarellakugeln ── */
+.mozza-orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 180px;
+  height: 180px;
+  margin: -90px 0 0 -90px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.mozza-orbit-1 {
+  animation: mozzaOrbit 6s linear infinite;
+}
+
+.mozza-orbit-2 {
+  animation: mozzaOrbit 6s linear infinite;
+  animation-delay: -3s;
+}
+
+@keyframes mozzaOrbit {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.mozza-ball {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  width: 36px;
+  height: 36px;
+  margin-left: -18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffffff 0%, #f8f4e8 50%, #e8dcc4 100%);
+  border: 1px solid #d4c9a8;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  /* Counter-rotate so the ball doesn't spin with the orbit */
+  animation: mozzaCounter 6s linear infinite;
+}
+
+.mozza-orbit-2 .mozza-ball {
+  animation: mozzaCounter 6s linear infinite;
+  animation-delay: -3s;
+}
+
+@keyframes mozzaCounter {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+.mozza-shine {
+  position: absolute;
+  top: 5px;
+  left: 7px;
+  width: 12px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.mozza-dot {
+  position: absolute;
+  bottom: 6px;
+  right: 7px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #d4c9a8;
+  opacity: 0.4;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .join-flag-svg {
+  .join-flag-svg,
+  .mozza-orbit-1,
+  .mozza-orbit-2,
+  .mozza-ball {
     animation: none;
   }
+  .mozza-orbit-1 .mozza-ball { top: -18px; }
+  .mozza-orbit-2 .mozza-ball { top: auto; bottom: -18px; }
 }
 
 .join-card h1 {

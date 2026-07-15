@@ -132,31 +132,40 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
     <div className="join-screen">
       <div className="join-card">
         <div className="join-logo">
-          <svg viewBox="0 0 220 140" width="200" height="127" className="join-flag-svg" aria-label="Italienische Flagge mit Mozzarellakugeln">
-            {/* ── Mozzarellakugel links ── */}
-            <ellipse cx="22" cy="80" rx="22" ry="20" fill="#f8f4e8" stroke="#e0d8c0" strokeWidth="0.8" />
-            <ellipse cx="16" cy="73" rx="6" ry="4.5" fill="#ffffff" opacity="0.7" />
-            <circle cx="28" cy="86" r="2.5" fill="#d4c9a8" opacity="0.4" />
+          <div className="join-orbit">
+            {/* ── Mozzarellakugel 1 (kreist) ── */}
+            <div className="mozza-orbit mozza-orbit-1">
+              <div className="mozza-ball">
+                <div className="mozza-shine"></div>
+                <div className="mozza-dot"></div>
+              </div>
+            </div>
+            {/* ── Mozzarellakugel 2 (kreist, versetzt) ── */}
+            <div className="mozza-orbit mozza-orbit-2">
+              <div className="mozza-ball">
+                <div className="mozza-shine"></div>
+                <div className="mozza-dot"></div>
+              </div>
+            </div>
 
-            {/* ── Flaggenmast ── */}
-            <line x1="56" y1="14" x2="56" y2="128" stroke="#8B7355" strokeWidth="3" strokeLinecap="round" />
-            <circle cx="56" cy="12" r="3.5" fill="#a08866" />
+            {/* ── Wehende Flagge als SVG ── */}
+            <svg viewBox="0 0 200 220" width="160" height="176" className="join-flag-svg" aria-label="Italienische Flagge">
+              {/* ── Flaggenmast ── */}
+              <line x1="45" y1="12" x2="45" y2="210" stroke="#8B7355" strokeWidth="3.5" strokeLinecap="round" />
+              <circle cx="45" cy="10" r="4" fill="#a08866" />
+              <line x1="45" y1="30" x2="43" y2="210" stroke="#7a6244" strokeWidth="1" opacity="0.3" />
 
-            {/* ── Wehende Flagge: grün ── */}
-            <path d="M 56 24 Q 76 18 96 26 Q 116 34 136 24 L 136 56 Q 116 66 96 56 Q 76 46 56 54 Z"
-              fill="#009246" />
-            {/* ── Wehende Flagge: weiß ── */}
-            <path d="M 56 54 Q 76 46 96 56 Q 116 66 136 56 L 136 88 Q 116 98 96 88 Q 76 78 56 84 Z"
-              fill="#ffffff" />
-            {/* ── Wehende Flagge: rot ── */}
-            <path d="M 56 84 Q 76 78 96 88 Q 116 98 136 88 L 136 120 Q 116 130 96 120 Q 76 110 56 114 Z"
-              fill="#ce2b37" />
-
-            {/* ── Mozzarellakugel rechts ── */}
-            <ellipse cx="170" cy="80" rx="22" ry="20" fill="#f8f4e8" stroke="#e0d8c0" strokeWidth="0.8" />
-            <ellipse cx="164" cy="73" rx="6" ry="4.5" fill="#ffffff" opacity="0.7" />
-            <circle cx="176" cy="86" r="2.5" fill="#d4c9a8" opacity="0.4" />
-          </svg>
+              {/* ── Wehende Flagge: grün ── */}
+              <path d="M 45 22 Q 70 14 95 24 Q 120 34 145 22 Q 170 14 195 24 L 195 58 Q 170 68 145 58 Q 120 48 95 58 Q 70 48 45 56 Z"
+                fill="#009246" />
+              {/* ── Wehende Flagge: weiß ── */}
+              <path d="M 45 56 Q 70 48 95 58 Q 120 48 145 58 Q 170 68 195 58 L 195 92 Q 170 102 145 92 Q 120 82 95 92 Q 70 82 45 90 Z"
+                fill="#ffffff" />
+              {/* ── Wehende Flagge: rot ── */}
+              <path d="M 45 90 Q 70 82 95 92 Q 120 82 145 92 Q 170 102 195 92 L 195 126 Q 170 136 145 126 Q 120 116 95 126 Q 70 116 45 124 Z"
+                fill="#ce2b37" />
+            </svg>
+          </div>
         </div>
         <h1>Bella Mozzarella</h1>
         <p className="join-subtitle">{subtitle}</p>
