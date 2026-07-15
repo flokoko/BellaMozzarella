@@ -15,27 +15,14 @@ function useMozzarellaTexture() {
     ctx.fillStyle = '#ffffff'
     ctx.fillRect(0, 0, size, size)
 
-    // Very subtle warm undertone — barely visible cheese body variation
-    for (let i = 0; i < 15; i++) {
-      const x = Math.random() * size
-      const y = Math.random() * size
-      const r = 40 + Math.random() * 80
-      const grad = ctx.createRadialGradient(x, y, 0, x, y, r)
-      grad.addColorStop(0, 'rgba(250,247,238,0.15)')
-      grad.addColorStop(1, 'rgba(255,255,255,0)')
-      ctx.fillStyle = grad
-      ctx.beginPath()
-      ctx.arc(x, y, r, 0, Math.PI * 2)
-      ctx.fill()
-    }
-
-    // Very faint smooth grain — NOT craters, just subtle surface variation
-    for (let i = 0; i < 100; i++) {
+    // No warm undertones — keep it pure white
+    // Very faint cool-white variation only (subtle surface micro-texture)
+    for (let i = 0; i < 60; i++) {
       const x = Math.random() * size
       const y = Math.random() * size
       const r = 2 + Math.random() * 5
       const grad = ctx.createRadialGradient(x, y, 0, x, y, r)
-      grad.addColorStop(0, 'rgba(248,245,235,0.08)')
+      grad.addColorStop(0, 'rgba(253,253,253,0.06)')
       grad.addColorStop(1, 'rgba(255,255,255,0)')
       ctx.fillStyle = grad
       ctx.beginPath()
@@ -109,7 +96,7 @@ function MozzarellaBall({
         sheenRoughness={0.2}
         map={texture}
         transparent
-        opacity={0.97}
+        opacity={1.0}
         envMapIntensity={0.8}
       />
     </mesh>
@@ -160,17 +147,17 @@ export default function MozzaScene() {
       shadows
       dpr={[1, 2]}
     >
-      {/* Lighting — warm tones for fresh mozzarella look */}
-      <ambientLight intensity={0.5} color="#fff5e6" />
+      {/* Lighting — neutral/cool white to keep mozzarella pure white */}
+      <ambientLight intensity={0.7} color="#ffffff" />
       <directionalLight
         position={[3, 4, 3]}
         intensity={1.5}
-        color="#fff8ee"
+        color="#ffffff"
         castShadow
         shadow-mapSize-width={512}
         shadow-mapSize-height={512}
       />
-      <pointLight position={[-3, -2, 2]} intensity={0.4} color="#ffe8cc" />
+      <pointLight position={[-3, -2, 2]} intensity={0.3} color="#ffffff" />
 
       {/* Two orbiting mozzarella balls on different orbital planes */}
       <OrbitingBall orbitRadius={1.8} speed={2.5} tiltX={Math.PI / 3} tiltZ={0} offset={0} />
