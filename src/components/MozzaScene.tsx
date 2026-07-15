@@ -2,28 +2,26 @@ import { useRef, useMemo } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
-/** Procedural bump texture for mozzarella surface irregularity */
+/** Procedural texture for mozzarella: fibrous cheese strands + smooth white surface */
 function useMozzarellaTexture() {
   return useMemo(() => {
-    const size = 256
+    const size = 512
     const canvas = document.createElement('canvas')
     canvas.width = size
     canvas.height = size
     const ctx = canvas.getContext('2d')!
 
-    // Base: creamy off-white
-    ctx.fillStyle = '#f5f0e0'
+    // Base: pure white (fresh mozzarella)
+    ctx.fillStyle = '#fefefb'
     ctx.fillRect(0, 0, size, size)
 
-    // Add irregular dents and bumps (mozzarella surface texture)
-    for (let i = 0; i < 60; i++) {
+    // Subtle warm undertone patches (cheese body variation)
+    for (let i = 0; i < 25; i++) {
       const x = Math.random() * size
       const y = Math.random() * size
-      const r = 4 + Math.random() * 12
-      const brightness = Math.random() > 0.5 ? 15 : -20
+      const r = 30 + Math.random() * 60
       const grad = ctx.createRadialGradient(x, y, 0, x, y, r)
-      const val = brightness > 0 ? `rgba(255,250,235,0.4)` : `rgba(200,190,165,0.35)`
-      grad.addColorStop(0, val)
+      grad.addColorStop(0, 'rgba(248,243,228,0.3)')
       grad.addColorStop(1, 'rgba(0,0,0,0)')
       ctx.fillStyle = grad
       ctx.beginPath()
@@ -31,12 +29,51 @@ function useMozzarellaTexture() {
       ctx.fill()
     }
 
-    // Small specks (like brine droplets or surface grain)
-    for (let i = 0; i < 30; i++) {
+    // Fibrous cheese strands — the signature mozzarella pull texture
+    ctx.lineCap = 'round'
+    for (let i = 0; i < 80; i++) {
+      const x1 = Math.random() * size
+      const y1 = Math.random() * size
+      const angle = Math.random() * Math.PI * 2
+      const len = 20 + Math.random() * 60
+      const x2 = x1 + Math.cos(angle) * len
+      const y2 = y1 + Math.sin(angle) * len
+      const opacity = 0.08 + Math.random() * 0.12
+      ctx.strokeStyle = `rgba(235,228,205,${opacity})`
+      ctx.lineWidth = 1 + Math.random() * 2.5
+      ctx.beginPath()
+      // Slight curve for organic fiber look
+      const cx = (x1 + x2) / 2 + (Math.random() - 0.5) * 15
+      const cy = (y1 + y2) / 2 + (Math.random() - 0.5) * 15
+      ctx.moveTo(x1, y1)
+      ctx.quadraticCurveTo(cx, cy, x2, y2)
+      ctx.stroke()
+    }
+
+    // Fine grain texture (tiny cheese particles)
+    for (let i = 0; i < 200; i++) {
       const x = Math.random() * size
       const y = Math.random() * size
-      const r = 1 + Math.random() * 2.5
-      ctx.fillStyle = `rgba(180,170,145,${0.15 + Math.random() * 0.2})`
+      const r = 0.5 + Math.random() * 1.5
+      const v = Math.random()
+      ctx.fillStyle = v > 0.6
+        ? `rgba(240,235,220,${0.1 + Math.random() * 0.15})`
+        : `rgba(252,250,245,${0.15 + Math.random() * 0.2})`
+      ctx.beginPath()
+      ctx.arc(x, y, r, 0, Math.PI * 2)
+      ctx.fill()
+    }
+
+    // Soft glossy highlights (wet mozzarella surface from brine)
+    for (let i = 0; i < 8; i++) {
+      const x = Math.random() * size
+      const y = Math.random() * size
+      const r = 15 + Math.random() * 30
+      const grad = ctx.createRadialGradient(x, y, 0, x, y, r)
+      grad.addColorStop(0, 'rgba(255,255,255,0.5)')
+      grad.addColorStop(0.5, 'rgba(255,255,255,0.15)')
+      grad.addColorStop(1, 'rgba(255,255,255,0)')
+      ctx.fillStyle = grad
       ctx.beginPath()
       ctx.arc(x, y, r, 0, Math.PI * 2)
       ctx.fill()
@@ -68,19 +105,19 @@ function MozzarellaBall({
     <mesh ref={meshRef} castShadow receiveShadow>
       <sphereGeometry args={[radius, 64, 64]} />
       <meshPhysicalMaterial
-        color="#f5f0e0"
-        roughness={0.75}
+        color="#fdfdf9"
+        roughness={0.55}
         metalness={0.0}
-        clearcoat={0.15}
-        clearcoatRoughness={0.8}
-        sheen={0.5}
-        sheenColor="#fff8e8"
-        sheenRoughness={0.5}
+        clearcoat={0.3}
+        clearcoatRoughness={0.6}
+        sheen={0.8}
+        sheenColor="#ffffff"
+        sheenRoughness={0.3}
         map={texture}
         bumpMap={texture}
-        bumpScale={0.03}
+        bumpScale={0.015}
         transparent
-        opacity={0.92}
+        opacity={0.95}
       />
     </mesh>
   )
