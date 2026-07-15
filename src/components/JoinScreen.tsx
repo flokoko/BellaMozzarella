@@ -155,7 +155,7 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
           placeholder="z.B. Florian"
           onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
         />
-        <p className="join-hint">Tipp: Gib deinen exakten Namen ein, damit du in der Abrechnung richtig zugeordnet wirst.</p>
+
 
         {error && <p className="join-error">{error}</p>}
 
