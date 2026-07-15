@@ -57,6 +57,33 @@ const ROY_BIANCO_QUOTES = [
   'Auf Capri, wo die Sonne niemals untergeht',
   // Baci
   'Baci, und die Welt steht still',
+  // Sophia Loren
+  'Du raubst mir die Nächte und verschwendest mein Herz',
+  'Du gibst mir das Beste und ich vergess\' alle Welt',
+  'Du bist die Einzige für mich — so jemand wie dich, das gab\'s noch nicht',
+  'An jedem Haus lauf\' ich entlang, auf jedes schreib\' ich deinen Namen',
+  'Du und ich, so wie im Film — was niemand hat, doch jeder will',
+  'Für immer — Sophia Loren!',
+  // Bardolino
+  'Ich will nie wieder Bardolino seh\'n',
+  'Uns\'re Tage des Glücks liegen hier am Grund des Gardasees',
+  'Mit Netzen aus Verlang\'n hast du mich eingefang\'n',
+  'Ich will heim, kann nicht geh\'n, nie wieder Bardolino seh\'n',
+  'Kann nicht geh\'n, ich will heim, zu viel billiger Wein',
+  // Rimini Disco
+  'In Rimini, wo die Nächte nie enden',
+  'Die Diskokugel dreht sich, der Sommer gehört uns',
+  // Agosto 83
+  'Im August, als die Sonne uns verriet',
+  'Es war ein Sommer, der nie enden sollte',
+  // Schneeflocken in Calabria
+  'Schneeflocken in Calabria, so kalt war\'s nie in Neapel',
+  // Weiße Rosen
+  'Weiße Rosen auf dem Wasser, der Abend gehört uns beiden',
+  // Mille Grazie
+  'Mille grazie, tausend Dank für jede Nacht',
+  // Ouvertüre
+  'Es beginnt, wie es endet — mit einem Lied',
 ]
 
 interface JoinScreenProps {
