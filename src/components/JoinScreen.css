@@ -67,35 +67,41 @@
   90% { transform: skewX(-2deg) scaleY(1.02) scaleX(1); }
 }
 
-/* ── Mozzarellakugeln ── */
+/* ── Mozzarellakugeln: horizontales Kreisen um die Flagge ── */
 .mozza-orbit {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 180px;
-  height: 180px;
-  margin: -90px 0 0 -90px;
+  width: 220px;
+  height: 120px;
+  margin: -60px 0 0 -110px;
   pointer-events: none;
   z-index: 2;
 }
 
 .mozza-orbit-1 {
-  animation: mozzaOrbit 6s linear infinite;
+  animation: mozzaOrbitH 5s ease-in-out infinite;
 }
 
 .mozza-orbit-2 {
-  animation: mozzaOrbit 6s linear infinite;
-  animation-delay: -3s;
+  animation: mozzaOrbitH 5s ease-in-out infinite;
+  animation-delay: -2.5s;
 }
 
-@keyframes mozzaOrbit {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+/* Horizontales Kreisen: Kugel wandert links→hinten→rechts→vorne→links
+   translateX für Links/Rechts, scaleY für Perspektive (kleiner hinten, größer vorne),
+   z-index Wechsel für vor/hinter der Flagge */
+@keyframes mozzaOrbitH {
+  0%   { transform: translateX(-95px) scale(0.8); z-index: 1; }   /* links, hinten */
+  25%  { transform: translateX(0) scale(1.1); z-index: 3; }        /* mitte, vorne */
+  50%  { transform: translateX(95px) scale(0.8); z-index: 1; }    /* rechts, hinten */
+  75%  { transform: translateX(0) scale(1.1); z-index: 3; }      /* mitte, vorne */
+  100% { transform: translateX(-95px) scale(0.8); z-index: 1; }  /* links, hinten */
 }
 
 .mozza-ball {
   position: absolute;
-  top: -18px;
+  top: 0;
   left: 50%;
   width: 36px;
   height: 36px;
@@ -104,18 +110,9 @@
   background: radial-gradient(circle at 35% 30%, #ffffff 0%, #f8f4e8 50%, #e8dcc4 100%);
   border: 1px solid #d4c9a8;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
-  /* Counter-rotate so the ball doesn't spin with the orbit */
-  animation: mozzaCounter 6s linear infinite;
 }
 
 .mozza-orbit-2 .mozza-ball {
-  animation: mozzaCounter 6s linear infinite;
-  animation-delay: -3s;
-}
-
-@keyframes mozzaCounter {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(-360deg); }
 }
 
 .mozza-shine {
@@ -142,12 +139,11 @@
 @media (prefers-reduced-motion: reduce) {
   .join-flag-svg,
   .mozza-orbit-1,
-  .mozza-orbit-2,
-  .mozza-ball {
+  .mozza-orbit-2 {
     animation: none;
   }
-  .mozza-orbit-1 .mozza-ball { top: -18px; }
-  .mozza-orbit-2 .mozza-ball { top: auto; bottom: -18px; }
+  .mozza-orbit-1 .mozza-ball { transform: translateX(-95px); }
+  .mozza-orbit-2 .mozza-ball { transform: translateX(95px); }
 }
 
 .join-card h1 {
