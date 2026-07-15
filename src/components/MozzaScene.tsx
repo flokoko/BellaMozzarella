@@ -12,7 +12,7 @@ function MozzarellaBall({
 
   useFrame((_, delta) => {
     if (meshRef.current) {
-      meshRef.current.rotation.y += delta * 0.3
+      meshRef.current.rotation.y += delta * 0.8
     }
   })
 
@@ -85,8 +85,8 @@ export default function MozzaScene() {
       <pointLight position={[-3, -2, 2]} intensity={0.3} />
 
       {/* Two orbiting mozzarella balls on different orbital planes */}
-      <OrbitingBall orbitRadius={1.8} speed={1.0} tiltX={Math.PI / 3} tiltZ={0} offset={0} />
-      <OrbitingBall orbitRadius={1.8} speed={1.0} tiltX={Math.PI / 3} tiltZ={Math.PI / 2} offset={Math.PI} />
+      <OrbitingBall orbitRadius={1.8} speed={2.5} tiltX={Math.PI / 3} tiltZ={0} offset={0} />
+      <OrbitingBall orbitRadius={1.8} speed={2.5} tiltX={Math.PI / 3} tiltZ={Math.PI / 2} offset={Math.PI} />
     </Canvas>
   )
 }
