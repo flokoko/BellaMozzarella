@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import type { PointerEvent as ReactPointerEvent } from 'react'
-import { Trash2, GripVertical } from 'lucide-react'
+import { Trash2, GripVertical, Pizza } from 'lucide-react'
 import type { BringFilter, ListItem, ItemCategory, ListType } from '../types'
 import AddItemForm from './AddItemForm'
 import CategoryManager from './CategoryManager'
@@ -164,7 +164,7 @@ export default function BringScreen({ items, categories, listId, userName, onIte
       />
 
       {grouped.length === 0 && (
-        <p className="bring-empty">Nichts hier — vielleicht Filter ändern?</p>
+        <p className="bring-empty"><Pizza size={24} strokeWidth={1.5} /> Nichts hier — vielleicht Filter ändern?</p>
       )}
 
       {grouped.map(([person, personItems]) => {

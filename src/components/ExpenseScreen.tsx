@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react'
-import { Wallet, Receipt, Pencil, Trash2, ArrowRight } from 'lucide-react'
+import { Wallet, Receipt, Pencil, Trash2, ArrowRight, Pizza } from 'lucide-react'
 import type { Expense, ExpenseSplit } from '../types'
 import { supabase } from '../lib/supabase'
 import './ExpenseScreen.css'
@@ -481,7 +481,7 @@ export default function ExpenseScreen({
 
           {/* Expense list grouped by date */}
           {expenses.length === 0 && !formExpanded && (
-            <p className="expense-empty">Noch keine Ausgaben — füge die erste hinzu!</p>
+            <p className="expense-empty"><Pizza size={24} strokeWidth={1.5} /> Noch keine Ausgaben — füge die erste hinzu!</p>
           )}
 
           <div className="expense-list">

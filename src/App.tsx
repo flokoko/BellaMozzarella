@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
-import { ArrowLeft, Settings, Sun, Moon, WifiOff, ShoppingCart, Backpack, UtensilsCrossed, Wallet, type LucideIcon } from 'lucide-react'
+import { ArrowLeft, Settings, Sun, Moon, WifiOff, ShoppingCart, Backpack, Pizza, Wallet, type LucideIcon } from 'lucide-react'
 import type { ListItem, ItemCategory, ListType, ShoppingList, TabView, Meal, MealIdea, QuickNote, Expense, ExpenseSplit, Participant } from './types'
 import { supabase, setJoinCode } from './lib/supabase'
 import { getResolvedTheme, toggleTheme, applyTheme, initThemeListener } from './lib/theme'
@@ -471,7 +471,7 @@ export default function App() {
   const featureTitles: Record<Exclude<TabView, 'home'>, { icon: LucideIcon; label: string }> = {
     list: { icon: ShoppingCart, label: 'Einkaufsliste' },
     bring: { icon: Backpack, label: 'Mitbringen' },
-    mealplan: { icon: UtensilsCrossed, label: 'Essensplan' },
+    mealplan: { icon: Pizza, label: 'Essensplan' },
     expenses: { icon: Wallet, label: 'Ausgaben' },
     settings: { icon: Settings, label: 'Einstellungen' },
   }

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Pizza } from 'lucide-react'
 import type { ListItem, ItemCategory, ListType } from '../types'
 import type { PointerEvent as ReactPointerEvent } from 'react'
 import { supabase } from '../lib/supabase'
@@ -128,7 +128,7 @@ export default function ListScreen({ items, categories, listId, userName, onItem
       />
 
       {visibleItems.length === 0 && (
-        <p className="list-empty">{hideChecked ? 'Alle erledigten Items ausgeblendet!' : 'Noch keine Items — füge welche hinzu!'}</p>
+        <p className="list-empty"><Pizza size={24} strokeWidth={1.5} /> {hideChecked ? 'Alle erledigten Items ausgeblendet!' : 'Noch keine Items — füge welche hinzu!'}</p>
       )}
 
       {categories.map((cat) => {

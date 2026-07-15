@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Coffee, Sandwich, UtensilsCrossed, Calendar, Lightbulb, X, Check, Pencil, Trash2, type LucideIcon } from 'lucide-react'
+import { Coffee, Sandwich, UtensilsCrossed, Calendar, Pizza, X, Check, Pencil, Trash2, type LucideIcon } from 'lucide-react'
 import type { Meal, MealIdea, DayOfWeek, MealType } from '../types'
 import { supabase } from '../lib/supabase'
 import './MealPlanScreen.css'
@@ -215,7 +215,7 @@ export default function MealPlanScreen({
           className={`mealplan-toggle-btn ${section === 'ideas' ? 'active' : ''}`}
           onClick={() => setSection('ideas')}
         >
-          <Lightbulb size={16} strokeWidth={2} /> Ideen{ideaCount > 0 && <span className="mealplan-toggle-badge">{ideaCount}</span>}
+          <Pizza size={16} strokeWidth={2} /> Ideen{ideaCount > 0 && <span className="mealplan-toggle-badge">{ideaCount}</span>}
         </button>
       </div>
 
@@ -359,7 +359,7 @@ export default function MealPlanScreen({
           </div>
 
           {mealIdeas.length === 0 && (
-            <p className="mealplan-empty">Noch keine Ideen — füge welche hinzu!</p>
+            <p className="mealplan-empty"><Pizza size={28} strokeWidth={1.5} /> Noch keine Ideen — füge welche hinzu!</p>
           )}
 
           <div className="mealplan-idea-list">

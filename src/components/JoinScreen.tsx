@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react'
-import { ChefHat } from 'lucide-react'
 import type { ShoppingList } from '../types'
 import { supabase, setJoinCode as setSupabaseJoinCode } from '../lib/supabase'
 
@@ -136,7 +135,6 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
           <div className="join-flag-bar green"></div>
           <div className="join-flag-bar white"></div>
           <div className="join-flag-bar red"></div>
-          <div className="join-icon"><ChefHat size={48} strokeWidth={2} /></div>
         </div>
         <h1>Bella Mozzarella</h1>
         <p className="join-subtitle">{subtitle}</p>

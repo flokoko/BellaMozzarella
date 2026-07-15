@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ShoppingCart, Backpack, UtensilsCrossed, Wallet, Smartphone, StickyNote, Trash2 } from 'lucide-react'
+import { ShoppingCart, Backpack, Pizza, Wallet, Smartphone, StickyNote, Trash2 } from 'lucide-react'
 import type { QuickNote, TabView } from '../types'
 import { supabase } from '../lib/supabase'
 import './DashboardScreen.css'
@@ -140,7 +140,7 @@ export default function DashboardScreen({
         </button>
 
         <button className="dash-card" onClick={() => onNavigate('mealplan')}>
-          <div className="dash-card-icon"><UtensilsCrossed size={28} strokeWidth={2} /></div>
+          <div className="dash-card-icon"><Pizza size={24} strokeWidth={2} /></div>
           <div className="dash-card-body">
             <div className="dash-card-title">Essensplan</div>
             <div className="dash-card-sub">{mealStatus}</div>
