@@ -149,7 +149,7 @@ export default function DashboardScreen({
           )}
         </button>
 
-        <button className="dash-card dash-card-expenses" onClick={() => onNavigate('expenses')}>
+        <button className="dash-card" onClick={() => onNavigate('expenses')}>
           <div className="dash-card-icon">💰</div>
           <div className="dash-card-body">
             <div className="dash-card-title">Ausgaben</div>
@@ -158,14 +158,6 @@ export default function DashboardScreen({
           {expenseCount > 0 && (
             <span className="dash-card-badge">{expenseTotalFmt}</span>
           )}
-        </button>
-
-        <button className="dash-card" onClick={() => onNavigate('settings')}>
-          <div className="dash-card-icon">⚙️</div>
-          <div className="dash-card-body">
-            <div className="dash-card-title">Einstellungen</div>
-            <div className="dash-card-sub">Profil, Kategorien, Design</div>
-          </div>
         </button>
       </div>
 

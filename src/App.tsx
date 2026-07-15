@@ -492,9 +492,12 @@ export default function App() {
             </button>
           )}
           <div className="header-actions">
-            {tab !== 'home' && (
-              <span className="header-feature-title">{featureTitles[tab as Exclude<TabView, 'home'>]}</span>
+            {tab !== 'home' && tab !== 'settings' && (
+              <span className="header-feature-title">{featureTitles[tab as Exclude<TabView, 'home' | 'settings'>]}</span>
             )}
+            <button className="header-settings-btn" onClick={() => setTab('settings')} aria-label="Einstellungen">
+              ⚙️
+            </button>
             <button className="header-theme-toggle" onClick={handleToggleTheme} aria-label="Theme wechseln">
               {isDark ? '☀️' : '🌙'}
             </button>
