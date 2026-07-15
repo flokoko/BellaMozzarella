@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import type { ShoppingList } from '../types'
 import { supabase, setJoinCode as setSupabaseJoinCode } from '../lib/supabase'
+import MozzaScene from './MozzaScene'
 
 import './JoinScreen.css'
 
@@ -160,15 +161,6 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
       <div className="join-card">
         <div className="join-logo">
           <div className="join-orbit">
-            {/* ── Mozzarellakugel 1 (kreist) ── */}
-            <div className="mozza-orbit mozza-orbit-1">
-              <div className="mozza-ball"></div>
-            </div>
-            {/* ── Mozzarellakugel 2 (kreist, versetzt) ── */}
-            <div className="mozza-orbit mozza-orbit-2">
-              <div className="mozza-ball"></div>
-            </div>
-
             {/* ── Wehende Flagge als SVG ── */}
             <svg viewBox="0 0 200 220" width="160" height="176" className="join-flag-svg" aria-label="Italienische Flagge">
               {/* ── Flaggenmast ── */}
@@ -186,6 +178,10 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
               <path d="M 45 90 Q 70 82 95 92 Q 120 82 145 92 Q 170 102 195 92 L 195 126 Q 170 136 145 126 Q 120 116 95 126 Q 70 116 45 124 Z"
                 fill="#ce2b37" />
             </svg>
+            {/* ── 3D Mozzarellakugeln kreisen um die Flagge ── */}
+            <div className="mozza-3d-canvas">
+              <MozzaScene />
+            </div>
           </div>
         </div>
         <h1>Bella Mozzarella</h1>
