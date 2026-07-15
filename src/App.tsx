@@ -235,22 +235,42 @@ export default function App() {
   // ── Optimistic update helpers ────────────────────────────────────
   const toggleShoppingItem = useCallback((item: ListItem) => {
     setShoppingItems(prev => prev.map(i => i.id === item.id ? { ...i, is_checked: !i.is_checked } : i))
-    supabase.from('items').update({ is_checked: !item.is_checked }).eq('id', item.id).then()
+    supabase.from('items').update({ is_checked: !item.is_checked }).eq('id', item.id).then(({ error }) => {
+      if (error) {
+        console.error('toggleShoppingItem error:', error)
+        setShoppingItems(prev => prev.map(i => i.id === item.id ? { ...i, is_checked: item.is_checked } : i))
+      }
+    })
   }, [])
 
   const deleteShoppingItem = useCallback((item: ListItem) => {
     setShoppingItems(prev => prev.filter(i => i.id !== item.id))
-    supabase.from('items').delete().eq('id', item.id).then()
+    supabase.from('items').delete().eq('id', item.id).then(({ error }) => {
+      if (error) {
+        console.error('deleteShoppingItem error:', error)
+        setShoppingItems(prev => [item, ...prev])
+      }
+    })
   }, [])
 
   const toggleBringItem = useCallback((item: ListItem) => {
     setBringItems(prev => prev.map(i => i.id === item.id ? { ...i, is_brought: !i.is_brought } : i))
-    supabase.from('items').update({ is_brought: !item.is_brought }).eq('id', item.id).then()
+    supabase.from('items').update({ is_brought: !item.is_brought }).eq('id', item.id).then(({ error }) => {
+      if (error) {
+        console.error('toggleBringItem error:', error)
+        setBringItems(prev => prev.map(i => i.id === item.id ? { ...i, is_brought: item.is_brought } : i))
+      }
+    })
   }, [])
 
   const deleteBringItem = useCallback((item: ListItem) => {
     setBringItems(prev => prev.filter(i => i.id !== item.id))
-    supabase.from('items').delete().eq('id', item.id).then()
+    supabase.from('items').delete().eq('id', item.id).then(({ error }) => {
+      if (error) {
+        console.error('deleteBringItem error:', error)
+        setBringItems(prev => [item, ...prev])
+      }
+    })
   }, [])
 
   // ── Batch reorder (single RPC) ────────────────────────────────────

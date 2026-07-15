@@ -78,8 +78,20 @@ export default function SettingsScreen({
     setEditingName(false)
   }
 
-  const handleCopyCode = () => {
-    navigator.clipboard.writeText(joinCode)
+  const handleCopyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(joinCode)
+    } catch {
+      // Fallback for non-HTTPS or permission denied
+      const textarea = document.createElement('textarea')
+      textarea.value = joinCode
+      textarea.style.position = 'fixed'
+      textarea.style.opacity = '0'
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textarea)
+    }
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -165,8 +177,9 @@ export default function SettingsScreen({
   }
 
   const handleAddCategory = (listType: ListType) => {
-    const sortOrder = categories.filter((c) => c.list_type === listType).length + 1
-    addCategory(listId, listType, sortOrder)
+    const cats = categories.filter((c) => c.list_type === listType)
+    const maxOrder = cats.reduce((max, c) => Math.max(max, c.sort_order), 0)
+    addCategory(listId, listType, maxOrder + 1)
   }
 
   const renderCategoryEditor = (listType: ListType, title: string) => {

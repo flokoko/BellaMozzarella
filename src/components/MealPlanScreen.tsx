@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Meal, MealIdea, DayOfWeek, MealType } from '../types'
 import { supabase } from '../lib/supabase'
 import './MealPlanScreen.css'
@@ -48,7 +48,18 @@ export default function MealPlanScreen({
   const [planDay, setPlanDay] = useState<DayOfWeek>('Montag')
   const [planMealType, setPlanMealType] = useState<MealType>('Abendessen')
 
-  const todayName = new Date().toLocaleDateString('de-DE', { weekday: 'long' }) as DayOfWeek
+  // Track "today" so it stays correct if the app stays open past midnight
+  const [todayName, setTodayName] = useState<DayOfWeek>(() =>
+    new Date().toLocaleDateString('de-DE', { weekday: 'long' }) as DayOfWeek
+  )
+  useEffect(() => {
+    const check = () => {
+      const current = new Date().toLocaleDateString('de-DE', { weekday: 'long' }) as DayOfWeek
+      setTodayName(prev => prev !== current ? current : prev)
+    }
+    const interval = setInterval(check, 60000)
+    return () => clearInterval(interval)
+  }, [])
 
   const getMeal = (day: DayOfWeek, type: MealType) =>
     meals.find((m) => m.day === day && m.meal_type === type)

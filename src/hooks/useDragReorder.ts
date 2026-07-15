@@ -12,13 +12,16 @@ export function useDragReorder<T extends { id: string }>(
   const [dragState, setDragState] = useState<DragState>({ draggingId: null, dragOverId: null })
   const dragStartY = useRef(0)
   const dragItemIndex = useRef(-1)
+  const itemEls = useRef<Map<string, HTMLElement>>(new Map())
   const itemTops = useRef<Map<string, number>>(new Map())
 
-  // Register item position for hit-testing
+  // Register item element + position for hit-testing
   const registerItem = useCallback((id: string, el: HTMLElement | null) => {
     if (el) {
+      itemEls.current.set(id, el)
       itemTops.current.set(id, el.getBoundingClientRect().top)
     } else {
+      itemEls.current.delete(id)
       itemTops.current.delete(id)
     }
   }, [])
@@ -26,6 +29,10 @@ export function useDragReorder<T extends { id: string }>(
   const handlePointerDown = useCallback((e: React.PointerEvent, id: string) => {
     // Only start drag on primary button or touch
     if (e.button !== 0 && e.pointerType === 'mouse') return
+    // Refresh all positions before starting drag (in case of scroll/resize)
+    for (const [itemId, el] of itemEls.current) {
+      itemTops.current.set(itemId, el.getBoundingClientRect().top)
+    }
     dragStartY.current = e.clientY
     dragItemIndex.current = items.findIndex(i => i.id === id)
     setDragState({ draggingId: id, dragOverId: null })

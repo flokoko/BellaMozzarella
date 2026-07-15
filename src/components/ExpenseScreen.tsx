@@ -195,10 +195,14 @@ export default function ExpenseScreen({
   // ── Calculate share amounts for saving ──
   const calculateShares = useCallback((): { person_name: string; share_amount: number }[] => {
     if (splitMode === 'equal') {
-      const per = splitPeople.length > 0 ? amountNum / splitPeople.length : 0
-      return splitPeople.map((p) => ({
+      if (splitPeople.length === 0) return []
+      // Distribute rounding remainder to first N people so shares sum to total
+      const totalCents = Math.round(amountNum * 100)
+      const perCents = Math.floor(totalCents / splitPeople.length)
+      const remainder = totalCents - perCents * splitPeople.length
+      return splitPeople.map((p, i) => ({
         person_name: p,
-        share_amount: Math.round(per * 100) / 100,
+        share_amount: (perCents + (i < remainder ? 1 : 0)) / 100,
       }))
     }
     return splitPeople.map((p) => {

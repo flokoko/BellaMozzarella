@@ -16,8 +16,8 @@ export default function CategoryManager({ categories, listId, listType, onCatego
   const { updateCategory, deleteCategory, addCategory } = useCategories(() => onCategoriesChange?.())
 
   const handleAdd = () => {
-    const sortOrder = categories.length + 1
-    addCategory(listId, listType, sortOrder)
+    const maxOrder = categories.reduce((max, c) => Math.max(max, c.sort_order), 0)
+    addCategory(listId, listType, maxOrder + 1)
   }
 
   return (
