@@ -3,6 +3,7 @@ import { Tag, Trash2 } from 'lucide-react'
 import type { ItemCategory, ListType } from '../types'
 import { useCategories } from '../hooks/useCategories'
 import { useDebouncedCallback } from '../hooks/useDebouncedCallback'
+import { useToast } from '../context/ToastContext'
 
 import './CategoryManager.css'
 
@@ -14,6 +15,7 @@ interface CategoryManagerProps {
 }
 
 export default function CategoryManager({ categories, listId, listType, onCategoriesChange }: CategoryManagerProps) {
+  const { confirm } = useToast()
   const [expanded, setExpanded] = useState(false)
   const [localNames, setLocalNames] = useState<Record<string, string>>({})
   const { updateCategory, deleteCategory, addCategory } = useCategories(() => onCategoriesChange?.())
@@ -54,7 +56,7 @@ export default function CategoryManager({ categories, listId, listType, onCatego
               />
               <button
                 className="cat-manager-delete-btn"
-                onClick={() => { if (confirm('Dieses Element wirklich löschen?')) deleteCategory(cat.id) }}
+                onClick={() => confirm('Dieses Element wirklich löschen?', () => deleteCategory(cat.id))}
                 aria-label="Kategorie löschen"
               >
                 <Trash2 size={16} strokeWidth={2} />

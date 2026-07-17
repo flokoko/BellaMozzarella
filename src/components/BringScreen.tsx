@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import type { PointerEvent as ReactPointerEvent } from 'react'
 import { Trash2, GripVertical, Pizza } from 'lucide-react'
 import type { BringFilter, ListItem, ItemCategory, ListType } from '../types'
+import { useToast } from '../context/ToastContext'
 import AddItemForm from './AddItemForm'
 import CategoryManager from './CategoryManager'
 import { useDragReorder } from '../hooks/useDragReorder'
@@ -36,6 +37,7 @@ function DraggableBringGroup({
   onDelete: (item: ListItem) => void
   onReorder?: (newOrder: string[]) => void
 }) {
+  const { confirm } = useToast()
   const {
     dragState,
     handlePointerDown,
@@ -87,7 +89,7 @@ function DraggableBringGroup({
             </label>
             <span className="bring-item-name">{item.name}</span>
             <span className="bring-item-qty">{item.quantity}</span>
-            <button className="bring-item-delete" onClick={() => { if (confirm('Dieses Element wirklich löschen?')) onDelete(item) }} aria-label="Löschen">
+            <button className="bring-item-delete" onClick={() => confirm('Dieses Element wirklich löschen?', () => onDelete(item))} aria-label="Löschen">
               <Trash2 size={16} strokeWidth={2} />
             </button>
           </div>

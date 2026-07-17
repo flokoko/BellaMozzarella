@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { ItemCategory, ListType } from '../types'
 import { supabase } from '../lib/supabase'
+import { useToast } from '../context/ToastContext'
 import './AddItemForm.css'
 
 interface AddItemFormProps {
@@ -24,6 +25,7 @@ export default function AddItemForm({
   listType,
   persons,
 }: AddItemFormProps) {
+  const { toast } = useToast()
   const [name, setName] = useState('')
   const [quantity, setQuantity] = useState('')
   const [category, setCategory] = useState<string>(categories[0]?.name ?? '')
@@ -53,7 +55,7 @@ export default function AddItemForm({
     })
     if (error) {
       console.error('Insert failed:', error)
-      alert(`Fehler beim Speichern: ${error.message}`)
+      toast(`Fehler beim Speichern: ${error.message}`, 'error')
       return
     }
     setName('')

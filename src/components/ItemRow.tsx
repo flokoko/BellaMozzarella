@@ -1,6 +1,7 @@
 import type { ListItem } from '../types'
 import type { PointerEvent as ReactPointerEvent } from 'react'
 import { Trash2, GripVertical } from 'lucide-react'
+import { useToast } from '../context/ToastContext'
 import './ItemRow.css'
 
 interface ItemRowProps {
@@ -18,6 +19,7 @@ interface ItemRowProps {
 }
 
 export default function ItemRow({ item, onToggle, onDelete, dragHandleProps, isDragging, isDragOver, registerRef }: ItemRowProps) {
+  const { confirm } = useToast()
 
   const toggleChecked = () => {
     onToggle?.(item)
@@ -25,9 +27,10 @@ export default function ItemRow({ item, onToggle, onDelete, dragHandleProps, isD
   }
 
   const deleteItem = () => {
-    if (!confirm('Dieses Element wirklich löschen?')) return
-    onDelete?.(item)
-    navigator.vibrate?.(15)
+    confirm('Dieses Element wirklich löschen?', () => {
+      onDelete?.(item)
+      navigator.vibrate?.(15)
+    })
   }
 
   const rowClass = [

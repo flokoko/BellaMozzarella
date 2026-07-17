@@ -1,0 +1,56 @@
+.skeleton {
+  background: var(--button-bg, rgba(0, 0, 0, 0.06));
+  border-radius: 8px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+.skeleton-line {
+  width: 100%;
+  height: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-line:last-child {
+  margin-bottom: 0;
+  width: 70%;
+}
+
+.skeleton-card {
+  width: 100%;
+  height: 4rem;
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+}
+
+.skeleton-note {
+  width: 100%;
+  height: 3.5rem;
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+}
+
+.skeleton-cat-header {
+  width: 100%;
+  height: 2.25rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-item-row {
+  width: 100%;
+  height: 2.75rem;
+  border-radius: 8px;
+  margin-bottom: 0.25rem;
+}
+
+.skeleton-expense-card {
+  width: 100%;
+  height: 5rem;
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+}

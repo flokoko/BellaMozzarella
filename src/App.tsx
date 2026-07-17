@@ -4,6 +4,7 @@ import confetti from 'canvas-confetti'
 import type { TabView } from './types'
 import { getResolvedTheme, toggleTheme, applyTheme, initThemeListener } from './lib/theme'
 import { supabase } from './lib/supabase'
+import { useToast } from './context/ToastContext'
 import JoinScreen from './components/JoinScreen'
 import DashboardScreen from './components/DashboardScreen'
 import { useListData } from './hooks/useListData'
@@ -56,11 +57,12 @@ function fireConfetti() {
 }
 
 export default function App() {
+  const { toast } = useToast()
   const {
     userName, list, shoppingItems, bringItems, categories, meals, mealIdeas,
     notes, expenses, expenseSplits, participants, adminUnlocked,
     isAdmin, shoppingCategories, bringCategories, knownPersons, userBalance,
-    expenseTotal, checkedCount,
+    expenseTotal, checkedCount, isLoading, isOnline, queueLength, flushQueue,
     setList, setAdminUnlocked,
     fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes, fetchExpenses, fetchParticipants,
     toggleShoppingItem, deleteShoppingItem, toggleBringItem, deleteBringItem, reorderItems,
@@ -86,19 +88,29 @@ export default function App() {
     }
   }, [])
 
-  // ── Online / offline status ────────────────────────────────────────
-  const [isOnline, setIsOnline] = useState(navigator.onLine)
-
+  // ── Online/offline: handle flush + toast ───────────────────────────
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true)
-    const handleOffline = () => setIsOnline(false)
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
-    return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
+    if (isOnline && queueLength > 0) {
+      toast(`Synchronisiere ${queueLength} offene Änderungen…`, 'info')
+      flushQueue().then(({ success, failed }) => {
+        if (failed > 0) {
+          toast('Einige Änderungen konnten nicht synchronisiert werden.', 'error')
+        } else if (success > 0) {
+          toast('Synchronisiert!', 'success')
+          // Full refetch after successful sync
+          if (list) {
+            fetchItems(list.id, 'shopping')
+            fetchItems(list.id, 'bring')
+            fetchCategories(list.id)
+            fetchMeals(list.id)
+            fetchNotes(list.id)
+            fetchExpenses(list.id)
+            fetchParticipants(list.id)
+          }
+        }
+      })
     }
-  }, [])
+  }, [isOnline, queueLength, flushQueue, toast, list, fetchItems, fetchCategories, fetchMeals, fetchNotes, fetchExpenses, fetchParticipants])
 
   // ── beforeinstallprompt: capture for custom install UI ─────────────
   const [installPrompt, setInstallPrompt] = useState<any>(null)
@@ -144,7 +156,7 @@ export default function App() {
       .update({ admin_password: password })
       .eq('id', list.id)
     if (error) {
-      alert(`Fehler beim Speichern: ${error.message}`)
+      toast(`Fehler beim Speichern: ${error.message}`, 'error')
       return
     }
     setList({ ...list, admin_password: password })
@@ -256,7 +268,7 @@ export default function App() {
 
       {!isOnline && (
         <div className="offline-banner">
-          <WifiOff size={16} strokeWidth={2} /> Du bist offline — Änderungen können momentan nicht gespeichert werden.
+          <WifiOff size={16} strokeWidth={2} /> Du bist offline — {queueLength > 0 ? `${queueLength} ${queueLength === 1 ? 'Änderung wird' : 'Änderungen werden'} synchronisiert` : 'Änderungen können momentan nicht gespeichert werden'}.
         </div>
       )}
 
@@ -274,6 +286,7 @@ export default function App() {
             expenseTotal={expenseTotal}
             userBalance={userBalance}
             notes={notes}
+            isLoading={isLoading}
             onNavigate={setTab}
             onNotesChange={() => fetchNotes(list.id)}
             installPrompt={installPrompt}
@@ -287,6 +300,7 @@ export default function App() {
               categories={shoppingCategories}
               listId={list.id}
               userName={userName}
+              isLoading={isLoading}
               onItemToggle={toggleShoppingItem}
               onItemDelete={deleteShoppingItem}
               onItemChange={() => fetchItems(list.id, 'shopping')}
@@ -331,6 +345,7 @@ export default function App() {
               listId={list.id}
               userName={userName}
               knownPersons={knownPersons}
+              isLoading={isLoading}
               onExpensesChange={() => fetchExpenses(list.id)}
             />
           </Suspense>

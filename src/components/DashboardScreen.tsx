@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { ShoppingCart, Backpack, Pizza, Wallet, Smartphone, StickyNote, Trash2 } from 'lucide-react'
 import type { QuickNote, TabView } from '../types'
 import { supabase } from '../lib/supabase'
+import { useToast } from '../context/ToastContext'
+import { SkeletonCard, SkeletonNote } from './Skeleton'
 import WeatherWidget from './WeatherWidget'
 import './DashboardScreen.css'
 
@@ -17,6 +19,7 @@ interface DashboardScreenProps {
   expenseTotal: number
   userBalance: number
   notes: QuickNote[]
+  isLoading?: boolean
   onNavigate: (tab: TabView) => void
   onNotesChange: () => void
   installPrompt: any
@@ -34,11 +37,13 @@ export default function DashboardScreen({
   expenseTotal,
   userBalance,
   notes,
+  isLoading,
   onNavigate,
   onNotesChange,
   installPrompt,
   onInstall,
 }: DashboardScreenProps) {
+  const { toast, confirm } = useToast()
   const [showForm, setShowForm] = useState(false)
   const [formTitle, setFormTitle] = useState('')
   const [formContent, setFormContent] = useState('')
@@ -56,7 +61,7 @@ export default function DashboardScreen({
       created_by: userName,
     })
     if (error) {
-      alert(`Fehler beim Speichern: ${error.message}`)
+      toast(`Fehler beim Speichern: ${error.message}`, 'error')
       return
     }
     setFormTitle('')
@@ -65,15 +70,16 @@ export default function DashboardScreen({
     onNotesChange()
   }
 
-  const handleDelete = async (note: QuickNote) => {
-    if (!confirm('Dieses Element wirklich löschen?')) return
-    const { error } = await supabase.from('notes').delete().eq('id', note.id)
-    if (error) {
-      alert(`Fehler beim Löschen: ${error.message}`)
-      return
-    }
-    navigator.vibrate?.(15)
-    onNotesChange()
+  const handleDelete = (note: QuickNote) => {
+    confirm('Dieses Element wirklich löschen?', async () => {
+      const { error } = await supabase.from('notes').delete().eq('id', note.id)
+      if (error) {
+        toast(`Fehler beim Löschen: ${error.message}`, 'error')
+        return
+      }
+      navigator.vibrate?.(15)
+      onNotesChange()
+    })
   }
 
   const startEdit = (note: QuickNote) => {
@@ -99,7 +105,7 @@ export default function DashboardScreen({
       })
       .eq('id', note.id)
     if (error) {
-      alert(`Fehler beim Speichern: ${error.message}`)
+      toast(`Fehler beim Speichern: ${error.message}`, 'error')
       return
     }
     cancelEdit()
@@ -120,6 +126,14 @@ export default function DashboardScreen({
       <WeatherWidget />
 
       {/* ── Feature Cards ── */}
+      {isLoading ? (
+        <div className="dashboard-cards">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+      ) : (
       <div className="dashboard-cards">
         <button className="dash-card" onClick={() => onNavigate('list')}>
           <div className="dash-card-icon"><ShoppingCart size={28} strokeWidth={2} /></div>
@@ -165,6 +179,7 @@ export default function DashboardScreen({
           )}
         </button>
       </div>
+      )}
 
       {/* ── Install Banner ── */}
       {installPrompt && (
@@ -178,6 +193,13 @@ export default function DashboardScreen({
       <section className="dash-notes-section">
         <h2 className="dash-section-title"><StickyNote size={18} strokeWidth={2} /> Kurznotizen</h2>
 
+        {isLoading ? (
+          <div className="dash-notes-list">
+            <SkeletonNote />
+            <SkeletonNote />
+          </div>
+        ) : (
+        <>
         {!showForm && (
           <button className="dash-add-btn" onClick={() => setShowForm(true)}>
             + Notiz hinzufügen
@@ -264,6 +286,8 @@ export default function DashboardScreen({
             )
           })}
         </div>
+        </>
+        )}
       </section>
     </div>
   )

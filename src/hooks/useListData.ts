@@ -12,8 +12,12 @@ import type {
   Participant,
 } from '../types'
 import { supabase, setJoinCode } from '../lib/supabase'
+import { useOfflineQueue } from './useOfflineQueue'
 
 export function useListData() {
+  // ── Offline queue ──────────────────────────────────────────────────
+  const { isOnline, enqueue, flushQueue, queueLength } = useOfflineQueue()
+
   // ── State ──────────────────────────────────────────────────────────
   const [userName, setUserName] = useState<string | null>(null)
   const [list, setList] = useState<ShoppingList | null>(null)
@@ -27,6 +31,7 @@ export function useListData() {
   const [expenseSplits, setExpenseSplits] = useState<ExpenseSplit[]>([])
   const [participants, setParticipants] = useState<Participant[]>([])
   const [adminUnlocked, setAdminUnlocked] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   // ── Activity + fetch guards for adaptive polling ───────────────────
   const lastActivityRef = useRef(Date.now())
@@ -153,6 +158,7 @@ export function useListData() {
       ])
     } finally {
       isFetchingRef.current = false
+      setIsLoading(false)
     }
   }, [fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes, fetchExpenses, fetchParticipants])
 
@@ -227,6 +233,7 @@ export function useListData() {
             const listData = data[0] as ShoppingList
             setJoinCode(listData.join_code)
             setUserName(savedName)
+            setIsLoading(true)
             const { data: fullList } = await supabase
               .from('lists')
               .select('*')
@@ -250,50 +257,66 @@ export function useListData() {
   const toggleShoppingItem = useCallback((item: ListItem) => {
     markActivity()
     setShoppingItems(prev => prev.map(i => i.id === item.id ? { ...i, is_checked: !i.is_checked } : i))
-    supabase.from('items').update({ is_checked: !item.is_checked }).eq('id', item.id).then(({ error }) => {
-      if (error) {
-        console.error('toggleShoppingItem error:', error)
-        setShoppingItems(prev => prev.map(i => i.id === item.id ? { ...i, is_checked: item.is_checked } : i))
-      }
-    })
+    if (isOnline) {
+      supabase.from('items').update({ is_checked: !item.is_checked }).eq('id', item.id).then(({ error }) => {
+        if (error) {
+          console.error('toggleShoppingItem error:', error)
+          setShoppingItems(prev => prev.map(i => i.id === item.id ? { ...i, is_checked: item.is_checked } : i))
+        }
+      })
+    } else {
+      enqueue({ type: 'update', table: 'items', payload: { is_checked: !item.is_checked }, filterColumn: 'id', filterValue: item.id })
+    }
     instantRefetch()
-  }, [markActivity, instantRefetch])
+  }, [markActivity, instantRefetch, isOnline, enqueue])
 
   const deleteShoppingItem = useCallback((item: ListItem) => {
     markActivity()
     setShoppingItems(prev => prev.filter(i => i.id !== item.id))
-    supabase.from('items').delete().eq('id', item.id).then(({ error }) => {
-      if (error) {
-        console.error('deleteShoppingItem error:', error)
-        setShoppingItems(prev => [item, ...prev])
-      }
-    })
+    if (isOnline) {
+      supabase.from('items').delete().eq('id', item.id).then(({ error }) => {
+        if (error) {
+          console.error('deleteShoppingItem error:', error)
+          setShoppingItems(prev => [item, ...prev])
+        }
+      })
+    } else {
+      enqueue({ type: 'delete', table: 'items', payload: {}, filterColumn: 'id', filterValue: item.id })
+    }
     instantRefetch()
-  }, [markActivity, instantRefetch])
+  }, [markActivity, instantRefetch, isOnline, enqueue])
 
   const toggleBringItem = useCallback((item: ListItem) => {
     markActivity()
     setBringItems(prev => prev.map(i => i.id === item.id ? { ...i, is_brought: !i.is_brought } : i))
-    supabase.from('items').update({ is_brought: !item.is_brought }).eq('id', item.id).then(({ error }) => {
-      if (error) {
-        console.error('toggleBringItem error:', error)
-        setBringItems(prev => prev.map(i => i.id === item.id ? { ...i, is_brought: item.is_brought } : i))
-      }
-    })
+    if (isOnline) {
+      supabase.from('items').update({ is_brought: !item.is_brought }).eq('id', item.id).then(({ error }) => {
+        if (error) {
+          console.error('toggleBringItem error:', error)
+          setBringItems(prev => prev.map(i => i.id === item.id ? { ...i, is_brought: item.is_brought } : i))
+        }
+      })
+    } else {
+      enqueue({ type: 'update', table: 'items', payload: { is_brought: !item.is_brought }, filterColumn: 'id', filterValue: item.id })
+    }
     instantRefetch()
-  }, [markActivity, instantRefetch])
+  }, [markActivity, instantRefetch, isOnline, enqueue])
 
   const deleteBringItem = useCallback((item: ListItem) => {
     markActivity()
     setBringItems(prev => prev.filter(i => i.id !== item.id))
-    supabase.from('items').delete().eq('id', item.id).then(({ error }) => {
-      if (error) {
-        console.error('deleteBringItem error:', error)
-        setBringItems(prev => [item, ...prev])
-      }
-    })
+    if (isOnline) {
+      supabase.from('items').delete().eq('id', item.id).then(({ error }) => {
+        if (error) {
+          console.error('deleteBringItem error:', error)
+          setBringItems(prev => [item, ...prev])
+        }
+      })
+    } else {
+      enqueue({ type: 'delete', table: 'items', payload: {}, filterColumn: 'id', filterValue: item.id })
+    }
     instantRefetch()
-  }, [markActivity, instantRefetch])
+  }, [markActivity, instantRefetch, isOnline, enqueue])
 
   const reorderItems = useCallback(async (listType: ListType, newOrder: string[]) => {
     if (!list) return
@@ -315,9 +338,13 @@ export function useListData() {
         }).filter(Boolean)
       })
     }
-    await supabase.rpc('batch_reorder_items', { item_ids: newOrder })
+    if (isOnline) {
+      await supabase.rpc('batch_reorder_items', { item_ids: newOrder })
+    } else {
+      enqueue({ type: 'rpc', table: '', payload: { item_ids: newOrder }, rpcName: 'batch_reorder_items' })
+    }
     instantRefetch()
-  }, [list, markActivity, instantRefetch])
+  }, [list, markActivity, instantRefetch, isOnline, enqueue])
 
   // ── Derived values ─────────────────────────────────────────────────
   const shoppingCategories = useMemo(() => categories.filter((c) => c.list_type === 'shopping'), [categories])
@@ -357,6 +384,7 @@ export function useListData() {
     setUserName(name)
     setList(l)
     markActivity()
+    setIsLoading(true)
     fetchAll(l.id)
     const { data: fullList } = await supabase
       .from('lists')
@@ -420,6 +448,11 @@ export function useListData() {
     expenseSplits,
     participants,
     adminUnlocked,
+    isLoading,
+    // offline
+    isOnline,
+    queueLength,
+    flushQueue,
     // derived
     isAdmin,
     shoppingCategories,

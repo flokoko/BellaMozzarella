@@ -4,6 +4,7 @@ import type { ItemCategory, ListType, Participant } from '../types'
 import type { ThemeMode } from '../lib/theme'
 import { getTheme, setTheme } from '../lib/theme'
 import { supabase } from '../lib/supabase'
+import { useToast } from '../context/ToastContext'
 import { useCategories } from '../hooks/useCategories'
 import { useDebouncedCallback } from '../hooks/useDebouncedCallback'
 import { APP_VERSION } from '../version'
@@ -47,6 +48,7 @@ export default function SettingsScreen({
   onUnlockAdmin,
   onChangeAdminPassword,
 }: SettingsScreenProps) {
+  const { toast, confirm } = useToast()
   const [theme, setThemeState] = useState<ThemeMode>('auto')
   const [editingName, setEditingName] = useState(false)
   const [newName, setNewName] = useState(userName)
@@ -130,18 +132,18 @@ export default function SettingsScreen({
     const n = newParticipantName.trim()
     if (!n) return
     if (participants.length >= MAX_PARTICIPANTS) {
-      alert(`Maximal ${MAX_PARTICIPANTS} Teilnehmer erreicht.`)
+      toast(`Maximal ${MAX_PARTICIPANTS} Teilnehmer erreicht.`, 'error')
       return
     }
     // Case-insensitive duplicate check
     const exists = participants.find(p => p.name.toLowerCase() === n.toLowerCase())
     if (exists) {
-      alert(`Teilnehmer "${exists.name}" existiert bereits!`)
+      toast(`Teilnehmer "${exists.name}" existiert bereits!`, 'error')
       return
     }
     const { error } = await supabase.from('participants').insert({ list_id: listId, name: n })
     if (error) {
-      alert(`Fehler: ${error.message}`)
+      toast(`Fehler: ${error.message}`, 'error')
       return
     }
     navigator.vibrate?.(10)
@@ -150,15 +152,16 @@ export default function SettingsScreen({
     onParticipantsChange()
   }
 
-  const handleDeleteParticipant = async (p: Participant) => {
-    if (!confirm(`Teilnehmer "${p.name}" entfernen?`)) return
-    const { error } = await supabase.from('participants').delete().eq('id', p.id)
-    if (error) {
-      alert(`Fehler: ${error.message}`)
-      return
-    }
-    navigator.vibrate?.(10)
-    onParticipantsChange()
+  const handleDeleteParticipant = (p: Participant) => {
+    confirm(`Teilnehmer "${p.name}" entfernen?`, async () => {
+      const { error } = await supabase.from('participants').delete().eq('id', p.id)
+      if (error) {
+        toast(`Fehler: ${error.message}`, 'error')
+        return
+      }
+      navigator.vibrate?.(10)
+      onParticipantsChange()
+    })
   }
 
   const handleUnlock = async () => {
@@ -239,7 +242,7 @@ export default function SettingsScreen({
             />
             <button
               className="settings-cat-delete-btn"
-              onClick={() => { if (confirm('Dieses Element wirklich löschen?')) deleteCategory(cat.id) }}
+              onClick={() => confirm('Dieses Element wirklich löschen?', () => deleteCategory(cat.id))}
               aria-label="Kategorie löschen"
             >
               <Trash2 size={16} strokeWidth={2} />

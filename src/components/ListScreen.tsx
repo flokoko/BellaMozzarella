@@ -1,11 +1,14 @@
-import { useState } from 'react'
-import { Trash2, Pizza } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { Trash2, Pizza, GripVertical, ChevronDown } from 'lucide-react'
 import type { ListItem, ItemCategory, ListType } from '../types'
 import type { PointerEvent as ReactPointerEvent } from 'react'
 import { supabase } from '../lib/supabase'
+import { useToast } from '../context/ToastContext'
+import { aggregateItems, type AggregatedItem } from '../lib/aggregate'
 import ItemRow from './ItemRow'
 import AddItemForm from './AddItemForm'
 import CategoryManager from './CategoryManager'
+import { SkeletonCatHeader, SkeletonItemRow } from './Skeleton'
 
 import { useDragReorder } from '../hooks/useDragReorder'
 import './ListScreen.css'
@@ -15,6 +18,7 @@ interface ListScreenProps {
   categories: ItemCategory[]
   listId: string
   userName: string
+  isLoading?: boolean
   onItemToggle?: (item: ListItem) => void
   onItemDelete?: (item: ListItem) => void
   onItemChange?: () => void
@@ -22,7 +26,7 @@ interface ListScreenProps {
   onCategoriesChange?: () => void
 }
 
-/** Wraps one category's items with independent drag-reorder. */
+/** Wraps one category's items with independent drag-reorder + aggregation. */
 function DraggableCategorySection({
   catItems,
   cat,
@@ -36,15 +40,62 @@ function DraggableCategorySection({
   onItemDelete?: (item: ListItem) => void
   onReorder?: (newOrder: string[]) => void
 }) {
+  const { confirm } = useToast()
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
+
+  // Aggregate items within this category
+  const aggregated = useMemo(() => aggregateItems(catItems), [catItems])
+
+  // For drag-reorder, we work with the group keys (first item's id per group)
+  // but the drag hook needs items with { id: string } — we use AggregatedItem which has groupKey
+  const dragItems = useMemo(() =>
+    aggregated.map(a => ({ id: a.groupKey, ...a })), [aggregated])
+
   const {
     dragState,
     handlePointerDown,
     handlePointerMove,
     handlePointerUp,
     registerItem,
-  } = useDragReorder<ListItem>(catItems, (newOrder) => onReorder?.(newOrder))
+  } = useDragReorder<{ id: string }>(dragItems, (newOrder) => {
+    // Map group keys back to all underlying item ids in order
+    const allIds: string[] = []
+    for (const key of newOrder) {
+      const group = aggregated.find(a => a.groupKey === key)
+      if (group) {
+        for (const item of group.items) {
+          allIds.push(item.id)
+        }
+      }
+    }
+    onReorder?.(allIds)
+  })
 
   const checkedCount = catItems.filter((i) => i.is_checked).length
+
+  const toggleExpand = (groupKey: string) => {
+    setExpandedGroups(prev => {
+      const next = new Set(prev)
+      if (next.has(groupKey)) next.delete(groupKey)
+      else next.add(groupKey)
+      return next
+    })
+  }
+
+  const handleAggregatedToggle = (agg: AggregatedItem) => {
+    // Toggle all items in the group
+    for (const item of agg.items) {
+      onItemToggle?.(item)
+    }
+  }
+
+  const handleAggregatedDelete = (agg: AggregatedItem) => {
+    confirm(`"${agg.name}" (${agg.count} Einträge) wirklich löschen?`, () => {
+      for (const item of agg.items) {
+        onItemDelete?.(item)
+      }
+    })
+  }
 
   return (
     <div className="cat-section">
@@ -54,27 +105,115 @@ function DraggableCategorySection({
           {checkedCount}/{catItems.length} erledigt
         </span>
       </div>
-      {catItems.map((item) => (
-        <ItemRow
-          key={item.id}
-          item={item}
-          onToggle={onItemToggle}
-          onDelete={onItemDelete}
-          dragHandleProps={{
-            onPointerDown: (e: ReactPointerEvent) => handlePointerDown(e, item.id),
-            onPointerMove: handlePointerMove,
-            onPointerUp: handlePointerUp,
-          }}
-          isDragging={dragState.draggingId === item.id}
-          isDragOver={dragState.dragOverId === item.id}
-          registerRef={(el) => registerItem(item.id, el)}
-        />
-      ))}
+      {aggregated.map((agg) => {
+        const isDragging = dragState.draggingId === agg.groupKey
+        const isDragOver = dragState.dragOverId === agg.groupKey
+        const isExpanded = expandedGroups.has(agg.groupKey)
+
+        if (!agg.isAggregated) {
+          // Single item — render as normal ItemRow
+          const item = agg.items[0]
+          return (
+            <ItemRow
+              key={item.id}
+              item={item}
+              onToggle={onItemToggle}
+              onDelete={onItemDelete}
+              dragHandleProps={{
+                onPointerDown: (e: ReactPointerEvent) => handlePointerDown(e, agg.groupKey),
+                onPointerMove: handlePointerMove,
+                onPointerUp: handlePointerUp,
+              }}
+              isDragging={isDragging}
+              isDragOver={isDragOver}
+              registerRef={(el) => registerItem(agg.groupKey, el)}
+            />
+          )
+        }
+
+        // Aggregated row
+        const rowClass = [
+          'item-row',
+          agg.isChecked ? 'checked' : '',
+          isDragging ? 'dragging' : '',
+          isDragOver ? 'drag-over' : '',
+        ].filter(Boolean).join(' ')
+
+        return (
+          <div
+            key={agg.groupKey}
+            className={rowClass}
+            ref={(el) => registerItem(agg.groupKey, el)}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+          >
+            <span
+              className="item-drag-handle"
+              onPointerDown={(e: ReactPointerEvent) => handlePointerDown(e, agg.groupKey)}
+            >
+              <GripVertical size={16} strokeWidth={2} />
+            </span>
+            <label className="item-checkbox-wrap">
+              <input
+                type="checkbox"
+                checked={agg.isChecked}
+                onChange={() => { handleAggregatedToggle(agg); navigator.vibrate?.(10) }}
+              />
+              <span className="item-checkmark" />
+            </label>
+            <div
+              className="item-content"
+              onClick={() => toggleExpand(agg.groupKey)}
+              style={{ cursor: 'pointer' }}
+            >
+              <span className="item-name">
+                {agg.name}
+                <span className="agg-badge" title={`${agg.count} Einträge`}>× {agg.count}</span>
+              </span>
+              <div className="item-meta">
+                <span className="item-qty">{agg.displayQuantity}</span>
+                <ChevronDown
+                  size={14}
+                  strokeWidth={2}
+                  style={{
+                    transition: 'transform 0.2s',
+                    transform: isExpanded ? 'rotate(180deg)' : 'none',
+                  }}
+                />
+              </div>
+            </div>
+            <button className="item-delete" onClick={() => handleAggregatedDelete(agg)} aria-label="Löschen">
+              <Trash2 size={16} strokeWidth={2} />
+            </button>
+
+            {isExpanded && (
+              <div className="agg-expanded">
+                {agg.items.map((item) => (
+                  <div key={item.id} className="agg-sub-item">
+                    <label className="item-checkbox-wrap">
+                      <input
+                        type="checkbox"
+                        checked={item.is_checked}
+                        onChange={() => { onItemToggle?.(item); navigator.vibrate?.(10) }}
+                      />
+                      <span className="item-checkmark" />
+                    </label>
+                    <span className="agg-sub-name">{item.name}</span>
+                    <span className="agg-sub-qty">{item.quantity}</span>
+                    {item.created_by && <span className="agg-sub-by">von {item.created_by}</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }
 
-export default function ListScreen({ items, categories, listId, userName, onItemToggle, onItemDelete, onItemChange, onReorder, onCategoriesChange }: ListScreenProps) {
+export default function ListScreen({ items, categories, listId, userName, isLoading, onItemToggle, onItemDelete, onItemChange, onReorder, onCategoriesChange }: ListScreenProps) {
+  const { confirm } = useToast()
   const [hideChecked, setHideChecked] = useState(() => localStorage.getItem('bella_hide_checked') === 'true')
 
   const toggleHideChecked = () => {
@@ -85,14 +224,34 @@ export default function ListScreen({ items, categories, listId, userName, onItem
 
   const checkedItems = items.filter((i) => i.is_checked)
 
-  const handleDeleteChecked = async () => {
+  const handleDeleteChecked = () => {
     if (checkedItems.length === 0) return
-    if (!confirm('Alle erledigten Items löschen?')) return
-    await Promise.all(checkedItems.map((item) => supabase.from('items').delete().eq('id', item.id)))
-    onItemChange?.()
+    confirm('Alle erledigten Items löschen?', async () => {
+      await Promise.all(checkedItems.map((item) => supabase.from('items').delete().eq('id', item.id)))
+      onItemChange?.()
+    })
   }
 
   const visibleItems = hideChecked ? items.filter((i) => !i.is_checked) : items
+
+  // Skeleton loading state
+  if (isLoading) {
+    return (
+      <div className="list-screen">
+        <div className="list-top-bar">
+          <div className="skeleton" style={{ width: '140px', height: '2rem', borderRadius: '8px' }} />
+        </div>
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="cat-section">
+            <SkeletonCatHeader />
+            <SkeletonItemRow />
+            <SkeletonItemRow />
+            <SkeletonItemRow />
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div className="list-screen">

@@ -2,6 +2,8 @@ import { useState, useMemo, useCallback } from 'react'
 import { Wallet, Receipt, Pencil, Trash2, ArrowRight, Pizza } from 'lucide-react'
 import type { Expense, ExpenseSplit } from '../types'
 import { supabase } from '../lib/supabase'
+import { useToast } from '../context/ToastContext'
+import { SkeletonExpenseCard } from './Skeleton'
 import ExpenseCharts from './ExpenseCharts'
 import './ExpenseScreen.css'
 
@@ -11,6 +13,7 @@ interface ExpenseScreenProps {
   listId: string
   userName: string
   knownPersons: string[]
+  isLoading?: boolean
   onExpensesChange: () => void
 }
 
@@ -39,8 +42,10 @@ export default function ExpenseScreen({
   listId,
   userName,
   knownPersons,
+  isLoading,
   onExpensesChange,
 }: ExpenseScreenProps) {
+  const { toast, confirm } = useToast()
   const [section, setSection] = useState<'expenses' | 'settlement'>('expenses')
   const [formExpanded, setFormExpanded] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -233,7 +238,7 @@ export default function ExpenseScreen({
         })
         .eq('id', editingId)
       if (updErr) {
-        alert(`Fehler beim Speichern: ${updErr.message}`)
+        toast(`Fehler beim Speichern: ${updErr.message}`, 'error')
         return
       }
       // Delete old splits, insert new
@@ -242,7 +247,7 @@ export default function ExpenseScreen({
         .delete()
         .eq('expense_id', editingId)
       if (delErr) {
-        alert(`Fehler beim Aktualisieren der Aufteilung: ${delErr.message}`)
+        toast(`Fehler beim Aktualisieren der Aufteilung: ${delErr.message}`, 'error')
         return
       }
       if (shares.length > 0) {
@@ -254,7 +259,7 @@ export default function ExpenseScreen({
           })),
         )
         if (splitErr) {
-          alert(`Fehler beim Speichern der Aufteilung: ${splitErr.message}`)
+          toast(`Fehler beim Speichern der Aufteilung: ${splitErr.message}`, 'error')
           return
         }
       }
@@ -273,7 +278,7 @@ export default function ExpenseScreen({
         .select('id')
         .single()
       if (insErr) {
-        alert(`Fehler beim Speichern: ${insErr.message}`)
+        toast(`Fehler beim Speichern: ${insErr.message}`, 'error')
         return
       }
       const expenseId = data.id
@@ -287,7 +292,7 @@ export default function ExpenseScreen({
           })),
         )
         if (splitErr) {
-          alert(`Fehler beim Speichern der Aufteilung: ${splitErr.message}`)
+          toast(`Fehler beim Speichern der Aufteilung: ${splitErr.message}`, 'error')
           // Clean up: delete the orphaned expense
           await supabase.from('expenses').delete().eq('id', expenseId)
           return
@@ -301,15 +306,16 @@ export default function ExpenseScreen({
   }
 
   // ── Delete ──
-  const handleDelete = async (expense: Expense) => {
-    if (!confirm(`"${expense.description}" wirklich löschen?`)) return
-    const { error } = await supabase.from('expenses').delete().eq('id', expense.id)
-    if (error) {
-      alert(`Fehler beim Löschen: ${error.message}`)
-      return
-    }
-    navigator.vibrate?.(10)
-    onExpensesChange()
+  const handleDelete = (expense: Expense) => {
+    confirm(`"${expense.description}" wirklich löschen?`, async () => {
+      const { error } = await supabase.from('expenses').delete().eq('id', expense.id)
+      if (error) {
+        toast(`Fehler beim Löschen: ${error.message}`, 'error')
+        return
+      }
+      navigator.vibrate?.(10)
+      onExpensesChange()
+    })
   }
 
   // ── Preview for equal split ──
@@ -481,6 +487,14 @@ export default function ExpenseScreen({
           )}
 
           {/* Expense list grouped by date */}
+          {isLoading ? (
+            <div className="expense-list">
+              <SkeletonExpenseCard />
+              <SkeletonExpenseCard />
+              <SkeletonExpenseCard />
+            </div>
+          ) : (
+          <>
           {expenses.length === 0 && !formExpanded && (
             <p className="expense-empty"><Pizza size={24} strokeWidth={1.5} /> Noch keine Ausgaben — füge die erste hinzu!</p>
           )}
@@ -525,6 +539,8 @@ export default function ExpenseScreen({
               </div>
             ))}
           </div>
+          </>
+          )}
         </div>
       )}
 
