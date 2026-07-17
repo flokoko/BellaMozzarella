@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Tag, Trash2 } from 'lucide-react'
 import type { ItemCategory, ListType } from '../types'
 import { useCategories } from '../hooks/useCategories'
+import { useDebouncedCallback } from '../hooks/useDebouncedCallback'
 
 import './CategoryManager.css'
 
@@ -14,7 +15,10 @@ interface CategoryManagerProps {
 
 export default function CategoryManager({ categories, listId, listType, onCategoriesChange }: CategoryManagerProps) {
   const [expanded, setExpanded] = useState(false)
+  const [localNames, setLocalNames] = useState<Record<string, string>>({})
   const { updateCategory, deleteCategory, addCategory } = useCategories(() => onCategoriesChange?.())
+
+  const debouncedUpdate = useDebouncedCallback(updateCategory, 400)
 
   const handleAdd = () => {
     const maxOrder = categories.reduce((max, c) => Math.max(max, c.sort_order), 0)
@@ -42,8 +46,11 @@ export default function CategoryManager({ categories, listId, listType, onCatego
               <input
                 className="cat-manager-name-input"
                 type="text"
-                value={cat.name}
-                onChange={(e) => updateCategory(cat.id, { name: e.target.value })}
+                value={localNames[cat.id] ?? cat.name}
+                onChange={(e) => {
+                  setLocalNames(prev => ({ ...prev, [cat.id]: e.target.value }))
+                  debouncedUpdate(cat.id, { name: e.target.value })
+                }}
               />
               <button
                 className="cat-manager-delete-btn"

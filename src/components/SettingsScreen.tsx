@@ -5,6 +5,7 @@ import type { ThemeMode } from '../lib/theme'
 import { getTheme, setTheme } from '../lib/theme'
 import { supabase } from '../lib/supabase'
 import { useCategories } from '../hooks/useCategories'
+import { useDebouncedCallback } from '../hooks/useDebouncedCallback'
 import { APP_VERSION } from '../version'
 
 import './SettingsScreen.css'
@@ -59,8 +60,10 @@ export default function SettingsScreen({
   const [showChangePassword, setShowChangePassword] = useState(false)
   const [oldPassword, setOldPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
+  const [localCatNames, setLocalCatNames] = useState<Record<string, string>>({})
 
   const { updateCategory, deleteCategory, addCategory } = useCategories(onCategoriesChange)
+  const debouncedUpdateCategory = useDebouncedCallback(updateCategory, 400)
 
   useEffect(() => {
     setThemeState(getTheme())
@@ -204,8 +207,11 @@ export default function SettingsScreen({
             <input
               className="settings-cat-name-input"
               type="text"
-              value={cat.name}
-              onChange={(e) => updateCategory(cat.id, { name: e.target.value })}
+              value={localCatNames[cat.id] ?? cat.name}
+              onChange={(e) => {
+                setLocalCatNames(prev => ({ ...prev, [cat.id]: e.target.value }))
+                debouncedUpdateCategory(cat.id, { name: e.target.value })
+              }}
             />
             <button
               className="settings-cat-delete-btn"
