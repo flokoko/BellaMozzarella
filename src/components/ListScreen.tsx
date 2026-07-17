@@ -257,14 +257,14 @@ export default function ListScreen({ items, categories, listId, userName, isLoad
     <div className="list-screen">
       <div className="list-top-bar">
         <button
-          className={`bring-filter-btn ${hideChecked ? 'active' : ''}`}
+          className={`list-top-bar-btn ${hideChecked ? 'active' : ''}`}
           onClick={toggleHideChecked}
         >
           {hideChecked ? 'Alle zeigen' : 'Erledigte ausblenden'}
         </button>
         {checkedItems.length > 0 && (
           <button
-            className="bring-filter-btn list-delete-checked-btn"
+            className="list-top-bar-btn list-delete-checked-btn"
             onClick={handleDeleteChecked}
           >
             <Trash2 size={16} strokeWidth={2} /> Erledigte löschen ({checkedItems.length})

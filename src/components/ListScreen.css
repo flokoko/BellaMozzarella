@@ -4,23 +4,58 @@
 
 .list-top-bar {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.4rem;
   margin-bottom: 0.75rem;
 }
 
-.list-top-bar .bring-filter-btn {
-  flex: none;
+.list-top-bar-btn {
+  flex: 1 1 auto;
+  min-width: 120px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.8rem;
+  border: 2px solid var(--input-border);
+  border-radius: 999px;
+  background: var(--card-bg);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--button-text);
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+              background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.list-top-bar-btn:hover {
+  border-color: var(--accent-light);
+  transform: translateY(-1px);
+}
+
+.list-top-bar-btn.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 2px 12px rgba(0, 146, 70, 0.25);
+}
+
+.list-top-bar-btn:active {
+  transform: scale(0.96);
 }
 
 .list-delete-checked-btn {
-  border-color: var(--danger) !important;
-  color: var(--danger) !important;
+  border-color: var(--danger);
+  color: var(--danger);
 }
 
 .list-delete-checked-btn:hover {
-  background: var(--danger) !important;
-  color: white !important;
-  border-color: var(--danger) !important;
+  background: var(--danger);
+  color: white;
+  border-color: var(--danger);
 }
 
 .list-empty {
