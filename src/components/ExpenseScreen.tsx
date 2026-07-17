@@ -232,6 +232,8 @@ export default function ExpenseScreen({
 
     if (editingId) {
       // ── Update existing expense ──
+      // 1. Save old splits for fallback before deleting
+      const oldSplits = getSplitsForExpense(editingId)
       const { error: updErr } = await supabase
         .from('expenses')
         .update({
@@ -246,7 +248,7 @@ export default function ExpenseScreen({
         toast(`Fehler beim Speichern: ${updErr.message}`, 'error')
         return
       }
-      // Delete old splits, insert new
+      // 2. Delete old splits
       const { error: delErr } = await supabase
         .from('expense_splits')
         .delete()
@@ -255,6 +257,7 @@ export default function ExpenseScreen({
         toast(`Fehler beim Aktualisieren der Aufteilung: ${delErr.message}`, 'error')
         return
       }
+      // 3. Insert new splits — with fallback to old splits on failure
       if (shares.length > 0) {
         const { error: splitErr } = await supabase.from('expense_splits').insert(
           shares.map((s) => ({
@@ -265,6 +268,16 @@ export default function ExpenseScreen({
         )
         if (splitErr) {
           toast(`Fehler beim Speichern der Aufteilung: ${splitErr.message}`, 'error')
+          // Rollback: re-insert old splits so the expense isn't left with zero splits
+          if (oldSplits.length > 0) {
+            await supabase.from('expense_splits').insert(
+              oldSplits.map((s) => ({
+                expense_id: editingId,
+                person_name: s.person_name,
+                share_amount: s.share_amount,
+              })),
+            )
+          }
           return
         }
       }
@@ -314,6 +327,8 @@ export default function ExpenseScreen({
   // ── Delete ──
   const handleDelete = (expense: Expense) => {
     confirm(`"${expense.description}" wirklich löschen?`, async () => {
+      // Delete splits first, then the expense — avoids orphaned split rows
+      await supabase.from('expense_splits').delete().eq('expense_id', expense.id)
       const { error } = await supabase.from('expenses').delete().eq('id', expense.id)
       if (error) {
         toast(`Fehler beim Löschen: ${error.message}`, 'error')
@@ -324,11 +339,20 @@ export default function ExpenseScreen({
     })
   }
 
-  // ── Preview for equal split ──
+  // ── Preview for equal split (shows the actual saved amount per person) ──
   const equalPreview = useMemo(() => {
     if (splitMode !== 'equal' || splitPeople.length === 0 || amountNum <= 0) return null
-    const per = amountNum / splitPeople.length
-    return `${splitPeople.length} Personen à ${fmtEUR(per)}`
+    // Use the same rounding logic as calculateShares for accurate preview
+    const totalCents = Math.round(amountNum * 100)
+    const perCents = Math.floor(totalCents / splitPeople.length)
+    const remainder = totalCents - perCents * splitPeople.length
+    if (remainder === 0) {
+      return `${splitPeople.length} Personen à ${fmtEUR(perCents / 100)}`
+    }
+    // Uneven split — show the range (first N pay 1 cent more)
+    const lower = perCents / 100
+    const higher = (perCents + 1) / 100
+    return `${splitPeople.length} Personen à ${fmtEUR(lower)}–${fmtEUR(higher)}`
   }, [splitMode, splitPeople, amountNum])
 
   const canSave =
