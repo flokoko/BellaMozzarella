@@ -161,24 +161,25 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
       <div className="join-card">
         <div className="join-logo">
           <div className="join-orbit">
-            {/* ── Wehende Flagge als SVG ── */}
+            {/* ── Wehende Flagge als SVG (vertikale Streifen = korrekte Italia) ── */}
             <svg viewBox="0 0 200 160" width="160" height="128" className="join-flag-svg" aria-label="Italienische Flagge">
+              <defs>
+                {/* Wellenform der Flagge als Clip — eine zusammenhängende Form */}
+                <clipPath id="flagWave">
+                  <path d="M 12 8 Q 40 4 70 10 Q 100 16 130 10 Q 160 4 190 10 L 190 124 Q 160 130 130 124 Q 100 118 70 124 Q 40 118 12 122 Z" />
+                </clipPath>
+              </defs>
+
               {/* ── Flaggenmast ── */}
               <line x1="12" y1="2" x2="12" y2="158" stroke="#8B7355" strokeWidth="3.5" strokeLinecap="round" />
               <circle cx="12" cy="2" r="4" fill="#a08866" />
 
-              {/* ── Wehende Flagge: 3 Streifen, nahtlos aneinander ──
-                   Die Wellen verlaufen horizontal (links→rechts), nicht pro Streifen.
-                   Jeder Streifen teilt dieselbe Wellenfunktion für top/bottom. */}
-              {/* Grün (oben) */}
-              <path d="M 12 8 Q 40 4 70 10 Q 100 16 130 10 Q 160 4 190 10 L 190 48 Q 160 54 130 48 Q 100 42 70 48 Q 40 42 12 46 Z"
-                fill="#009246" />
-              {/* Weiß (mitte) — top edge = bottom edge von grün, bottom edge = top edge von rot */}
-              <path d="M 12 46 Q 40 42 70 48 Q 100 42 130 48 Q 160 54 190 48 L 190 86 Q 160 92 130 86 Q 100 80 70 86 Q 40 80 12 84 Z"
-                fill="#ffffff" />
-              {/* Rot (unten) */}
-              <path d="M 12 84 Q 40 80 70 86 Q 100 80 130 86 Q 160 92 190 86 L 190 124 Q 160 130 130 124 Q 100 118 70 124 Q 40 118 12 122 Z"
-                fill="#ce2b37" />
+              {/* ── 3 vertikale Streifen (grün | weiß | rot), geclippt durch Wellenform ── */}
+              <g clipPath="url(#flagWave)">
+                <rect x="0"  y="0" width="64"  height="160" fill="#009246" />
+                <rect x="64" y="0" width="64"  height="160" fill="#ffffff" />
+                <rect x="128" y="0" width="64" height="160" fill="#ce2b37" />
+              </g>
             </svg>
             {/* ── 3D Mozzarellakugeln kreisen um die Flagge ── */}
             <div className="mozza-3d-canvas">
