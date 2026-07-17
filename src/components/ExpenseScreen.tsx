@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from 'react'
 import { Wallet, Receipt, Pencil, Trash2, ArrowRight, Pizza } from 'lucide-react'
 import type { Expense, ExpenseSplit } from '../types'
 import { supabase } from '../lib/supabase'
+import ExpenseCharts from './ExpenseCharts'
 import './ExpenseScreen.css'
 
 interface ExpenseScreenProps {
@@ -533,6 +534,13 @@ export default function ExpenseScreen({
           <div className="expense-total-banner">
             <Wallet size={18} strokeWidth={2} /> Gesamtausgaben: {fmtEUR(totalExpenses)}
           </div>
+
+          {/* ── Charts ── */}
+          <ExpenseCharts
+            expenses={expenses}
+            expenseSplits={expenseSplits}
+            knownPersons={knownPersons}
+          />
 
           {expenses.length === 0 ? (
             <p className="expense-empty">Noch keine Ausgaben zur Abrechnung.</p>

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ShoppingCart, Backpack, Pizza, Wallet, Smartphone, StickyNote, Trash2 } from 'lucide-react'
 import type { QuickNote, TabView } from '../types'
 import { supabase } from '../lib/supabase'
+import WeatherWidget from './WeatherWidget'
 import './DashboardScreen.css'
 
 interface DashboardScreenProps {
@@ -115,6 +116,9 @@ export default function DashboardScreen({
 
   return (
     <div className="dashboard-screen">
+      {/* ── Weather Widget ── */}
+      <WeatherWidget />
+
       {/* ── Feature Cards ── */}
       <div className="dashboard-cards">
         <button className="dash-card" onClick={() => onNavigate('list')}>

@@ -33,6 +33,9 @@ export function useListData() {
   const lastFetchTime = useRef(0)
   const isFetchingRef = useRef(false)
 
+  // ── Track previous shopping items for push notifications ───────────
+  const prevShoppingItemsRef = useRef<ListItem[]>([])
+
   const markActivity = useCallback(() => {
     lastActivityRef.current = Date.now()
   }, [])
@@ -48,9 +51,28 @@ export function useListData() {
       .order('created_at', { ascending: true })
     if (err) { console.error('fetchItems error:', err); return }
     const items = (data || []) as ListItem[]
-    if (listType === 'shopping') setShoppingItems(items)
-    else setBringItems(items)
-  }, [])
+    if (listType === 'shopping') {
+      // ── Push notification: check for new items added by others ──
+      const prevIds = new Set(prevShoppingItemsRef.current.map(i => i.id))
+      const newItems = items.filter(i => !prevIds.has(i.id) && i.created_by !== userName)
+      if (
+        newItems.length > 0 &&
+        document.hidden &&
+        'Notification' in window &&
+        Notification.permission === 'granted' &&
+        localStorage.getItem('push_notifications_enabled') === 'true'
+      ) {
+        new Notification('Neue Items in der Einkaufsliste', {
+          body: `🛒 ${newItems.length} neue(s) Item(s) in der Einkaufsliste`,
+          tag: 'shopping-update',
+        })
+      }
+      prevShoppingItemsRef.current = items
+      setShoppingItems(items)
+    } else {
+      setBringItems(items)
+    }
+  }, [userName])
 
   const fetchCategories = useCallback(async (listId: string) => {
     const { data, error: err } = await supabase
@@ -360,6 +382,7 @@ export function useListData() {
     setExpenseSplits([])
     setParticipants([])
     setAdminUnlocked(false)
+    prevShoppingItemsRef.current = []
   }, [])
 
   const handleRename = useCallback(async (newName: string) => {

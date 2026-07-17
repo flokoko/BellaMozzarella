@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Trash2, Palette, Sun, Moon, Check, Copy, Pencil, Crown, Lock, KeyRound } from 'lucide-react'
+import { Trash2, Palette, Sun, Moon, Check, Copy, Pencil, Crown, Lock, KeyRound, Bell, BellOff } from 'lucide-react'
 import type { ItemCategory, ListType, Participant } from '../types'
 import type { ThemeMode } from '../lib/theme'
 import { getTheme, setTheme } from '../lib/theme'
@@ -61,17 +61,41 @@ export default function SettingsScreen({
   const [oldPassword, setOldPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [localCatNames, setLocalCatNames] = useState<Record<string, string>>({})
+  const [pushEnabled, setPushEnabled] = useState(false)
+  const [pushPermission, setPushPermission] = useState<NotificationPermission>('default')
 
   const { updateCategory, deleteCategory, addCategory } = useCategories(onCategoriesChange)
   const debouncedUpdateCategory = useDebouncedCallback(updateCategory, 400)
 
   useEffect(() => {
     setThemeState(getTheme())
+    setPushEnabled(localStorage.getItem('push_notifications_enabled') === 'true')
+    if ('Notification' in window) {
+      setPushPermission(Notification.permission)
+    }
   }, [])
 
   const handleThemeChange = (mode: ThemeMode) => {
     setThemeState(mode)
     setTheme(mode)
+  }
+
+  const handleTogglePush = async () => {
+    if (pushEnabled) {
+      // Disabling
+      localStorage.removeItem('push_notifications_enabled')
+      setPushEnabled(false)
+      return
+    }
+    // Enabling — request permission
+    if ('Notification' in window) {
+      const permission = await Notification.requestPermission()
+      setPushPermission(permission)
+      if (permission === 'granted') {
+        localStorage.setItem('push_notifications_enabled', 'true')
+        setPushEnabled(true)
+      }
+    }
   }
 
   const handleSaveName = () => {
@@ -255,6 +279,38 @@ export default function SettingsScreen({
             </button>
           </div>
         </div>
+      </div>
+
+      {/* ── Push-Benachrichtigungen ──────────────────────────────────── */}
+      <div className="settings-section">
+        <h3 className="settings-section-title">Push-Benachrichtigungen</h3>
+        <div className="settings-item" onClick={handleTogglePush} style={{ cursor: 'pointer' }}>
+          <span className="settings-item-icon">
+            {pushEnabled ? <Bell size={18} strokeWidth={2} /> : <BellOff size={18} strokeWidth={2} />}
+          </span>
+          <span className="settings-item-label">Benachrichtigungen bei neuen Items</span>
+          <div className="settings-item-control">
+            <span className={`settings-push-status ${pushEnabled ? 'on' : 'off'}`}>
+              {pushEnabled
+                ? 'Aktiviert'
+                : pushPermission === 'denied'
+                  ? 'Nicht erlaubt'
+                  : 'Deaktiviert'}
+            </span>
+            <button
+              className={`settings-push-toggle ${pushEnabled ? 'on' : ''}`}
+              type="button"
+              aria-label="Push-Benachrichtigungen umschalten"
+            >
+              <span className="settings-push-toggle-knob" />
+            </button>
+          </div>
+        </div>
+        {pushPermission === 'denied' && (
+          <p className="settings-cat-hint" style={{ marginTop: '0.4rem', marginBottom: 0 }}>
+            Benachrichtigungen wurden im Browser blockiert. Bitte in den Browser-Einstellungen erlauben.
+          </p>
+        )}
       </div>
 
       {/* ── Account ─────────────────────────────────────────────────── */}

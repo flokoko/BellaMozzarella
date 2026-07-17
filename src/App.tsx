@@ -1,5 +1,6 @@
-import { useState, useEffect, Suspense, lazy } from 'react'
+import { useState, useEffect, useRef, Suspense, lazy } from 'react'
 import { ArrowLeft, Settings, Sun, Moon, WifiOff, ShoppingCart, Backpack, Pizza, Wallet, type LucideIcon } from 'lucide-react'
+import confetti from 'canvas-confetti'
 import type { TabView } from './types'
 import { getResolvedTheme, toggleTheme, applyTheme, initThemeListener } from './lib/theme'
 import { supabase } from './lib/supabase'
@@ -15,6 +16,44 @@ const ExpenseScreen = lazy(() => import('./components/ExpenseScreen'))
 const SettingsScreen = lazy(() => import('./components/SettingsScreen'))
 
 import './App.css'
+
+// ── Confetti helper: Italian flag colored burst ──────────────────────
+function fireConfetti() {
+  const colors = ['#009246', '#ffffff', '#ce2b37']
+  // Burst 1: center, upward
+  confetti({
+    particleCount: 80,
+    spread: 70,
+    origin: { y: 0.6 },
+    colors,
+    startVelocity: 35,
+    scalar: 0.9,
+  })
+  // Burst 2: left side
+  setTimeout(() => {
+    confetti({
+      particleCount: 50,
+      angle: 60,
+      spread: 55,
+      origin: { x: 0, y: 0.7 },
+      colors,
+      startVelocity: 40,
+    })
+  }, 200)
+  // Burst 3: right side
+  setTimeout(() => {
+    confetti({
+      particleCount: 50,
+      angle: 120,
+      spread: 55,
+      origin: { x: 1, y: 0.7 },
+      colors,
+      startVelocity: 40,
+    })
+  }, 400)
+  // Vibrate
+  navigator.vibrate?.([100, 50, 100, 50, 200])
+}
 
 export default function App() {
   const {
@@ -74,6 +113,18 @@ export default function App() {
     window.addEventListener('beforeinstallprompt', handler)
     return () => window.removeEventListener('beforeinstallprompt', handler)
   }, [])
+
+  // ── Confetti when all shopping items are checked off ───────────────
+  const prevAllCheckedRef = useRef(false)
+
+  useEffect(() => {
+    const allChecked = shoppingItems.length > 0 && checkedCount === shoppingItems.length
+    // Only fire on transition false → true (not on initial load)
+    if (allChecked && !prevAllCheckedRef.current) {
+      fireConfetti()
+    }
+    prevAllCheckedRef.current = allChecked
+  }, [checkedCount, shoppingItems.length])
 
   // ── Early return (after all hooks) ─────────────────────────────────
   if (!userName || !list) {
