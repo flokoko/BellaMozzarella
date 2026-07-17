@@ -329,6 +329,27 @@
   line-height: 1.4;
 }
 
+/* ── Note Links ── */
+.dash-note-link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  word-break: break-all;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  font-weight: 600;
+}
+
+.dash-note-link:active {
+  opacity: 0.7;
+}
+
+.dash-note-link-icon {
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
 .dash-note-delete {
   border: none;
   background: none;

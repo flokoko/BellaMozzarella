@@ -1,11 +1,44 @@
-import { useState } from 'react'
-import { ShoppingCart, Backpack, Pizza, Wallet, Smartphone, StickyNote, Trash2 } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
+import { ShoppingCart, Backpack, Pizza, Wallet, Smartphone, StickyNote, Trash2, ExternalLink } from 'lucide-react'
 import type { QuickNote, TabView } from '../types'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../context/ToastContext'
 import { SkeletonCard, SkeletonNote } from './Skeleton'
 import WeatherWidget from './WeatherWidget'
 import './DashboardScreen.css'
+
+/** Detect URLs in text and render them as clickable links. */
+function renderTextWithLinks(text: string): ReactNode[] {
+  const urlRegex = /(https?:\/\/[^\s<>"']+)/gi
+  const result: ReactNode[] = []
+  let lastIndex = 0
+  let match: RegExpExecArray | null
+  let key = 0
+  while ((match = urlRegex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      result.push(text.slice(lastIndex, match.index))
+    }
+    const url = match[0]
+    result.push(
+      <a
+        key={key++}
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="dash-note-link"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {url}
+        <ExternalLink size={11} strokeWidth={2} className="dash-note-link-icon" />
+      </a>,
+    )
+    lastIndex = match.index + url.length
+  }
+  if (lastIndex < text.length) {
+    result.push(text.slice(lastIndex))
+  }
+  return result
+}
 
 interface DashboardScreenProps {
   listId: string
@@ -271,7 +304,7 @@ export default function DashboardScreen({
                 <div className="dash-note-card-top">
                   <div className="dash-note-card-content">
                     {note.title && <div className="dash-note-title">{note.title}</div>}
-                    <div className="dash-note-text">{note.content}</div>
+                    <div className="dash-note-text">{renderTextWithLinks(note.content)}</div>
                   </div>
                   <button
                     className="dash-note-delete"
