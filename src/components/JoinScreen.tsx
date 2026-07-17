@@ -162,20 +162,22 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
         <div className="join-logo">
           <div className="join-orbit">
             {/* ── Wehende Flagge als SVG ── */}
-            <svg viewBox="0 0 200 220" width="160" height="176" className="join-flag-svg" aria-label="Italienische Flagge">
+            <svg viewBox="0 0 200 160" width="160" height="128" className="join-flag-svg" aria-label="Italienische Flagge">
               {/* ── Flaggenmast ── */}
-              <line x1="45" y1="12" x2="45" y2="210" stroke="#8B7355" strokeWidth="3.5" strokeLinecap="round" />
-              <circle cx="45" cy="10" r="4" fill="#a08866" />
-              <line x1="45" y1="30" x2="43" y2="210" stroke="#7a6244" strokeWidth="1" opacity="0.3" />
+              <line x1="12" y1="2" x2="12" y2="158" stroke="#8B7355" strokeWidth="3.5" strokeLinecap="round" />
+              <circle cx="12" cy="2" r="4" fill="#a08866" />
 
-              {/* ── Wehende Flagge: grün ── */}
-              <path d="M 45 22 Q 70 14 95 24 Q 120 34 145 22 Q 170 14 195 24 L 195 58 Q 170 68 145 58 Q 120 48 95 58 Q 70 48 45 56 Z"
+              {/* ── Wehende Flagge: 3 Streifen, nahtlos aneinander ──
+                   Die Wellen verlaufen horizontal (links→rechts), nicht pro Streifen.
+                   Jeder Streifen teilt dieselbe Wellenfunktion für top/bottom. */}
+              {/* Grün (oben) */}
+              <path d="M 12 8 Q 40 4 70 10 Q 100 16 130 10 Q 160 4 190 10 L 190 48 Q 160 54 130 48 Q 100 42 70 48 Q 40 42 12 46 Z"
                 fill="#009246" />
-              {/* ── Wehende Flagge: weiß ── */}
-              <path d="M 45 56 Q 70 48 95 58 Q 120 48 145 58 Q 170 68 195 58 L 195 92 Q 170 102 145 92 Q 120 82 95 92 Q 70 82 45 90 Z"
+              {/* Weiß (mitte) — top edge = bottom edge von grün, bottom edge = top edge von rot */}
+              <path d="M 12 46 Q 40 42 70 48 Q 100 42 130 48 Q 160 54 190 48 L 190 86 Q 160 92 130 86 Q 100 80 70 86 Q 40 80 12 84 Z"
                 fill="#ffffff" />
-              {/* ── Wehende Flagge: rot ── */}
-              <path d="M 45 90 Q 70 82 95 92 Q 120 82 145 92 Q 170 102 195 92 L 195 126 Q 170 136 145 126 Q 120 116 95 126 Q 70 116 45 124 Z"
+              {/* Rot (unten) */}
+              <path d="M 12 84 Q 40 80 70 86 Q 100 80 130 86 Q 160 92 190 86 L 190 124 Q 160 130 130 124 Q 100 118 70 124 Q 40 118 12 122 Z"
                 fill="#ce2b37" />
             </svg>
             {/* ── 3D Mozzarellakugeln kreisen um die Flagge ── */}
