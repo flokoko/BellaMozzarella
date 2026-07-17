@@ -55,6 +55,7 @@ export default function ExpenseScreen({
   const [splitPeople, setSplitPeople] = useState<string[]>([])
   const [splitMode, setSplitMode] = useState<'equal' | 'exact'>('equal')
   const [exactShares, setExactShares] = useState<Record<string, string>>({})
+  const [expenseDate, setExpenseDate] = useState(() => new Date().toISOString().slice(0, 10))
 
   // ── All known persons (from props + current form state) ──
   const allPersons = useMemo(() => {
@@ -156,6 +157,7 @@ export default function ExpenseScreen({
     setSplitPeople([])
     setSplitMode('equal')
     setExactShares({})
+    setExpenseDate(new Date().toISOString().slice(0, 10))
     setEditingId(null)
     setFormExpanded(false)
   }, [userName])
@@ -168,6 +170,7 @@ export default function ExpenseScreen({
     setSplitPeople(allPersons.slice()) // default: all selected
     setSplitMode('equal')
     setExactShares({})
+    setExpenseDate(new Date().toISOString().slice(0, 10))
     setFormExpanded(true)
   }, [userName, allPersons])
 
@@ -179,6 +182,7 @@ export default function ExpenseScreen({
       setAmount(expense.amount.toString())
       setPaidBy(expense.paid_by)
       setSplitMode(expense.split_mode)
+      setExpenseDate(expense.expense_date)
       const people = splits.map((s) => s.person_name)
       setSplitPeople(people)
       const shares: Record<string, string> = {}
@@ -235,6 +239,7 @@ export default function ExpenseScreen({
           amount: amountNum,
           paid_by: paidBy,
           split_mode: splitMode,
+          expense_date: expenseDate,
         })
         .eq('id', editingId)
       if (updErr) {
@@ -273,6 +278,7 @@ export default function ExpenseScreen({
           amount: amountNum,
           paid_by: paidBy,
           split_mode: splitMode,
+          expense_date: expenseDate,
           created_by: userName,
         })
         .select('id')
@@ -404,6 +410,14 @@ export default function ExpenseScreen({
                   ))}
                 </select>
               </div>
+
+              {/* Datum */}
+              <input
+                className="expense-input"
+                type="date"
+                value={expenseDate}
+                onChange={(e) => setExpenseDate(e.target.value)}
+              />
 
               {/* Split among chips */}
               <div>
