@@ -17,7 +17,7 @@ CREATE OR REPLACE FUNCTION login_participant(
   p_password TEXT
 ) RETURNS JSONB
 LANGUAGE plpgsql SECURITY DEFINER
-SET search_path = public
+SET search_path = extensions, public
 AS $$
 DECLARE
   v_list RECORD;
@@ -86,7 +86,7 @@ CREATE OR REPLACE FUNCTION change_participant_password(
   p_new_password TEXT
 ) RETURNS JSONB
 LANGUAGE plpgsql SECURITY DEFINER
-SET search_path = public
+SET search_path = extensions, public
 AS $$
 DECLARE
   v_participant RECORD;
@@ -121,7 +121,7 @@ CREATE OR REPLACE FUNCTION restore_participant_session(
   p_participant_id UUID
 ) RETURNS JSONB
 LANGUAGE plpgsql SECURITY DEFINER
-SET search_path = public
+SET search_path = extensions, public
 AS $$
 DECLARE
   v_participant_id UUID;
