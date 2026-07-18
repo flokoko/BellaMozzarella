@@ -66,7 +66,7 @@ interface JoinScreenProps {
 }
 
 export default function JoinScreen({ onJoin }: JoinScreenProps) {
-  const [joinCode, setJoinCode] = useState(() => localStorage.getItem('join_code') || '')
+  const [joinCode] = useState(() => localStorage.getItem('join_code') || 'BELLA26')
   const [name, setName] = useState(() => localStorage.getItem('user_name') || '')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -84,7 +84,7 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
     const n = name.trim()
     const pw = password.trim()
     if (!code || !n) {
-      setError('Bitte Join-Code und Namen eingeben.')
+      setError('Bitte Namen eingeben.')
       return
     }
     if (!pw) {
@@ -152,17 +152,6 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
         </div>
         <h1>Bella Mozzarella</h1>
         <p className="join-subtitle">{subtitle}</p>
-
-        <label className="join-label">Join-Code</label>
-        <input
-          className="join-input"
-          type="text"
-          value={joinCode}
-          onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-          autoCapitalize="characters"
-          placeholder="Join-Code"
-          onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-        />
 
         <label className="join-label">Dein Name</label>
         <input
