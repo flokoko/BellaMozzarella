@@ -164,25 +164,6 @@ export default function App() {
     navigator.vibrate?.(10)
   }
 
-  const handleChangeAdminPassword = async (oldPassword: string, newPassword: string): Promise<boolean> => {
-    if (!list) return false
-    const { data, error } = await supabase
-      .from('lists')
-      .select('admin_password')
-      .eq('id', list.id)
-      .single()
-    if (error || !data || !data.admin_password) return false
-    if (oldPassword !== data.admin_password) return false
-    const { error: updateError } = await supabase
-      .from('lists')
-      .update({ admin_password: newPassword })
-      .eq('id', list.id)
-    if (updateError) return false
-    setList({ ...list, admin_password: newPassword })
-    navigator.vibrate?.(10)
-    return true
-  }
-
   const handleChangeOwnPassword = async (oldPassword: string, newPassword: string) => {
     if (!participantId) return { error: 'Nicht angemeldet' }
     return changeParticipantPassword(participantId, oldPassword, newPassword)
