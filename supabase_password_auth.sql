@@ -45,7 +45,7 @@ BEGIN
     END IF;
 
     -- Mit Initial-Passwort anlegen
-    v_password_hash := encode(digest(p_password, 'sha256'), 'hex');
+    v_password_hash := encode(digest(p_password::bytea, 'sha256'::text), 'hex');
     INSERT INTO participants (list_id, name, password_hash, is_admin)
     VALUES (
       v_list.id,
@@ -57,7 +57,7 @@ BEGIN
     v_is_new := true;
   ELSE
     -- Existierender Teilnehmer: Passwort prüfen
-    v_password_hash := encode(digest(p_password, 'sha256'), 'hex');
+    v_password_hash := encode(digest(p_password::bytea, 'sha256'::text), 'hex');
     IF v_participant.password_hash IS NULL OR v_participant.password_hash = '' THEN
       -- Erstes Login: Passwort setzen
       UPDATE participants SET password_hash = v_password_hash
@@ -99,7 +99,7 @@ BEGIN
     RETURN jsonb_build_object('error', 'Teilnehmer nicht gefunden');
   END IF;
 
-  v_old_hash := encode(digest(p_old_password, 'sha256'), 'hex');
+  v_old_hash := encode(digest(p_old_password::bytea, 'sha256'::text), 'hex');
 
   IF v_participant.password_hash != v_old_hash THEN
     RETURN jsonb_build_object('error', 'Altes Passwort falsch');
@@ -109,7 +109,7 @@ BEGIN
     RETURN jsonb_build_object('error', 'Passwort muss mindestens 3 Zeichen lang sein');
   END IF;
 
-  v_new_hash := encode(digest(p_new_password, 'sha256'), 'hex');
+  v_new_hash := encode(digest(p_new_password::bytea, 'sha256'::text), 'hex');
   UPDATE participants SET password_hash = v_new_hash WHERE id = p_participant_id;
 
   RETURN jsonb_build_object('success', true);
