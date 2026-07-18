@@ -4,6 +4,9 @@
 -- Im Supabase Dashboard → SQL Editor → New Query → dies ausführen
 -- ═══════════════════════════════════════════════════════════════
 
+-- 0. pgcrypto Extension aktivieren (für digest/sha256)
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- 1. password_hash Spalte zu participants hinzufügen
 ALTER TABLE participants ADD COLUMN IF NOT EXISTS password_hash TEXT;
 
