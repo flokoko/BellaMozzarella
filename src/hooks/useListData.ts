@@ -11,7 +11,7 @@ import type {
   ExpenseSplit,
   Participant,
 } from '../types'
-import { supabase, setJoinCode } from '../lib/supabase'
+import { supabase } from '../lib/supabase'
 import { useOfflineQueue } from './useOfflineQueue'
 
 export function useListData() {
@@ -225,13 +225,11 @@ export function useListData() {
   // ── Auto-restore session ───────────────────────────────────────────
   useEffect(() => {
     const savedName = localStorage.getItem('user_name')
-    const savedCode = localStorage.getItem('join_code')
     const savedParticipantId = localStorage.getItem('participant_id')
-    if (savedName && savedCode && savedParticipantId) {
-      import('../lib/supabase').then(({ restoreParticipantSession, setJoinCode }) => {
+    if (savedName && savedParticipantId) {
+      import('../lib/supabase').then(({ restoreParticipantSession }) => {
         restoreParticipantSession(savedParticipantId).then((result) => {
           if (result.error || !result.list_id) return
-          setJoinCode(result.join_code)
           setUserName(result.participant_name)
           setParticipantId(result.participant_id)
           setIsLoading(true)
@@ -385,7 +383,6 @@ export function useListData() {
 
   // ── Join / Leave / Rename ──────────────────────────────────────────
   const handleJoin = useCallback(async (name: string, l: ShoppingList, pid: string) => {
-    setJoinCode(l.join_code)
     setUserName(name)
     setParticipantId(pid)
     setList(l)
@@ -401,9 +398,7 @@ export function useListData() {
   }, [fetchAll, markActivity])
 
   const handleLeave = useCallback(() => {
-    setJoinCode('')
     localStorage.removeItem('user_name')
-    localStorage.removeItem('join_code')
     localStorage.removeItem('participant_id')
     setUserName(null)
     setList(null)

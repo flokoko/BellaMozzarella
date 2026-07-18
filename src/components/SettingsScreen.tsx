@@ -14,7 +14,6 @@ import './SettingsScreen.css'
 interface SettingsScreenProps {
   userName: string
   listName: string
-  joinCode: string
   onLeave: () => void
   onRename: (newName: string) => void
   categories: ItemCategory[]
@@ -33,7 +32,6 @@ interface SettingsScreenProps {
 export default function SettingsScreen({
   userName,
   listName,
-  joinCode,
   onLeave,
   onRename,
   categories,
@@ -108,10 +106,10 @@ export default function SettingsScreen({
 
   const handleCopyCode = async () => {
     try {
-      await navigator.clipboard.writeText(joinCode)
+      await navigator.clipboard.writeText('BELLA26')
     } catch {
       const textarea = document.createElement('textarea')
-      textarea.value = joinCode
+      textarea.value = 'BELLA26'
       textarea.style.position = 'fixed'
       textarea.style.opacity = '0'
       document.body.appendChild(textarea)
@@ -323,15 +321,6 @@ export default function SettingsScreen({
         <div className="settings-info-row">
           <span className="settings-info-label">Liste</span>
           <span className="settings-info-value">{listName}</span>
-        </div>
-        <div className="settings-info-row">
-          <span className="settings-info-label">Join-Code</span>
-          <div className="settings-join-code-wrap">
-            <span className="settings-info-value">{joinCode}</span>
-            <button className="settings-copy-btn" onClick={handleCopyCode}>
-              {copied ? <><Check size={14} strokeWidth={2} /> Kopiert!</> : <><Copy size={14} strokeWidth={2} /> Kopieren</>}
-            </button>
-          </div>
         </div>
 
         {editingName ? (

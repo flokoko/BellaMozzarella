@@ -9,8 +9,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
   )
 }
 
+// Fester Join-Code für die Liste (wird für RLS benötigt, für Benutzer unsichtbar)
+const LIST_JOIN_CODE = 'BELLA26'
+
 // Module-level variable for the current join code (used for RLS)
-let currentJoinCode = ''
+let currentJoinCode = LIST_JOIN_CODE
 
 export function setJoinCode(code: string) {
   currentJoinCode = code
@@ -50,12 +53,11 @@ export interface LoginResult {
 }
 
 export async function loginParticipant(
-  joinCode: string,
   name: string,
   password: string
 ): Promise<LoginResult> {
   const { data, error } = await supabase.rpc('login_participant', {
-    p_join_code: joinCode,
+    p_join_code: LIST_JOIN_CODE,
     p_name: name,
     p_password: password,
   })

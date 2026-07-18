@@ -341,7 +341,6 @@ export default function App() {
             <SettingsScreen
               userName={userName}
               listName={list.name}
-              joinCode={list.join_code}
               onLeave={handleLeave}
               onRename={handleRename}
               categories={categories}

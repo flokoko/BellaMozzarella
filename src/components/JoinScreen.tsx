@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import type { ShoppingList } from '../types'
-import { supabase, setJoinCode as setSupabaseJoinCode, loginParticipant } from '../lib/supabase'
+import { supabase, loginParticipant } from '../lib/supabase'
 import MozzaScene from './MozzaScene'
 
 import './JoinScreen.css'
@@ -66,7 +66,6 @@ interface JoinScreenProps {
 }
 
 export default function JoinScreen({ onJoin }: JoinScreenProps) {
-  const [joinCode] = useState(() => localStorage.getItem('join_code') || 'BELLA26')
   const [name, setName] = useState(() => localStorage.getItem('user_name') || '')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -80,10 +79,9 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
   )
 
   const handleLogin = async () => {
-    const code = joinCode.trim().toUpperCase()
     const n = name.trim()
     const pw = password.trim()
-    if (!code || !n) {
+    if (!n) {
       setError('Bitte Namen eingeben.')
       return
     }
@@ -94,13 +92,11 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
     setLoading(true)
     setError('')
     try {
-      const result = await loginParticipant(code, n, pw)
+      const result = await loginParticipant(n, pw)
       if (result.error) {
         setError(result.error)
         return
       }
-      // Set join code header BEFORE any table queries (RLS needs it)
-      setSupabaseJoinCode(result.join_code)
 
       // Fetch full list data
       const { data: fullList } = await supabase
@@ -115,7 +111,6 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
       }
 
       localStorage.setItem('user_name', result.participant_name)
-      localStorage.setItem('join_code', code)
       localStorage.setItem('participant_id', result.participant_id)
 
       onJoin(result.participant_name, fullList as ShoppingList, result.participant_id)
