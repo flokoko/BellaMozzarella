@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { Tag, Trash2 } from 'lucide-react'
+import { Tag, Trash2, GripVertical } from 'lucide-react'
+import type { PointerEvent as ReactPointerEvent } from 'react'
 import type { ItemCategory, ListType } from '../types'
 import { useCategories } from '../hooks/useCategories'
 import { useDebouncedCallback } from '../hooks/useDebouncedCallback'
+import { useDragReorder } from '../hooks/useDragReorder'
 import { useToast } from '../context/ToastContext'
 
 import './CategoryManager.css'
@@ -18,9 +20,19 @@ export default function CategoryManager({ categories, listId, listType, onCatego
   const { confirm } = useToast()
   const [expanded, setExpanded] = useState(false)
   const [localNames, setLocalNames] = useState<Record<string, string>>({})
-  const { updateCategory, deleteCategory, addCategory } = useCategories(() => onCategoriesChange?.())
+  const { updateCategory, deleteCategory, addCategory, reorderCategories } = useCategories(() => onCategoriesChange?.())
 
   const debouncedUpdate = useDebouncedCallback(updateCategory, 400)
+
+  const {
+    dragState,
+    handlePointerDown,
+    handlePointerMove,
+    handlePointerUp,
+    registerItem,
+  } = useDragReorder<ItemCategory>(categories, (newOrder) => {
+    reorderCategories(newOrder)
+  })
 
   const handleAdd = () => {
     const maxOrder = categories.reduce((max, c) => Math.max(max, c.sort_order), 0)
@@ -43,26 +55,48 @@ export default function CategoryManager({ categories, listId, listType, onCatego
           {categories.length === 0 && (
             <p className="cat-manager-empty">Keine Kategorien</p>
           )}
-          {categories.map((cat) => (
-            <div key={cat.id} className="cat-manager-row">
-              <input
-                className="cat-manager-name-input"
-                type="text"
-                value={localNames[cat.id] ?? cat.name}
-                onChange={(e) => {
-                  setLocalNames(prev => ({ ...prev, [cat.id]: e.target.value }))
-                  debouncedUpdate(cat.id, { name: e.target.value })
-                }}
-              />
-              <button
-                className="cat-manager-delete-btn"
-                onClick={() => confirm('Dieses Element wirklich löschen?', () => deleteCategory(cat.id))}
-                aria-label="Kategorie löschen"
+          {categories.map((cat) => {
+            const isDragging = dragState.draggingId === cat.id
+            const isDragOver = dragState.dragOverId === cat.id
+            const rowClass = [
+              'cat-manager-row',
+              isDragging ? 'dragging' : '',
+              isDragOver ? 'drag-over' : '',
+            ].filter(Boolean).join(' ')
+
+            return (
+              <div
+                key={cat.id}
+                className={rowClass}
+                ref={(el) => registerItem(cat.id, el)}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
               >
-                <Trash2 size={16} strokeWidth={2} />
-              </button>
-            </div>
-          ))}
+                <span
+                  className="cat-manager-drag-handle"
+                  onPointerDown={(e: ReactPointerEvent) => handlePointerDown(e, cat.id)}
+                >
+                  <GripVertical size={16} strokeWidth={2} />
+                </span>
+                <input
+                  className="cat-manager-name-input"
+                  type="text"
+                  value={localNames[cat.id] ?? cat.name}
+                  onChange={(e) => {
+                    setLocalNames(prev => ({ ...prev, [cat.id]: e.target.value }))
+                    debouncedUpdate(cat.id, { name: e.target.value })
+                  }}
+                />
+                <button
+                  className="cat-manager-delete-btn"
+                  onClick={() => confirm('Dieses Element wirklich löschen?', () => deleteCategory(cat.id))}
+                  aria-label="Kategorie löschen"
+                >
+                  <Trash2 size={16} strokeWidth={2} />
+                </button>
+              </div>
+            )
+          })}
           <button className="cat-manager-add-btn" onClick={handleAdd}>
             + Kategorie hinzufügen
           </button>

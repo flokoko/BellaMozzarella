@@ -95,10 +95,44 @@
   align-items: center;
   gap: 0.35rem;
   padding: 0.4rem 0;
+  transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+  border-radius: 10px;
+}
+
+.cat-manager-row.dragging {
+  opacity: 0.5;
+  transform: scale(0.97);
+}
+
+.cat-manager-row.drag-over {
+  box-shadow: 0 2px 0 var(--accent);
 }
 
 .cat-manager-row + .cat-manager-row {
   border-top: 1px solid var(--border-color);
+}
+
+.cat-manager-drag-handle {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0.3rem;
+  cursor: grab;
+  color: var(--text-muted);
+  opacity: 0.4;
+  border-radius: 8px;
+  transition: opacity 0.2s, color 0.2s, background 0.2s;
+  touch-action: none;
+}
+
+.cat-manager-drag-handle:hover {
+  opacity: 1;
+  color: var(--accent);
+  background: var(--accent-light);
+}
+
+.cat-manager-drag-handle:active {
+  cursor: grabbing;
 }
 
 .cat-manager-icon-input {
