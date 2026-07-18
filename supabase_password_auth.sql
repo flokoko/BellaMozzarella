@@ -121,26 +121,31 @@ LANGUAGE plpgsql SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  v_participant RECORD;
-  v_list RECORD;
+  v_participant_id UUID;
+  v_participant_name TEXT;
+  v_participant_is_admin BOOLEAN;
+  v_participant_list_id UUID;
+  v_list_name TEXT;
+  v_list_join_code TEXT;
 BEGIN
-  SELECT p.*, l.name as list_name, l.join_code
+  SELECT p.id, p.name, p.is_admin, p.list_id, l.name, l.join_code
+  INTO v_participant_id, v_participant_name, v_participant_is_admin,
+       v_participant_list_id, v_list_name, v_list_join_code
   FROM participants p
   JOIN lists l ON l.id = p.list_id
-  WHERE p.id = p_participant_id
-  INTO v_participant, v_list;
+  WHERE p.id = p_participant_id;
 
   IF NOT FOUND THEN
     RETURN jsonb_build_object('error', 'Session nicht gefunden');
   END IF;
 
   RETURN jsonb_build_object(
-    'list_id', v_participant.list_id,
-    'list_name', v_list.list_name,
-    'join_code', v_list.join_code,
-    'participant_id', v_participant.id,
-    'participant_name', v_participant.name,
-    'is_admin', v_participant.is_admin
+    'list_id', v_participant_list_id,
+    'list_name', v_list_name,
+    'join_code', v_list_join_code,
+    'participant_id', v_participant_id,
+    'participant_name', v_participant_name,
+    'is_admin', v_participant_is_admin
   );
 END;
 $$;
