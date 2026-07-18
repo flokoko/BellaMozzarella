@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Trash2, Palette, Sun, Moon, Check, Copy, Pencil, Crown, KeyRound, Bell, BellOff } from 'lucide-react'
+import { Trash2, Palette, Sun, Moon, Check, Copy, Pencil, Crown, Lock, KeyRound, Bell, BellOff } from 'lucide-react'
 import type { ItemCategory, ListType, Participant } from '../types'
 import type { ThemeMode } from '../lib/theme'
 import { getTheme, setTheme } from '../lib/theme'
@@ -27,8 +27,6 @@ interface SettingsScreenProps {
   hasAdminPassword: boolean
   onSetAdminPassword: (password: string) => void
   onUnlockAdmin: (password: string) => Promise<boolean>
-  onChangeAdminPassword: (oldPassword: string, newPassword: string) => Promise<boolean>
-  participantId: string
   onChangeOwnPassword: (oldPassword: string, newPassword: string) => Promise<{ success?: boolean; error?: string }>
 }
 
@@ -48,8 +46,6 @@ export default function SettingsScreen({
   hasAdminPassword,
   onSetAdminPassword,
   onUnlockAdmin,
-  onChangeAdminPassword,
-  participantId,
   onChangeOwnPassword,
 }: SettingsScreenProps) {
   const { toast, confirm } = useToast()

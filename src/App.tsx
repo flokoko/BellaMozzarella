@@ -373,8 +373,6 @@ export default function App() {
               hasAdminPassword={!!list.admin_password}
               onSetAdminPassword={handleSetAdminPassword}
               onUnlockAdmin={handleUnlockAdmin}
-              onChangeAdminPassword={handleChangeAdminPassword}
-              participantId={participantId ?? ''}
               onChangeOwnPassword={handleChangeOwnPassword}
             />
           </Suspense>
