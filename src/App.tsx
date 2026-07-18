@@ -3,7 +3,7 @@ import { ArrowLeft, Settings, Sun, Moon, WifiOff, ShoppingCart, Backpack, Pizza,
 import confetti from 'canvas-confetti'
 import type { TabView } from './types'
 import { getResolvedTheme, toggleTheme, applyTheme, initThemeListener } from './lib/theme'
-import { supabase } from './lib/supabase'
+import { supabase, changeParticipantPassword } from './lib/supabase'
 import { useToast } from './context/ToastContext'
 import JoinScreen from './components/JoinScreen'
 import DashboardScreen from './components/DashboardScreen'
@@ -59,7 +59,7 @@ function fireConfetti() {
 export default function App() {
   const { toast } = useToast()
   const {
-    userName, list, shoppingItems, bringItems, categories, meals, mealIdeas,
+    userName, list, participantId, shoppingItems, bringItems, categories, meals, mealIdeas,
     notes, expenses, expenseSplits, participants, adminUnlocked,
     isAdmin, shoppingCategories, bringCategories, knownPersons, userBalance,
     expenseTotal, checkedCount, isLoading, isOnline, queueLength, flushQueue,
@@ -181,6 +181,11 @@ export default function App() {
     setList({ ...list, admin_password: newPassword })
     navigator.vibrate?.(10)
     return true
+  }
+
+  const handleChangeOwnPassword = async (oldPassword: string, newPassword: string) => {
+    if (!participantId) return { error: 'Nicht angemeldet' }
+    return changeParticipantPassword(participantId, oldPassword, newPassword)
   }
 
   const handleUnlockAdmin = async (password: string): Promise<boolean> => {
@@ -369,6 +374,8 @@ export default function App() {
               onSetAdminPassword={handleSetAdminPassword}
               onUnlockAdmin={handleUnlockAdmin}
               onChangeAdminPassword={handleChangeAdminPassword}
+              participantId={participantId ?? ''}
+              onChangeOwnPassword={handleChangeOwnPassword}
             />
           </Suspense>
         )}

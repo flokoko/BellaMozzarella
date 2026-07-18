@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Trash2, Palette, Sun, Moon, Check, Copy, Pencil, Crown, Lock, KeyRound, Bell, BellOff } from 'lucide-react'
+import { Trash2, Palette, Sun, Moon, Check, Copy, Pencil, Crown, KeyRound, Bell, BellOff } from 'lucide-react'
 import type { ItemCategory, ListType, Participant } from '../types'
 import type { ThemeMode } from '../lib/theme'
 import { getTheme, setTheme } from '../lib/theme'
@@ -28,6 +28,8 @@ interface SettingsScreenProps {
   onSetAdminPassword: (password: string) => void
   onUnlockAdmin: (password: string) => Promise<boolean>
   onChangeAdminPassword: (oldPassword: string, newPassword: string) => Promise<boolean>
+  participantId: string
+  onChangeOwnPassword: (oldPassword: string, newPassword: string) => Promise<{ success?: boolean; error?: string }>
 }
 
 export default function SettingsScreen({
@@ -47,6 +49,8 @@ export default function SettingsScreen({
   onSetAdminPassword,
   onUnlockAdmin,
   onChangeAdminPassword,
+  participantId,
+  onChangeOwnPassword,
 }: SettingsScreenProps) {
   const { toast, confirm } = useToast()
   const [theme, setThemeState] = useState<ThemeMode>('auto')
@@ -84,12 +88,10 @@ export default function SettingsScreen({
 
   const handleTogglePush = async () => {
     if (pushEnabled) {
-      // Disabling
       localStorage.removeItem('push_notifications_enabled')
       setPushEnabled(false)
       return
     }
-    // Enabling — request permission
     if ('Notification' in window) {
       const permission = await Notification.requestPermission()
       setPushPermission(permission)
@@ -112,7 +114,6 @@ export default function SettingsScreen({
     try {
       await navigator.clipboard.writeText(joinCode)
     } catch {
-      // Fallback for non-HTTPS or permission denied
       const textarea = document.createElement('textarea')
       textarea.value = joinCode
       textarea.style.position = 'fixed'
@@ -135,7 +136,6 @@ export default function SettingsScreen({
       toast(`Maximal ${MAX_PARTICIPANTS} Teilnehmer erreicht.`, 'error')
       return
     }
-    // Case-insensitive duplicate check
     const exists = participants.find(p => p.name.toLowerCase() === n.toLowerCase())
     if (exists) {
       toast(`Teilnehmer "${exists.name}" existiert bereits!`, 'error')
@@ -185,10 +185,11 @@ export default function SettingsScreen({
       setAdminError('Neues Passwort muss mindestens 3 Zeichen lang sein.')
       return
     }
-    const ok = await onChangeAdminPassword(oldPw, newPw)
-    if (!ok) {
-      setAdminError('Altes Passwort falsch.')
+    const result = await onChangeOwnPassword(oldPw, newPw)
+    if (result.error) {
+      setAdminError(result.error)
     } else {
+      toast('Passwort geändert!', 'success')
       setOldPassword('')
       setNewPassword('')
       setShowChangePassword(false)
@@ -364,6 +365,45 @@ export default function SettingsScreen({
           </button>
         )}
 
+        {/* ── Eigenes Passwort ändern ──────────────────────────────── */}
+        {showChangePassword ? (
+          <div className="settings-inline-form" style={{ flexDirection: 'column', gap: '0.5rem', marginTop: '0.6rem' }}>
+            <input
+              className="settings-inline-input"
+              type="password"
+              placeholder="Altes Passwort"
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              autoFocus
+            />
+            <input
+              className="settings-inline-input"
+              type="password"
+              placeholder="Neues Passwort"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleChangePassword()}
+            />
+            {adminError && <p className="settings-admin-error">{adminError}</p>}
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button className="settings-btn settings-btn-secondary" onClick={() => { setShowChangePassword(false); setOldPassword(''); setNewPassword(''); setAdminError('') }}>
+                Abbrechen
+              </button>
+              <button className="settings-btn settings-btn-primary" onClick={handleChangePassword}>
+                Speichern
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            className="settings-btn settings-btn-secondary"
+            style={{ marginTop: '0.6rem', width: '100%' }}
+            onClick={() => setShowChangePassword(true)}
+          >
+            <KeyRound size={16} strokeWidth={2} /> Passwort ändern
+          </button>
+        )}
+
         <button className="settings-btn-danger" onClick={onLeave}>
           Liste verlassen
         </button>
@@ -377,7 +417,6 @@ export default function SettingsScreen({
         </h3>
         <p className="settings-cat-hint">{participants.length} {participants.length === 1 ? 'Person' : 'Personen'} in dieser Liste.</p>
 
-        {/* Teilnehmer-Liste (immer sichtbar) */}
         {participants.map((p) => (
           <div key={p.id} className="settings-cat-item">
             <span className="settings-participant-name">
@@ -399,7 +438,7 @@ export default function SettingsScreen({
           <p className="settings-cat-empty">Noch keine Teilnehmer</p>
         )}
 
-        {/* Admin-Bereich: Passwort-Protecte Teilnehmer-Verwaltung */}
+        {/* Admin-Bereich: Passwort-geschützte Teilnehmer-Verwaltung */}
         {isAdmin && !hasAdminPassword && !showSetPassword && (
           <button
             className="settings-btn settings-btn-secondary"
@@ -410,7 +449,6 @@ export default function SettingsScreen({
           </button>
         )}
 
-        {/* Passwort setzen (noch keins vorhanden) */}
         {isAdmin && !hasAdminPassword && showSetPassword && (
           <div className="settings-inline-form" style={{ flexDirection: 'column', gap: '0.5rem' }}>
             <p className="settings-cat-hint" style={{ marginBottom: 0 }}>
@@ -437,7 +475,6 @@ export default function SettingsScreen({
           </div>
         )}
 
-        {/* Passwort-Eingabe zum Entsperren (Passwort gesetzt, noch nicht entsperrt) */}
         {isAdmin && hasAdminPassword && !adminUnlocked && (
           <div className="settings-inline-form" style={{ flexDirection: 'column', gap: '0.5rem' }}>
             <p className="settings-cat-hint" style={{ marginBottom: 0 }}>
@@ -459,7 +496,6 @@ export default function SettingsScreen({
           </div>
         )}
 
-        {/* Entsperter Admin: Teilnehmer hinzufügen */}
         {isAdmin && adminUnlocked && (
           <>
             {showAddParticipant ? (
@@ -494,7 +530,7 @@ export default function SettingsScreen({
               </p>
             )}
 
-            {/* Passwort ändern */}
+            {/* Admin: Passwort ändern */}
             {showChangePassword ? (
               <div className="settings-inline-form" style={{ flexDirection: 'column', gap: '0.5rem', marginTop: '0.6rem' }}>
                 <input
@@ -535,7 +571,6 @@ export default function SettingsScreen({
           </>
         )}
 
-        {/* Non-Admin Hinweis */}
         {!isAdmin && (
           <p className="settings-cat-hint" style={{ marginTop: '0.5rem' }}>
             Nur der Admin kann Teilnehmer verwalten.

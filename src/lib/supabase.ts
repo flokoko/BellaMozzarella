@@ -9,7 +9,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   )
 }
 
-// Module-level variable for the current join code
+// Module-level variable for the current join code (used for RLS)
 let currentJoinCode = ''
 
 export function setJoinCode(code: string) {
@@ -35,3 +35,60 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     params: { eventsPerSecond: 2 },
   },
 })
+
+// ── Login / Auth helpers ──────────────────────────────────────────
+
+export interface LoginResult {
+  list_id: string
+  list_name: string
+  join_code: string
+  participant_id: string
+  participant_name: string
+  is_admin: boolean
+  is_new?: boolean
+  error?: string
+}
+
+export async function loginParticipant(
+  joinCode: string,
+  name: string,
+  password: string
+): Promise<LoginResult> {
+  const { data, error } = await supabase.rpc('login_participant', {
+    p_join_code: joinCode,
+    p_name: name,
+    p_password: password,
+  })
+  if (error) {
+    return { error: error.message } as LoginResult
+  }
+  return data as LoginResult
+}
+
+export async function changeParticipantPassword(
+  participantId: string,
+  oldPassword: string,
+  newPassword: string
+): Promise<{ success?: boolean; error?: string }> {
+  const { data, error } = await supabase.rpc('change_participant_password', {
+    p_participant_id: participantId,
+    p_old_password: oldPassword,
+    p_new_password: newPassword,
+  })
+  if (error) {
+    return { error: error.message }
+  }
+  return data as { success?: boolean; error?: string }
+}
+
+export async function restoreParticipantSession(
+  participantId: string
+): Promise<LoginResult> {
+  const { data, error } = await supabase.rpc('restore_participant_session', {
+    p_participant_id: participantId,
+  })
+  if (error) {
+    return { error: error.message } as LoginResult
+  }
+  return data as LoginResult
+}

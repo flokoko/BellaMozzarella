@@ -21,6 +21,7 @@ export function useListData() {
   // ── State ──────────────────────────────────────────────────────────
   const [userName, setUserName] = useState<string | null>(null)
   const [list, setList] = useState<ShoppingList | null>(null)
+  const [participantId, setParticipantId] = useState<string | null>(null)
   const [shoppingItems, setShoppingItems] = useState<ListItem[]>([])
   const [bringItems, setBringItems] = useState<ListItem[]>([])
   const [categories, setCategories] = useState<ItemCategory[]>([])
@@ -225,24 +226,28 @@ export function useListData() {
   useEffect(() => {
     const savedName = localStorage.getItem('user_name')
     const savedCode = localStorage.getItem('join_code')
-    if (savedName && savedCode) {
-      supabase
-        .rpc('verify_join_code', { code: savedCode })
-        .then(async ({ data }) => {
-          if (data && data.length > 0) {
-            const listData = data[0] as ShoppingList
-            setJoinCode(listData.join_code)
-            setUserName(savedName)
-            setIsLoading(true)
-            const { data: fullList } = await supabase
-              .from('lists')
-              .select('*')
-              .eq('id', listData.id)
-              .single()
-            setList((fullList as ShoppingList) ?? listData)
-            fetchAll(listData.id)
-          }
+    const savedParticipantId = localStorage.getItem('participant_id')
+    if (savedName && savedCode && savedParticipantId) {
+      import('../lib/supabase').then(({ restoreParticipantSession, setJoinCode }) => {
+        restoreParticipantSession(savedParticipantId).then((result) => {
+          if (result.error || !result.list_id) return
+          setJoinCode(result.join_code)
+          setUserName(result.participant_name)
+          setParticipantId(result.participant_id)
+          setIsLoading(true)
+          supabase
+            .from('lists')
+            .select('*')
+            .eq('id', result.list_id)
+            .single()
+            .then(({ data }) => {
+              if (data) {
+                setList(data as ShoppingList)
+                fetchAll(result.list_id)
+              }
+            })
         })
+      })
     }
   }, [fetchAll])
 
@@ -379,9 +384,10 @@ export function useListData() {
   )
 
   // ── Join / Leave / Rename ──────────────────────────────────────────
-  const handleJoin = useCallback(async (name: string, l: ShoppingList) => {
+  const handleJoin = useCallback(async (name: string, l: ShoppingList, pid: string) => {
     setJoinCode(l.join_code)
     setUserName(name)
+    setParticipantId(pid)
     setList(l)
     markActivity()
     setIsLoading(true)
@@ -398,8 +404,10 @@ export function useListData() {
     setJoinCode('')
     localStorage.removeItem('user_name')
     localStorage.removeItem('join_code')
+    localStorage.removeItem('participant_id')
     setUserName(null)
     setList(null)
+    setParticipantId(null)
     setShoppingItems([])
     setBringItems([])
     setCategories([])
@@ -438,6 +446,7 @@ export function useListData() {
     // state
     userName,
     list,
+    participantId,
     shoppingItems,
     bringItems,
     categories,
