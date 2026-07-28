@@ -1,11 +1,19 @@
 import { useState, useMemo, useCallback } from 'react'
-import { Wallet, Receipt, Pencil, Trash2, ArrowRight, Pizza, Table2 } from 'lucide-react'
+import { Wallet, Receipt, Pencil, Trash2, ArrowRight, Pizza, Table2, MessageSquare } from 'lucide-react'
 import type { Expense, ExpenseSplit } from '../types'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../context/ToastContext'
 import { SkeletonExpenseCard } from './Skeleton'
 import ExpenseCharts from './ExpenseCharts'
 import './ExpenseScreen.css'
+
+const EXPENSE_CATEGORIES = [
+  { value: 'supermarkt', label: '🛒 Supermarkt', color: '#009246' },
+  { value: 'restaurant', label: '🍝 Restaurant', color: '#ce2b37' },
+  { value: 'benzin', label: '⛽ Benzin', color: '#4a90d9' },
+  { value: 'aktivitaeten', label: '🎯 Aktivitäten', color: '#e8a83a' },
+  { value: 'sonstiges', label: '📦 Sonstiges', color: '#9b6dd9' },
+]
 
 interface ExpenseScreenProps {
   expenses: Expense[]
@@ -56,6 +64,8 @@ export default function ExpenseScreen({
   const [splitMode, setSplitMode] = useState<'equal' | 'exact'>('equal')
   const [exactShares, setExactShares] = useState<Record<string, string>>({})
   const [expenseDate, setExpenseDate] = useState(() => new Date().toISOString().slice(0, 10))
+  const [expenseNote, setExpenseNote] = useState('')
+  const [expenseCategory, setExpenseCategory] = useState('')
 
   // ── All known persons (from props + current form state) ──
   const allPersons = useMemo(() => {
@@ -187,6 +197,8 @@ export default function ExpenseScreen({
     setSplitMode('equal')
     setExactShares({})
     setExpenseDate(new Date().toISOString().slice(0, 10))
+    setExpenseNote('')
+    setExpenseCategory('')
     setEditingId(null)
     setFormExpanded(false)
   }, [userName])
@@ -200,6 +212,8 @@ export default function ExpenseScreen({
     setSplitMode('equal')
     setExactShares({})
     setExpenseDate(new Date().toISOString().slice(0, 10))
+    setExpenseNote('')
+    setExpenseCategory('')
     setFormExpanded(true)
   }, [userName, allPersons])
 
@@ -212,6 +226,8 @@ export default function ExpenseScreen({
       setPaidBy(expense.paid_by)
       setSplitMode(expense.split_mode)
       setExpenseDate(expense.expense_date)
+      setExpenseNote(expense.note ?? '')
+      setExpenseCategory(expense.category ?? '')
       const people = splits.map((s) => s.person_name)
       setSplitPeople(people)
       const shares: Record<string, string> = {}
@@ -271,6 +287,8 @@ export default function ExpenseScreen({
           paid_by: paidBy,
           split_mode: splitMode,
           expense_date: expenseDate,
+          note: expenseNote.trim() || null,
+          category: expenseCategory || null,
         })
         .eq('id', editingId)
       if (updErr) {
@@ -321,6 +339,8 @@ export default function ExpenseScreen({
           paid_by: paidBy,
           split_mode: splitMode,
           expense_date: expenseDate,
+          note: expenseNote.trim() || null,
+          category: expenseCategory || null,
           created_by: userName,
         })
         .select('id')
@@ -478,6 +498,30 @@ export default function ExpenseScreen({
                 onChange={(e) => setExpenseDate(e.target.value)}
               />
 
+              {/* Kategorie */}
+              <div className="expense-category-row">
+                {EXPENSE_CATEGORIES.map(cat => (
+                  <button
+                    key={cat.value}
+                    className={`expense-cat-chip ${expenseCategory === cat.value ? 'active' : ''}`}
+                    onClick={() => setExpenseCategory(expenseCategory === cat.value ? '' : cat.value)}
+                    type="button"
+                    style={expenseCategory === cat.value ? { borderColor: cat.color, background: cat.color + '18', color: cat.color } : {}}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Notiz */}
+              <input
+                className="expense-input"
+                type="text"
+                placeholder="Notiz (optional) — z.B. 'Für den Strandtag'"
+                value={expenseNote}
+                onChange={(e) => setExpenseNote(e.target.value)}
+              />
+
               {/* Split among chips */}
               <div>
                 <div className="expense-chips-label">Geteilt durch</div>
@@ -601,9 +645,19 @@ export default function ExpenseScreen({
                       </div>
                     </div>
                     <div className="expense-card-meta">
+                      {expense.category && (
+                        <span className="expense-card-category">
+                          {EXPENSE_CATEGORIES.find(c => c.value === expense.category)?.label ?? expense.category}
+                        </span>
+                      )}
                       Bezahlt von {expense.paid_by}
                     </div>
                     <div className="expense-card-split">{getSplitInfo(expense)}</div>
+                    {expense.note && (
+                      <div className="expense-card-note">
+                        <MessageSquare size={12} strokeWidth={2} /> {expense.note}
+                      </div>
+                    )}
                     {expense.created_by && (
                       <div className="expense-card-by">von {expense.created_by}</div>
                     )}

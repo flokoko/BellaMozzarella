@@ -77,6 +77,8 @@ export interface Expense {
   paid_by: string
   expense_date: string
   split_mode: 'equal' | 'exact'
+  note: string | null
+  category: string | null
   created_by: string | null
   created_at: string
 }
