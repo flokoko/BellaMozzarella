@@ -323,7 +323,7 @@ export default function SettingsScreen({
         </div>
         {bristolEnabled && (
           <p className="settings-cat-hint" style={{ marginTop: '0.4rem', marginBottom: 0 }}>
-            Bristol-Tracking und "Shit with me" sind aktiviert. Du siehst den Bristol-Tab in der Navigation.
+            Bristol-Tracking ist aktiviert. Du siehst die Bristol-Karte im Dashboard.
           </p>
         )}
       </div>
