@@ -53,6 +53,7 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
   const [entries, setEntries] = useState<BristolEntry[]>([])
   const [loadingEntries, setLoadingEntries] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [editingEntryId, setEditingEntryId] = useState<string | null>(null)
 
   const today = todayStr()
 
@@ -97,6 +98,23 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
     navigator.vibrate?.(20)
     fetchEntries()
   }, [listId, userName, today, toast, fetchEntries])
+
+  const handleUpdateEntry = useCallback(async (entryId: string, value: number) => {
+    setSubmitting(true)
+    const { error } = await supabase
+      .from('bristol_entries')
+      .update({ value })
+      .eq('id', entryId)
+    setSubmitting(false)
+    if (error) {
+      toast(`Fehler: ${error.message}`, 'error')
+      return
+    }
+    toast(`Bristol-Wert auf ${value} (${BRISTOL_ADJECTIVES[value]}) geändert!`, 'success')
+    navigator.vibrate?.(20)
+    setEditingEntryId(null)
+    fetchEntries()
+  }, [toast, fetchEntries])
 
   const myTodayEntry = useMemo(
     () => entries.find(e => e.participant_name === userName && e.entry_date === today),
@@ -331,21 +349,59 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
           <p className="bristol-empty-state">Noch keine Einträge. Tippe oben einen Wert, um zu starten!</p>
         ) : (
           <div className="bristol-history-list">
-            {entries.map(e => (
-              <div key={e.id} className="bristol-history-row">
-                <span className="bristol-history-date">
-                  {new Date(e.entry_date).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })}
-                </span>
-                <span className="bristol-history-name">
-                  {e.participant_name}
-                  {e.participant_name === userName && <span className="bristol-today-me"> (du)</span>}
-                </span>
-                <span className="bristol-history-badge" style={{ background: BRISTOL_COLORS[e.value] }}>
-                  {e.value}
-                </span>
-                <span className="bristol-history-adj">{BRISTOL_ADJECTIVES[e.value]}</span>
-              </div>
-            ))}
+            {entries.map(e => {
+              const isOwn = e.participant_name === userName
+              const isEditing = editingEntryId === e.id
+              return (
+                <div key={e.id} className={`bristol-history-row ${isOwn ? 'bristol-history-own' : ''}`}>
+                  <span className="bristol-history-date">
+                    {new Date(e.entry_date).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })}
+                  </span>
+                  <span className="bristol-history-name">
+                    {e.participant_name}
+                    {isOwn && <span className="bristol-today-me"> (du)</span>}
+                  </span>
+                  {isEditing ? (
+                    <div className="bristol-history-edit-picker">
+                      {Array.from({ length: 7 }, (_, i) => i + 1).map(v => (
+                        <button
+                          key={v}
+                          className={`bristol-history-edit-btn ${e.value === v ? 'selected' : ''}`}
+                          style={{ '--bristol-color': BRISTOL_COLORS[v] } as React.CSSProperties}
+                          disabled={submitting}
+                          onClick={() => handleUpdateEntry(e.id, v)}
+                        >
+                          {v}
+                        </button>
+                      ))}
+                      <button
+                        className="bristol-history-edit-cancel"
+                        onClick={() => setEditingEntryId(null)}
+                        disabled={submitting}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="bristol-history-badge" style={{ background: BRISTOL_COLORS[e.value] }}>
+                        {e.value}
+                      </span>
+                      <span className="bristol-history-adj">{BRISTOL_ADJECTIVES[e.value]}</span>
+                      {isOwn && (
+                        <button
+                          className="bristol-history-edit-trigger"
+                          onClick={() => setEditingEntryId(e.id)}
+                          aria-label="Wert bearbeiten"
+                        >
+                          ✏️
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              )
+            })}
           </div>
         )}
       </div>
