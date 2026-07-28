@@ -1,295 +1,399 @@
 /* ── Bristol Screen ─────────────────────────────────────────────────── */
 
 .bristol-screen {
-  padding: 0.75rem 0;
+  padding: 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-/* ── Section card ── */
-.bristol-section {
+/* ── Hero (Today's Entry) ── */
+.bristol-hero {
   background: var(--card-bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--border-color);
-  border-radius: 20px;
-  padding: 1.25rem 1.1rem;
-  margin-bottom: 1rem;
+  border-radius: 24px;
+  padding: 1.5rem 1.25rem;
+  text-align: center;
   box-shadow: var(--shadow-sm);
-  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.bristol-section-title {
-  font-size: 0.75rem;
+.bristol-hero-label {
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-secondary);
-  margin-bottom: 0.85rem;
-}
-
-.bristol-hint {
-  font-size: 0.85rem;
+  letter-spacing: 0.1em;
   color: var(--text-muted);
-  margin-bottom: 0.85rem;
-  line-height: 1.4;
+  margin-bottom: 0.75rem;
 }
 
-.bristol-empty {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  padding: 0.5rem 0;
-}
-
-/* ── Already entered display ── */
-.bristol-already-entered {
+.bristol-hero-value-wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
-  margin-bottom: 1rem;
-  padding: 1rem;
-  background: var(--accent-light);
-  border-radius: 14px;
+  gap: 0.6rem;
 }
 
-.bristol-already-value {
-  width: 56px;
-  height: 56px;
+.bristol-hero-circle {
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  animation: bristol-pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+
+.bristol-hero-emoji {
+  font-size: 1.4rem;
+  line-height: 1;
+  margin-bottom: -2px;
+}
+
+.bristol-hero-number {
   font-size: 1.6rem;
   font-weight: 800;
   color: white;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  line-height: 1;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
-.bristol-already-text {
-  font-size: 0.9rem;
+.bristol-hero-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.bristol-hero-adjective {
+  font-size: 1.1rem;
+  font-weight: 700;
   color: var(--text-primary);
-  text-align: center;
 }
 
-.bristol-already-hint {
-  font-size: 0.78rem;
+.bristol-hero-change-hint {
+  font-size: 0.72rem;
   color: var(--text-muted);
 }
 
-/* ── 7 value buttons: 2-3-2 grid layout ── */
-.bristol-value-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.6rem;
-  max-width: 420px;
-  margin: 0 auto;
+.bristol-hero-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
-.bristol-value-grid .bristol-value-btn:nth-child(1),
-.bristol-value-grid .bristol-value-btn:nth-child(2) {
-  grid-column: span 1;
+.bristol-hero-question {
+  font-size: 2rem;
 }
 
-/* Shift first two to center: use a trick with the first row */
-.bristol-value-grid .bristol-value-btn:nth-child(1) {
-  grid-column: 1 / 2;
-}
-.bristol-value-grid .bristol-value-btn:nth-child(2) {
-  grid-column: 2 / 3;
-}
-.bristol-value-grid .bristol-value-btn:nth-child(3) {
-  grid-column: 1 / 2;
-}
-.bristol-value-grid .bristol-value-btn:nth-child(4) {
-  grid-column: 2 / 3;
-}
-.bristol-value-grid .bristol-value-btn:nth-child(5) {
-  grid-column: 3 / 4;
-}
-.bristol-value-grid .bristol-value-btn:nth-child(6) {
-  grid-column: 1 / 2;
-}
-.bristol-value-grid .bristol-value-btn:nth-child(7) {
-  grid-column: 2 / 3;
+@keyframes bristol-pop-in {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
-.bristol-value-btn {
+/* ── Value Picker ── */
+.bristol-picker {
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 1.25rem 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.bristol-picker-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+
+.bristol-picker-row {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.bristol-picker-btn {
+  flex: 1;
+  min-width: 48px;
+  max-width: 64px;
   border: 2px solid var(--border-color);
   background: var(--card-bg-solid);
   border-radius: 16px;
-  padding: 0.85rem 0.5rem;
+  padding: 0.6rem 0.2rem;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.2rem;
+  gap: 0.1rem;
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-  aspect-ratio: 1;
-  justify-content: center;
 }
 
-.bristol-value-btn:hover {
+.bristol-picker-btn:hover {
   border-color: var(--bristol-color, var(--accent));
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
 
-.bristol-value-btn:active {
-  transform: scale(0.94);
+.bristol-picker-btn:active {
+  transform: scale(0.92);
 }
 
-.bristol-value-btn:disabled {
+.bristol-picker-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none !important;
 }
 
-.bristol-value-btn.selected {
+.bristol-picker-btn.selected {
   border-color: var(--bristol-color, var(--accent));
   background: var(--bristol-color, var(--accent));
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transform: translateY(-3px);
 }
 
-.bristol-value-btn.selected .bristol-value-num,
-.bristol-value-btn.selected .bristol-value-adj {
+.bristol-picker-btn.selected .bristol-picker-num,
+.bristol-picker-btn.selected .bristol-picker-adj {
   color: white;
 }
 
-.bristol-value-num {
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: var(--bristol-color, var(--accent));
+.bristol-picker-emoji {
+  font-size: 1rem;
   line-height: 1;
 }
 
-.bristol-value-adj {
-  font-size: 0.72rem;
+.bristol-picker-num {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--bristol-color, var(--accent));
+  line-height: 1.1;
+}
+
+.bristol-picker-adj {
+  font-size: 0.6rem;
   font-weight: 500;
   color: var(--text-secondary);
   text-transform: capitalize;
+  line-height: 1;
 }
 
-/* ── Tables ── */
-.bristol-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.85rem;
+/* ── Cards ── */
+.bristol-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 1.25rem 1.1rem;
+  box-shadow: var(--shadow-sm);
 }
 
-.bristol-table thead th {
-  text-align: left;
-  font-size: 0.72rem;
+.bristol-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.bristol-card-title {
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-secondary);
-  padding: 0.45rem 0.4rem;
-  border-bottom: 1px solid var(--border-color);
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
 }
 
-.bristol-table tbody td {
-  padding: 0.5rem 0.4rem;
-  border-bottom: 1px solid var(--border-color);
-  color: var(--text-primary);
-}
-
-.bristol-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.bristol-td-name {
+.bristol-card-badge {
+  font-size: 0.68rem;
   font-weight: 600;
-}
-
-.bristol-td-me {
   color: var(--accent);
-  font-size: 0.78rem;
+  background: var(--accent-light);
+  padding: 0.2rem 0.55rem;
+  border-radius: 20px;
 }
 
-.bristol-td-date {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  white-space: nowrap;
+.bristol-empty-state {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 0.75rem 0;
+  line-height: 1.5;
 }
 
-.bristol-td-adj {
-  font-size: 0.8rem;
+/* ── Today's Overview (chips) ── */
+.bristol-today-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.bristol-today-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.7rem;
+  background: var(--button-bg);
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+}
+
+.bristol-today-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bristol-today-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.bristol-today-me {
+  color: var(--accent);
+  font-size: 0.75rem;
+}
+
+.bristol-today-val {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  min-width: 1.2rem;
+  text-align: center;
+}
+
+.bristol-today-adj {
+  font-size: 0.75rem;
   color: var(--text-secondary);
   text-transform: capitalize;
 }
 
-.bristol-value-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: white;
+/* ── Stats Row ── */
+.bristol-stats-row {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
 }
 
-.bristol-history-wrap {
-  overflow-x: auto;
-}
-
-.bristol-history-table {
-  min-width: 340px;
-}
-
-/* ── Stats cards ── */
-.bristol-stats-cards {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0.5rem;
-  margin-bottom: 1.25rem;
-}
-
-.bristol-stat-card {
+.bristol-stat-item {
+  flex: 1;
   background: var(--button-bg);
   border-radius: 14px;
-  padding: 0.75rem 0.3rem;
+  padding: 0.6rem 0.2rem;
   text-align: center;
   border: 1px solid var(--border-color);
 }
 
-.bristol-stat-value {
-  font-size: 1.25rem;
+.bristol-stat-num {
+  display: block;
+  font-size: 1.1rem;
   font-weight: 800;
   color: var(--accent);
   line-height: 1.2;
 }
 
 .bristol-stat-label {
-  font-size: 0.65rem;
+  display: block;
+  font-size: 0.6rem;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  margin-top: 0.2rem;
+  margin-top: 0.15rem;
 }
 
 /* ── Charts ── */
-.bristol-chart-container {
-  margin-top: 1rem;
+.bristol-chart-box {
+  margin-top: 0.75rem;
   background: var(--card-bg-solid);
   border: 1px solid var(--border-color);
-  border-radius: 14px;
-  padding: 0.75rem 0.5rem;
+  border-radius: 16px;
+  padding: 0.75rem 0.4rem;
 }
 
-.bristol-chart-container + .bristol-chart-container {
-  margin-top: 0.75rem;
+.bristol-chart-box + .bristol-chart-box {
+  margin-top: 0.6rem;
 }
 
-.bristol-chart-title {
-  font-size: 0.85rem;
+.bristol-chart-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.4rem;
+  padding-left: 0.3rem;
+}
+
+/* ── History List ── */
+.bristol-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.bristol-history-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  background: var(--button-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.bristol-history-date {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  min-width: 3.2rem;
+  font-weight: 500;
+}
+
+.bristol-history-name {
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 0.5rem;
-  padding-left: 0.4rem;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* ── Bristol toggle in settings (reuses theme-toggle pattern) ── */
+.bristol-history-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.bristol-history-adj {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+  min-width: 2.5rem;
+}
+
+/* ── Bristol toggle in settings ── */
 .bristol-toggle-group {
   display: flex;
   gap: 0;
@@ -325,20 +429,16 @@
 
 /* ── Responsive ── */
 @media (max-width: 380px) {
-  .bristol-stats-cards {
-    grid-template-columns: repeat(3, 1fr);
+  .bristol-picker-btn {
+    min-width: 40px;
+    max-width: 52px;
+    padding: 0.5rem 0.1rem;
   }
-  .bristol-stats-cards .bristol-stat-card:nth-child(4),
-  .bristol-stats-cards .bristol-stat-card:nth-child(5) {
-    grid-column: span 1;
-  }
-  .bristol-value-grid {
-    gap: 0.4rem;
-  }
-  .bristol-value-num {
-    font-size: 1.2rem;
-  }
-  .bristol-value-adj {
-    font-size: 0.65rem;
-  }
+  .bristol-picker-emoji { font-size: 0.85rem; }
+  .bristol-picker-num { font-size: 0.95rem; }
+  .bristol-picker-adj { font-size: 0.55rem; }
+  .bristol-stats-row { gap: 0.3rem; }
+  .bristol-stat-num { font-size: 0.95rem; }
+  .bristol-hero-circle { width: 68px; height: 68px; }
+  .bristol-hero-number { font-size: 1.3rem; }
 }
