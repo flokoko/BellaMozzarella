@@ -576,3 +576,93 @@
   border-radius: 12px;
   animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* ── Matrix Section ── */
+.expense-matrix-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 0.75rem;
+  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.expense-matrix {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.78rem;
+  min-width: max-content;
+}
+
+.expense-matrix th,
+.expense-matrix td {
+  padding: 0.45rem 0.5rem;
+  text-align: center;
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.expense-matrix thead th {
+  position: sticky;
+  top: 0;
+  background: var(--card-bg);
+  z-index: 1;
+}
+
+.expense-matrix-corner {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-align: left;
+  min-width: 4rem;
+  border-top-left-radius: 10px;
+}
+
+.expense-matrix-header {
+  font-weight: 800;
+  color: #009246;
+  font-size: 0.78rem;
+  padding: 0.45rem 0.6rem !important;
+}
+
+.expense-matrix-total-header {
+  font-weight: 800;
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  border-top-right-radius: 10px;
+}
+
+.expense-matrix-label {
+  font-weight: 700;
+  color: var(--danger);
+  text-align: left !important;
+  font-size: 0.78rem;
+}
+
+.expense-matrix-cell {
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 4.5rem;
+}
+
+.expense-matrix-cell.has-debt {
+  color: var(--danger);
+  font-weight: 700;
+  background: rgba(206, 43, 55, 0.06);
+}
+
+.expense-matrix-total {
+  font-weight: 800;
+  color: var(--danger);
+  font-size: 0.82rem;
+}
+
+.expense-matrix-hint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  background: var(--accent-light);
+  border-radius: 10px;
+  line-height: 1.4;
+}

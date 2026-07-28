@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react'
-import { Wallet, Receipt, Pencil, Trash2, ArrowRight, Pizza } from 'lucide-react'
+import { Wallet, Receipt, Pencil, Trash2, ArrowRight, Pizza, Table2 } from 'lucide-react'
 import type { Expense, ExpenseSplit } from '../types'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../context/ToastContext'
@@ -46,7 +46,7 @@ export default function ExpenseScreen({
   onExpensesChange,
 }: ExpenseScreenProps) {
   const { toast, confirm } = useToast()
-  const [section, setSection] = useState<'expenses' | 'settlement'>('expenses')
+  const [section, setSection] = useState<'expenses' | 'settlement' | 'matrix'>('expenses')
   const [formExpanded, setFormExpanded] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [description, setDescription] = useState('')
@@ -135,6 +135,48 @@ export default function ExpenseScreen({
 
     return txns
   }, [balances])
+
+  // ── Matrix: who owes whom (debtor × creditor grid) ──
+  const matrix = useMemo<{ debtors: string[]; creditors: string[]; cells: Record<string, Record<string, number>> }>(() => {
+    // Step 1: For each expense, compute net debt between each pair
+    // debtGrid[debtor][creditor] = amount debtor owes creditor
+    const debtGrid: Record<string, Record<string, number>> = {}
+
+    for (const expense of expenses) {
+      const splits = expenseSplits.filter(s => s.expense_id === expense.id)
+      const payer = expense.paid_by
+      for (const split of splits) {
+        if (split.person_name === payer) continue // doesn't owe themselves
+        if (!debtGrid[split.person_name]) debtGrid[split.person_name] = {}
+        debtGrid[split.person_name][payer] = (debtGrid[split.person_name][payer] ?? 0) + split.share_amount
+      }
+    }
+
+    // Step 2: Net out mutual debts (if A owes B 10 and B owes A 7, net = A owes B 3)
+    const netGrid: Record<string, Record<string, number>> = {}
+    const allNames = Object.keys(debtGrid)
+    for (const a of allNames) {
+      for (const b of allNames) {
+        if (a === b) continue
+        const aToB = debtGrid[a]?.[b] ?? 0
+        const bToA = debtGrid[b]?.[a] ?? 0
+        if (aToB > bToA) {
+          if (!netGrid[a]) netGrid[a] = {}
+          netGrid[a][b] = Math.round((aToB - bToA) * 100) / 100
+        }
+      }
+    }
+
+    // Step 3: Collect sorted lists
+    const debtors = Object.keys(netGrid).sort((a, b) => a.localeCompare(b))
+    const creditorSet = new Set<string>()
+    for (const d of debtors) {
+      for (const c of Object.keys(netGrid[d])) creditorSet.add(c)
+    }
+    const creditors = Array.from(creditorSet).sort((a, b) => a.localeCompare(b))
+
+    return { debtors, creditors, cells: netGrid }
+  }, [expenses, expenseSplits])
 
   // ── Exact shares sum ──
   const exactSum = useMemo(() => {
@@ -395,6 +437,12 @@ export default function ExpenseScreen({
         >
           <Receipt size={16} strokeWidth={2} /> Abrechnung
         </button>
+        <button
+          className={`expense-toggle-btn ${section === 'matrix' ? 'active' : ''}`}
+          onClick={() => setSection('matrix')}
+        >
+          <Table2 size={16} strokeWidth={2} /> Matrix
+        </button>
       </div>
 
       {/* ── Ausgaben Section ── */}
@@ -638,6 +686,58 @@ export default function ExpenseScreen({
                 </div>
               )}
             </>
+          )}
+        </div>
+      )}
+
+      {/* ── Matrix Section ── */}
+      {section === 'matrix' && (
+        <div key="matrix">
+          <div className="expense-total-banner">
+            <Wallet size={18} strokeWidth={2} /> Gesamtausgaben: {fmtEUR(totalExpenses)}
+          </div>
+
+          {expenses.length === 0 ? (
+            <p className="expense-empty">Noch keine Ausgaben für die Matrix.</p>
+          ) : matrix.debtors.length === 0 ? (
+            <p className="expense-settlement-empty">Alle ausgeglichen — keine offenen Schulden!</p>
+          ) : (
+            <div className="expense-matrix-wrapper">
+              <table className="expense-matrix">
+                <thead>
+                  <tr>
+                    <th className="expense-matrix-corner">schuldet →<br />↓ bekommt</th>
+                    {matrix.creditors.map(c => (
+                      <th key={c} className="expense-matrix-header">{c}</th>
+                    ))}
+                    <th className="expense-matrix-total-header">Σ Schulden</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {matrix.debtors.map(debtor => {
+                    const totalOwed = matrix.creditors.reduce((sum, c) => sum + ((matrix.cells[debtor]?.[c]) ?? 0), 0)
+                    return (
+                      <tr key={debtor}>
+                        <td className="expense-matrix-label">{debtor}</td>
+                        {matrix.creditors.map(c => {
+                          const val = matrix.cells[debtor]?.[c] ?? 0
+                          return (
+                            <td key={c} className={`expense-matrix-cell ${val > 0 ? 'has-debt' : ''}`}>
+                              {val > 0 ? fmtEUR(val) : '—'}
+                            </td>
+                          )
+                        })}
+                        <td className="expense-matrix-total">{totalOwed > 0 ? fmtEUR(totalOwed) : '—'}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+              <p className="expense-matrix-hint">
+                <strong>So liest du die Matrix:</strong> {matrix.debtors.join(', ')} schulden Geld an {matrix.creditors.join(', ')}.
+                Jede Zelle zeigt, was der Schuldner (Zeile) dem Gläubiger (Spalte) zahlen muss.
+              </p>
+            </div>
           )}
         </div>
       )}
