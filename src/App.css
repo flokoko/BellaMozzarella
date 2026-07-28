@@ -26,6 +26,11 @@
 
 .mozza-bg canvas {
   display: block;
+  pointer-events: none !important;
+}
+
+.mozza-bg [style*="pointer-events"] {
+  pointer-events: none !important;
 }
 
 .app-header {
