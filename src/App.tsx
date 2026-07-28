@@ -157,9 +157,9 @@ export default function App() {
   }, [checkedCount, shoppingItems.length])
 
   // ── Early return (after all hooks) ─────────────────────────────────
-  if (!userName || !list) {
-    return <JoinScreen onJoin={handleJoin} />
-  }
+  // NOTE: no early return here — MozzaScene must render before the conditional
+  // to keep the WebGL context alive across login. The conditional rendering
+  // happens in the main return block below.
 
   // ── Event handlers ─────────────────────────────────────────────────
   const handleToggleTheme = () => {
