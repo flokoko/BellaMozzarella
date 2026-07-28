@@ -7,6 +7,7 @@ import { supabase, changeParticipantPassword } from './lib/supabase'
 import { useToast } from './context/ToastContext'
 import JoinScreen from './components/JoinScreen'
 import DashboardScreen from './components/DashboardScreen'
+import MozzaScene from './components/MozzaScene'
 import { useListData } from './hooks/useListData'
 
 // Code splitting: lazy-load screens that aren't needed on first paint
@@ -230,6 +231,14 @@ export default function App() {
   const expenseCategories = useMemo(() => categories.filter(c => c.list_type === 'expense'), [categories])
 
   return (
+    <>
+      {/* MozzaScene: immer gemountet, nie unmountet — per CSS versteckt nach Login */}
+      <div className={`mozza-bg ${!userName || !list ? '' : 'mozza-bg-hidden'}`}>
+        <MozzaScene fullscreen />
+      </div>
+      {!userName || !list ? (
+        <JoinScreen onJoin={handleJoin} />
+      ) : (
     <div className="app">
       <header className="app-header">
         <div className="header-top">
@@ -391,5 +400,7 @@ export default function App() {
         )}
       </main>
     </div>
+      )}
+    </>
   )
 }

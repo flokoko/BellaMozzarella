@@ -191,12 +191,12 @@ class WebGLErrorBoundary extends Component<{ children: ReactNode }, { hasError: 
   }
 }
 
-export default function MozzaScene() {
+export default function MozzaScene({ fullscreen }: { fullscreen?: boolean }) {
   return (
     <WebGLErrorBoundary>
       <Canvas
-        camera={{ position: [0, 1, 5], fov: 50 }}
-        style={{ width: 220, height: 220 }}
+        camera={{ position: [0, 1, fullscreen ? 8 : 5], fov: fullscreen ? 60 : 50 }}
+        style={fullscreen ? { width: '100%', height: '100%' } : { width: 220, height: 220 }}
         shadows
         dpr={[1, 2]}
       >
