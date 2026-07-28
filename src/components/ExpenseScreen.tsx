@@ -137,9 +137,9 @@ export default function ExpenseScreen({
   }, [balances])
 
   // ── Matrix: who owes whom (debtor × creditor grid) ──
+  // Shows ORIGINAL (unnetted) debts: what each person owes each other person
   const matrix = useMemo<{ debtors: string[]; creditors: string[]; cells: Record<string, Record<string, number>> }>(() => {
-    // Step 1: For each expense, compute net debt between each pair
-    // debtGrid[debtor][creditor] = amount debtor owes creditor
+    // For each expense, record what each non-payer owes the payer
     const debtGrid: Record<string, Record<string, number>> = {}
 
     for (const expense of expenses) {
@@ -152,30 +152,17 @@ export default function ExpenseScreen({
       }
     }
 
-    // Step 2: Net out mutual debts (if A owes B 10 and B owes A 7, net = A owes B 3)
-    const netGrid: Record<string, Record<string, number>> = {}
-    const allNames = Object.keys(debtGrid)
-    for (const a of allNames) {
-      for (const b of allNames) {
-        if (a === b) continue
-        const aToB = debtGrid[a]?.[b] ?? 0
-        const bToA = debtGrid[b]?.[a] ?? 0
-        if (aToB > bToA) {
-          if (!netGrid[a]) netGrid[a] = {}
-          netGrid[a][b] = Math.round((aToB - bToA) * 100) / 100
-        }
-      }
+    // Collect all names that appear as either debtor or creditor
+    const allDebtorNames = Object.keys(debtGrid)
+    const allCreditorNames = new Set<string>()
+    for (const d of allDebtorNames) {
+      for (const c of Object.keys(debtGrid[d])) allCreditorNames.add(c)
     }
 
-    // Step 3: Collect sorted lists
-    const debtors = Object.keys(netGrid).sort((a, b) => a.localeCompare(b))
-    const creditorSet = new Set<string>()
-    for (const d of debtors) {
-      for (const c of Object.keys(netGrid[d])) creditorSet.add(c)
-    }
-    const creditors = Array.from(creditorSet).sort((a, b) => a.localeCompare(b))
+    const debtors = allDebtorNames.sort((a, b) => a.localeCompare(b))
+    const creditors = Array.from(allCreditorNames).sort((a, b) => a.localeCompare(b))
 
-    return { debtors, creditors, cells: netGrid }
+    return { debtors, creditors, cells: debtGrid }
   }, [expenses, expenseSplits])
 
   // ── Exact shares sum ──
