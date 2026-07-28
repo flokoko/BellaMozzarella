@@ -1,0 +1,509 @@
+/* ── Bristol Screen ─────────────────────────────────────────────────── */
+
+.bristol-screen {
+  padding: 0.75rem 0;
+}
+
+/* ── Sub-toggle (pill switch between Tracking / Shit with me) ── */
+.bristol-sub-toggle-group {
+  display: flex;
+  gap: 0;
+  background: var(--button-bg);
+  border-radius: 14px;
+  padding: 4px;
+  margin-bottom: 1rem;
+}
+
+.bristol-sub-toggle-btn {
+  flex: 1;
+  border: none;
+  background: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--button-text);
+  padding: 0.55rem 0.75rem;
+  border-radius: 11px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bristol-sub-toggle-btn:active {
+  transform: scale(0.96);
+}
+
+.bristol-sub-toggle-btn.active {
+  background: var(--accent);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Section card ── */
+.bristol-section {
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 1.25rem 1.1rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow-sm);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.bristol-section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  margin-bottom: 0.85rem;
+}
+
+.bristol-hint {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.85rem;
+  line-height: 1.4;
+}
+
+.bristol-empty {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  padding: 0.5rem 0;
+}
+
+/* ── Already entered display ── */
+.bristol-already-entered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: var(--accent-light);
+  border-radius: 14px;
+}
+
+.bristol-already-value {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: white;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+.bristol-already-text {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.bristol-already-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* ── 7 value buttons: 2-3-2 grid layout ── */
+.bristol-value-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.bristol-value-grid .bristol-value-btn:nth-child(1),
+.bristol-value-grid .bristol-value-btn:nth-child(2) {
+  grid-column: span 1;
+}
+
+/* Shift first two to center: use a trick with the first row */
+.bristol-value-grid .bristol-value-btn:nth-child(1) {
+  grid-column: 1 / 2;
+}
+.bristol-value-grid .bristol-value-btn:nth-child(2) {
+  grid-column: 2 / 3;
+}
+.bristol-value-grid .bristol-value-btn:nth-child(3) {
+  grid-column: 1 / 2;
+}
+.bristol-value-grid .bristol-value-btn:nth-child(4) {
+  grid-column: 2 / 3;
+}
+.bristol-value-grid .bristol-value-btn:nth-child(5) {
+  grid-column: 3 / 4;
+}
+.bristol-value-grid .bristol-value-btn:nth-child(6) {
+  grid-column: 1 / 2;
+}
+.bristol-value-grid .bristol-value-btn:nth-child(7) {
+  grid-column: 2 / 3;
+}
+
+.bristol-value-btn {
+  border: 2px solid var(--border-color);
+  background: var(--card-bg-solid);
+  border-radius: 16px;
+  padding: 0.85rem 0.5rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  aspect-ratio: 1;
+  justify-content: center;
+}
+
+.bristol-value-btn:hover {
+  border-color: var(--bristol-color, var(--accent));
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.bristol-value-btn:active {
+  transform: scale(0.94);
+}
+
+.bristol-value-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bristol-value-btn.selected {
+  border-color: var(--bristol-color, var(--accent));
+  background: var(--bristol-color, var(--accent));
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.bristol-value-btn.selected .bristol-value-num,
+.bristol-value-btn.selected .bristol-value-adj {
+  color: white;
+}
+
+.bristol-value-num {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--bristol-color, var(--accent));
+  line-height: 1;
+}
+
+.bristol-value-adj {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+/* ── Tables ── */
+.bristol-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.bristol-table thead th {
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  padding: 0.45rem 0.4rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.bristol-table tbody td {
+  padding: 0.5rem 0.4rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.bristol-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.bristol-td-name {
+  font-weight: 600;
+}
+
+.bristol-td-me {
+  color: var(--accent);
+  font-size: 0.78rem;
+}
+
+.bristol-td-date {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.bristol-td-adj {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+.bristol-value-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: white;
+}
+
+.bristol-history-wrap {
+  overflow-x: auto;
+}
+
+.bristol-history-table {
+  min-width: 340px;
+}
+
+/* ── Stats cards ── */
+.bristol-stats-cards {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.bristol-stat-card {
+  background: var(--button-bg);
+  border-radius: 14px;
+  padding: 0.75rem 0.3rem;
+  text-align: center;
+  border: 1px solid var(--border-color);
+}
+
+.bristol-stat-value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1.2;
+}
+
+.bristol-stat-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-top: 0.2rem;
+}
+
+/* ── Charts ── */
+.bristol-chart-container {
+  margin-top: 1rem;
+  background: var(--card-bg-solid);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 0.75rem 0.5rem;
+}
+
+.bristol-chart-container + .bristol-chart-container {
+  margin-top: 0.75rem;
+}
+
+.bristol-chart-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  padding-left: 0.4rem;
+}
+
+/* ── Shit with me ── */
+.bristol-shit-section {
+  text-align: center;
+}
+
+.bristol-shit-button-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 0 1rem;
+}
+
+.bristol-shit-button {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #cc0000, #ff3333);
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 30px rgba(204, 0, 0, 0.4);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  animation: bristol-pulse 2s ease-in-out infinite;
+  position: relative;
+}
+
+.bristol-shit-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 40px rgba(204, 0, 0, 0.5);
+}
+
+.bristol-shit-button:active {
+  transform: scale(0.92);
+}
+
+.bristol-shit-button:disabled {
+  background: linear-gradient(135deg, #666, #999);
+  cursor: not-allowed;
+  animation: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes bristol-pulse {
+  0%, 100% {
+    box-shadow: 0 6px 30px rgba(204, 0, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 6px 50px rgba(204, 0, 0, 0.6), 0 0 0 10px rgba(204, 0, 0, 0.1);
+  }
+}
+
+.bristol-shit-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  line-height: 1.2;
+}
+
+.bristol-shit-emoji {
+  font-size: 2.2rem;
+}
+
+.bristol-shit-cooldown {
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.bristol-cooldown-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+}
+
+.bristol-active-alerts {
+  font-size: 0.85rem;
+  color: var(--danger);
+  font-weight: 600;
+  margin-top: 0.75rem;
+}
+
+/* ── Alerts list ── */
+.bristol-alerts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bristol-alert-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--button-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.3s ease;
+}
+
+.bristol-alert-item.mine {
+  background: var(--accent-light);
+  border-color: var(--accent);
+}
+
+.bristol-alert-emoji {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.bristol-alert-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.bristol-alert-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.bristol-alert-time {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ── Bristol toggle in settings (reuses theme-toggle pattern) ── */
+.bristol-toggle-group {
+  display: flex;
+  gap: 0;
+  background: var(--button-bg);
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.bristol-toggle-btn {
+  border: none;
+  background: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--button-text);
+  padding: 0.4rem 0.75rem;
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all 0.2s;
+}
+
+.bristol-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+.bristol-toggle-btn.active {
+  background: var(--accent);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Responsive ── */
+@media (max-width: 380px) {
+  .bristol-stats-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .bristol-stats-cards .bristol-stat-card:nth-child(4),
+  .bristol-stats-cards .bristol-stat-card:nth-child(5) {
+    grid-column: span 1;
+  }
+  .bristol-value-grid {
+    gap: 0.4rem;
+  }
+  .bristol-value-num {
+    font-size: 1.2rem;
+  }
+  .bristol-value-adj {
+    font-size: 0.65rem;
+  }
+}

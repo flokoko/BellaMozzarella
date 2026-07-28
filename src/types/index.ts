@@ -34,7 +34,7 @@ export interface ShoppingList {
   created_at: string
 }
 
-export type TabView = 'home' | 'list' | 'bring' | 'mealplan' | 'expenses' | 'settings'
+export type TabView = 'home' | 'list' | 'bring' | 'mealplan' | 'expenses' | 'bristol' | 'settings'
 export type BringFilter = 'all' | 'mine' | 'unfilled'
 
 export type DayOfWeek = 'Montag' | 'Dienstag' | 'Mittwoch' | 'Donnerstag' | 'Freitag' | 'Samstag' | 'Sonntag'
@@ -95,4 +95,20 @@ export interface Participant {
   name: string
   is_admin: boolean
   joined_at: string
+}
+
+export interface BristolEntry {
+  id: string
+  list_id: string
+  participant_name: string
+  value: number  // 1-7
+  entry_date: string  // YYYY-MM-DD
+  created_at: string
+}
+
+export interface ShitAlert {
+  id: string
+  list_id: string
+  participant_name: string
+  created_at: string
 }

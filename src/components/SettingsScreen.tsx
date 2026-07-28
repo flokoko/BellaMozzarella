@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Trash2, Palette, Sun, Moon, Check, Copy, Pencil, Crown, Lock, KeyRound, Bell, BellOff } from 'lucide-react'
+import { Trash2, Palette, Sun, Moon, Pencil, Crown, Lock, KeyRound, Bell, BellOff } from 'lucide-react'
 import type { ItemCategory, ListType, Participant } from '../types'
 import type { ThemeMode } from '../lib/theme'
 import { getTheme, setTheme } from '../lib/theme'
@@ -50,7 +50,8 @@ export default function SettingsScreen({
   const [theme, setThemeState] = useState<ThemeMode>('auto')
   const [editingName, setEditingName] = useState(false)
   const [newName, setNewName] = useState(userName)
-  const [copied, setCopied] = useState(false)
+  const [pushEnabled, setPushEnabled] = useState(false)
+  const [pushPermission, setPushPermission] = useState<NotificationPermission>('default')
   const [showAddParticipant, setShowAddParticipant] = useState(false)
   const [newParticipantName, setNewParticipantName] = useState('')
   const [adminPasswordInput, setAdminPasswordInput] = useState('')
@@ -61,8 +62,7 @@ export default function SettingsScreen({
   const [oldPassword, setOldPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [localCatNames, setLocalCatNames] = useState<Record<string, string>>({})
-  const [pushEnabled, setPushEnabled] = useState(false)
-  const [pushPermission, setPushPermission] = useState<NotificationPermission>('default')
+  const [bristolEnabled, setBristolEnabled] = useState(() => localStorage.getItem('bristol_modus_enabled') === 'true')
 
   const { updateCategory, deleteCategory, addCategory } = useCategories(onCategoriesChange)
   const debouncedUpdateCategory = useDebouncedCallback(updateCategory, 400)
@@ -74,6 +74,11 @@ export default function SettingsScreen({
       setPushPermission(Notification.permission)
     }
   }, [])
+
+  useEffect(() => {
+    localStorage.setItem('bristol_modus_enabled', bristolEnabled ? 'true' : 'false')
+    window.dispatchEvent(new CustomEvent('bristol-modus-change'))
+  }, [bristolEnabled])
 
   const handleThemeChange = (mode: ThemeMode) => {
     setThemeState(mode)
@@ -102,23 +107,6 @@ export default function SettingsScreen({
       onRename(trimmed)
     }
     setEditingName(false)
-  }
-
-  const handleCopyCode = async () => {
-    try {
-      await navigator.clipboard.writeText('BELLA26')
-    } catch {
-      const textarea = document.createElement('textarea')
-      textarea.value = 'BELLA26'
-      textarea.style.position = 'fixed'
-      textarea.style.opacity = '0'
-      document.body.appendChild(textarea)
-      textarea.select()
-      document.execCommand('copy')
-      document.body.removeChild(textarea)
-    }
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
   }
 
   const MAX_PARTICIPANTS = 14
@@ -307,6 +295,35 @@ export default function SettingsScreen({
         {pushPermission === 'denied' && (
           <p className="settings-cat-hint" style={{ marginTop: '0.4rem', marginBottom: 0 }}>
             Benachrichtigungen wurden im Browser blockiert. Bitte in den Browser-Einstellungen erlauben.
+          </p>
+        )}
+      </div>
+
+      {/* ── Bristol Modus ──────────────────────────────────────────────── */}
+      <div className="settings-section">
+        <h3 className="settings-section-title">Bristol Modus</h3>
+        <div className="settings-item" style={{ cursor: 'pointer' }}>
+          <span className="settings-item-label">Bristol Modus</span>
+          <div className="settings-item-control">
+            <div className="bristol-toggle-group">
+              <button
+                className={`bristol-toggle-btn ${!bristolEnabled ? 'active' : ''}`}
+                onClick={() => setBristolEnabled(false)}
+              >
+                Aus
+              </button>
+              <button
+                className={`bristol-toggle-btn ${bristolEnabled ? 'active' : ''}`}
+                onClick={() => setBristolEnabled(true)}
+              >
+                An
+              </button>
+            </div>
+          </div>
+        </div>
+        {bristolEnabled && (
+          <p className="settings-cat-hint" style={{ marginTop: '0.4rem', marginBottom: 0 }}>
+            Bristol-Tracking und "Shit with me" sind aktiviert. Du siehst den Bristol-Tab in der Navigation.
           </p>
         )}
       </div>
