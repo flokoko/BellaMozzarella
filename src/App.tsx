@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, Suspense, lazy } from 'react'
+import { useState, useEffect, useRef, useMemo, Suspense, lazy } from 'react'
 import { ArrowLeft, Settings, Sun, Moon, WifiOff, ShoppingCart, Backpack, Pizza, Wallet, type LucideIcon } from 'lucide-react'
 import confetti from 'canvas-confetti'
 import type { TabView } from './types'
@@ -227,6 +227,8 @@ export default function App() {
   }
 
   // ── Render ─────────────────────────────────────────────────────────
+  const expenseCategories = useMemo(() => categories.filter(c => c.list_type === 'expense'), [categories])
+
   return (
     <div className="app">
       <header className="app-header">
@@ -350,8 +352,10 @@ export default function App() {
               listId={list.id}
               userName={userName}
               knownPersons={knownPersons}
+              expenseCategories={expenseCategories}
               isLoading={isLoading}
               onExpensesChange={() => fetchExpenses(list.id)}
+              onCategoriesChange={() => fetchCategories(list.id)}
             />
           </Suspense>
         )}

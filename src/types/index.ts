@@ -1,10 +1,11 @@
-export type ListType = 'shopping' | 'bring'
+export type ListType = 'shopping' | 'bring' | 'expense'
 
 export interface ItemCategory {
   id: string
   list_id: string
   list_type: ListType
   name: string
+  icon: string
   color: string
   bg: string
   sort_order: number

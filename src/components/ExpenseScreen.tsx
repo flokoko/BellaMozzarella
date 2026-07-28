@@ -1,19 +1,11 @@
 import { useState, useMemo, useCallback } from 'react'
-import { Wallet, Receipt, Pencil, Trash2, ArrowRight, Pizza, Table2, MessageSquare } from 'lucide-react'
-import type { Expense, ExpenseSplit } from '../types'
+import { Wallet, Receipt, Pencil, Trash2, ArrowRight, Pizza, Table2, MessageSquare, Plus } from 'lucide-react'
+import type { Expense, ExpenseSplit, ItemCategory } from '../types'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../context/ToastContext'
 import { SkeletonExpenseCard } from './Skeleton'
 import ExpenseCharts from './ExpenseCharts'
 import './ExpenseScreen.css'
-
-const EXPENSE_CATEGORIES = [
-  { value: 'supermarkt', label: '🛒 Supermarkt', color: '#009246' },
-  { value: 'restaurant', label: '🍝 Restaurant', color: '#ce2b37' },
-  { value: 'benzin', label: '⛽ Benzin', color: '#4a90d9' },
-  { value: 'aktivitaeten', label: '🎯 Aktivitäten', color: '#e8a83a' },
-  { value: 'sonstiges', label: '📦 Sonstiges', color: '#9b6dd9' },
-]
 
 interface ExpenseScreenProps {
   expenses: Expense[]
@@ -21,8 +13,10 @@ interface ExpenseScreenProps {
   listId: string
   userName: string
   knownPersons: string[]
+  expenseCategories: ItemCategory[]
   isLoading?: boolean
   onExpensesChange: () => void
+  onCategoriesChange: () => void
 }
 
 const fmtEUR = (amount: number) =>
@@ -50,8 +44,10 @@ export default function ExpenseScreen({
   listId,
   userName,
   knownPersons,
+  expenseCategories,
   isLoading,
   onExpensesChange,
+  onCategoriesChange,
 }: ExpenseScreenProps) {
   const { toast, confirm } = useToast()
   const [section, setSection] = useState<'expenses' | 'settlement' | 'matrix'>('expenses')
@@ -66,6 +62,9 @@ export default function ExpenseScreen({
   const [expenseDate, setExpenseDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [expenseNote, setExpenseNote] = useState('')
   const [expenseCategory, setExpenseCategory] = useState('')
+  const [catEditorOpen, setCatEditorOpen] = useState(false)
+  const [catLocalNames, setCatLocalNames] = useState<Record<string, string>>({})
+  const [newCatName, setNewCatName] = useState('')
 
   // ── All known persons (from props + current form state) ──
   const allPersons = useMemo(() => {
@@ -500,18 +499,98 @@ export default function ExpenseScreen({
 
               {/* Kategorie */}
               <div className="expense-category-row">
-                {EXPENSE_CATEGORIES.map(cat => (
+                {expenseCategories.map(cat => (
                   <button
-                    key={cat.value}
-                    className={`expense-cat-chip ${expenseCategory === cat.value ? 'active' : ''}`}
-                    onClick={() => setExpenseCategory(expenseCategory === cat.value ? '' : cat.value)}
+                    key={cat.id}
+                    className={`expense-cat-chip ${expenseCategory === cat.name ? 'active' : ''}`}
+                    onClick={() => setExpenseCategory(expenseCategory === cat.name ? '' : cat.name)}
                     type="button"
-                    style={expenseCategory === cat.value ? { borderColor: cat.color, background: cat.color + '18', color: cat.color } : {}}
+                    style={expenseCategory === cat.name ? { borderColor: cat.color, background: cat.bg, color: cat.color } : {}}
                   >
-                    {cat.label}
+                    {cat.icon} {cat.name}
                   </button>
                 ))}
+                <button
+                  className="expense-cat-chip expense-cat-edit-btn"
+                  onClick={() => setCatEditorOpen(v => !v)}
+                  type="button"
+                >
+                  ✏️
+                </button>
               </div>
+
+              {/* Inline Category Editor */}
+              {catEditorOpen && (
+                <div className="expense-cat-editor">
+                  <div className="expense-cat-editor-list">
+                    {expenseCategories.map(cat => (
+                      <div key={cat.id} className="expense-cat-editor-row">
+                        <span className="expense-cat-editor-icon">{cat.icon}</span>
+                        <input
+                          className="expense-cat-editor-input"
+                          type="text"
+                          value={catLocalNames[cat.id] ?? cat.name}
+                          onChange={(e) => {
+                            setCatLocalNames(prev => ({ ...prev, [cat.id]: e.target.value }))
+                          }}
+                          onBlur={async () => {
+                            const newName = catLocalNames[cat.id]?.trim()
+                            if (newName && newName !== cat.name) {
+                              await supabase.from('categories').update({ name: newName }).eq('id', cat.id)
+                              onCategoriesChange()
+                            }
+                            setCatLocalNames(prev => { const n = { ...prev }; delete n[cat.id]; return n })
+                          }}
+                        />
+                        <button
+                          className="expense-cat-editor-del"
+                          onClick={async () => {
+                            confirm(`Kategorie "${cat.name}" wirklich löschen?`, async () => {
+                              await supabase.from('categories').delete().eq('id', cat.id)
+                              // Entferne Kategorie von allen Ausgaben die sie nutzen
+                              await supabase.from('expenses').update({ category: null }).eq('list_id', listId).eq('category', cat.name)
+                              onCategoriesChange()
+                              onExpensesChange()
+                            })
+                          }}
+                        >
+                          <Trash2 size={14} strokeWidth={2} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="expense-cat-editor-add-row">
+                    <input
+                      className="expense-cat-editor-input"
+                      type="text"
+                      placeholder="Neue Kategorie…"
+                      value={newCatName}
+                      onChange={(e) => setNewCatName(e.target.value)}
+                    />
+                    <button
+                      className="expense-cat-editor-add-btn"
+                      onClick={async () => {
+                        const name = newCatName.trim()
+                        if (!name) return
+                        const maxOrder = expenseCategories.reduce((m, c) => Math.max(m, c.sort_order), 0)
+                        await supabase.from('categories').insert({
+                          list_id: listId,
+                          list_type: 'expense',
+                          name,
+                          icon: '📦',
+                          color: '#9b6dd9',
+                          bg: '#e8dcf7',
+                          sort_order: maxOrder + 1,
+                        })
+                        setNewCatName('')
+                        onCategoriesChange()
+                      }}
+                    >
+                      <Plus size={16} strokeWidth={2} />
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Notiz */}
               <input
@@ -647,7 +726,7 @@ export default function ExpenseScreen({
                     <div className="expense-card-meta">
                       {expense.category && (
                         <span className="expense-card-category">
-                          {EXPENSE_CATEGORIES.find(c => c.value === expense.category)?.label ?? expense.category}
+                          {expenseCategories.find(c => c.name === expense.category)?.icon ?? '📦'} {expense.category}
                         </span>
                       )}
                       Bezahlt von {expense.paid_by}

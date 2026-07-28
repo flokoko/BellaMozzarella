@@ -315,6 +315,7 @@ export default function ListScreen({ items, categories, listId, userName, isLoad
           id: '__uncategorized__',
           list_id: listId,
           name: 'Ohne Kategorie',
+          icon: '📦',
           color: '#888',
           bg: '#f0f0f0',
           sort_order: 9999,
