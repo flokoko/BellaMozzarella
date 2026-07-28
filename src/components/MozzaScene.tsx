@@ -1,3 +1,4 @@
+import { Component, type ReactNode } from 'react'
 import { useRef, useMemo } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
@@ -139,14 +140,10 @@ function OrbitingBall({
   )
 }
 
-export default function MozzaScene() {
+/** Inner scene content — extracted so error boundary wraps the Canvas */
+function SceneContent() {
   return (
-    <Canvas
-      camera={{ position: [0, 1, 5], fov: 50 }}
-      style={{ width: 220, height: 220 }}
-      shadows
-      dpr={[1, 2]}
-    >
+    <>
       {/* Lighting — Alpinaweiß: high ambient for bright base, cool directional for crisp shadows */}
       <ambientLight intensity={0.85} color="#f0f4ff" />
       <directionalLight
@@ -164,6 +161,47 @@ export default function MozzaScene() {
       {/* Two orbiting mozzarella balls on different orbital planes */}
       <OrbitingBall orbitRadius={1.8} speed={2.5} tiltX={Math.PI / 3} tiltZ={0} offset={0} />
       <OrbitingBall orbitRadius={1.8} speed={2.5} tiltX={Math.PI / 3} tiltZ={Math.PI / 2} offset={Math.PI} />
-    </Canvas>
+    </>
+  )
+}
+
+/**
+ * Error boundary that silently catches WebGL context loss during unmount.
+ * This prevents the Three.js Canvas teardown from crashing the parent React tree.
+ */
+class WebGLErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false }
+
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+
+  componentDidCatch(error: Error) {
+    // WebGL context loss during unmount is expected — suppress silently
+    const msg = error?.message?.toLowerCase() || ''
+    if (msg.includes('webgl') || msg.includes('context') || msg.includes('canvas')) {
+      return
+    }
+    console.warn('MozzaScene error:', error)
+  }
+
+  render() {
+    if (this.state.hasError) return null
+    return this.props.children
+  }
+}
+
+export default function MozzaScene() {
+  return (
+    <WebGLErrorBoundary>
+      <Canvas
+        camera={{ position: [0, 1, 5], fov: 50 }}
+        style={{ width: 220, height: 220 }}
+        shadows
+        dpr={[1, 2]}
+      >
+        <SceneContent />
+      </Canvas>
+    </WebGLErrorBoundary>
   )
 }
