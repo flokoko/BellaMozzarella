@@ -6,7 +6,7 @@
   padding: 1.5rem;
   position: relative;
   z-index: 1;
-  background: transparent;
+  background: linear-gradient(160deg, rgba(0,146,70,0.04) 0%, rgba(255,255,255,0.15) 50%, rgba(206,43,55,0.04) 100%);
 }
 
 .join-card {
