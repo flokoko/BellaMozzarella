@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, Suspense, lazy } from 'react'
-import { ArrowLeft, Settings, Sun, Moon, WifiOff, ShoppingCart, Backpack, Pizza, Wallet, Activity, type LucideIcon } from 'lucide-react'
+import { ArrowLeft, Settings, Sun, Moon, WifiOff, ShoppingCart, Backpack, Pizza, Wallet, type LucideIcon } from 'lucide-react'
 import confetti from 'canvas-confetti'
 import type { TabView } from './types'
 import { getResolvedTheme, toggleTheme, applyTheme, initThemeListener } from './lib/theme'
@@ -222,7 +222,7 @@ export default function App() {
     bring: { icon: Backpack, label: 'Mitbringen' },
     mealplan: { icon: Pizza, label: 'Essensplan' },
     expenses: { icon: Wallet, label: 'Ausgaben' },
-    bristol: { icon: Activity, label: 'Bristol' },
+    bristol: { icon: Wallet, label: 'Bristol' },
     settings: { icon: Settings, label: 'Einstellungen' },
   }
 
@@ -258,15 +258,6 @@ export default function App() {
                 })()}
                 {featureTitles[tab as Exclude<TabView, 'home' | 'settings'>].label}
               </span>
-            )}
-            {bristolEnabled && (
-              <button
-                className={`header-tab-btn ${tab === 'bristol' ? 'active' : ''}`}
-                onClick={() => setTab('bristol')}
-                aria-label="Bristol"
-              >
-                <Activity size={20} strokeWidth={2} />
-              </button>
             )}
             <button className="header-settings-btn" onClick={() => setTab('settings')} aria-label="Einstellungen">
               <Settings size={20} strokeWidth={2} />
@@ -304,6 +295,7 @@ export default function App() {
             onNotesChange={() => fetchNotes(list.id)}
             installPrompt={installPrompt}
             onInstall={handleInstall}
+            bristolEnabled={bristolEnabled}
           />
         )}
         {tab === 'list' && (

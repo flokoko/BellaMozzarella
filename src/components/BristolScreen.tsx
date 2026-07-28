@@ -1,8 +1,7 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
-import { playNotificationSound } from '../lib/notificationSound'
 import { useToast } from '../context/ToastContext'
-import type { BristolEntry, ShitAlert } from '../types'
+import type { BristolEntry } from '../types'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   LineChart, Line, CartesianGrid, Legend,
@@ -29,8 +28,6 @@ const BRISTOL_COLORS: Record<number, string> = {
   7: '#FF6347',
 }
 
-const COOLDOWN_MS = 60 * 60 * 1000 // 1 hour
-
 interface BristolScreenProps {
   listId: string
   userName: string
@@ -40,33 +37,13 @@ function todayStr(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
-function timeAgo(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime()
-  const mins = Math.floor(diff / 60000)
-  if (mins < 1) return 'gerade eben'
-  if (mins < 60) return `vor ${mins} Min`
-  const hours = Math.floor(mins / 60)
-  return `vor ${hours}h ${mins % 60}min`
-}
-
 export default function BristolScreen({ listId, userName }: BristolScreenProps) {
   const { toast } = useToast()
-  const [subView, setSubView] = useState<'tracking' | 'shitwithme'>('tracking')
 
   // ── Bristol entries state ──
   const [entries, setEntries] = useState<BristolEntry[]>([])
   const [loadingEntries, setLoadingEntries] = useState(true)
   const [submitting, setSubmitting] = useState(false)
-
-  // ── Shit alerts state ──
-  const [alerts, setAlerts] = useState<ShitAlert[]>([])
-  const [lastUserAlertAt, setLastUserAlertAt] = useState<string | null>(null)
-  const [cooldownMs, setCooldownMs] = useState(0)
-  const [submittingAlert, setSubmittingAlert] = useState(false)
-
-  // ── Refs for polling ──
-  const knownAlertIdsRef = useRef<Set<string>>(new Set())
-  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const today = todayStr()
 
@@ -114,103 +91,6 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
     navigator.vibrate?.(20)
     fetchEntries()
   }, [listId, userName, today, toast, fetchEntries])
-
-  // ── Fetch shit alerts ──
-  const fetchAlerts = useCallback(async () => {
-    const startOfDay = new Date()
-    startOfDay.setHours(0, 0, 0, 0)
-
-    const { data, error } = await supabase
-      .from('shit_alerts')
-      .select('*')
-      .eq('list_id', listId)
-      .gte('created_at', startOfDay.toISOString())
-      .order('created_at', { ascending: false })
-    if (error) {
-      console.error('fetchAlerts error:', error)
-      return
-    }
-    const list = (data as ShitAlert[]) ?? []
-
-    // Check for new alerts from others
-    const known = knownAlertIdsRef.current
-    const newAlerts = list.filter(a => !known.has(a.id))
-    for (const a of newAlerts) {
-      if (a.participant_name !== userName) {
-        playNotificationSound()
-        toast(`💩 ${a.participant_name} ist auf dem Klo! 🚽`, 'info')
-        navigator.vibrate?.([100, 50, 100])
-      }
-    }
-    // Update known set
-    list.forEach(a => known.add(a.id))
-    knownAlertIdsRef.current = known
-
-    // Update last user alert time for cooldown
-    const userAlert = list.find(a => a.participant_name === userName)
-    if (userAlert) {
-      setLastUserAlertAt(userAlert.created_at)
-    }
-
-    setAlerts(list)
-  }, [listId, userName, toast])
-
-  // ── Cooldown timer tick ──
-  useEffect(() => {
-    if (!lastUserAlertAt) {
-      setCooldownMs(0)
-      return
-    }
-    const updateCd = () => {
-      const elapsed = Date.now() - new Date(lastUserAlertAt).getTime()
-      const remaining = COOLDOWN_MS - elapsed
-      setCooldownMs(remaining > 0 ? remaining : 0)
-    }
-    updateCd()
-    const interval = setInterval(updateCd, 1000)
-    return () => clearInterval(interval)
-  }, [lastUserAlertAt])
-
-  // ── Polling for alerts (when on shitwithme subview) ──
-  useEffect(() => {
-    if (subView !== 'shitwithme') {
-      if (pollingRef.current) {
-        clearInterval(pollingRef.current)
-        pollingRef.current = null
-      }
-      return
-    }
-    // Initial fetch
-    fetchAlerts()
-    // Poll every 5 seconds
-    pollingRef.current = setInterval(fetchAlerts, 5000)
-    return () => {
-      if (pollingRef.current) {
-        clearInterval(pollingRef.current)
-        pollingRef.current = null
-      }
-    }
-  }, [subView, fetchAlerts])
-
-  // ── Submit shit alert ──
-  const handleShitWithMe = useCallback(async () => {
-    if (cooldownMs > 0) return
-    setSubmittingAlert(true)
-    const { error } = await supabase
-      .from('shit_alerts')
-      .insert({
-        list_id: listId,
-        participant_name: userName,
-      })
-    setSubmittingAlert(false)
-    if (error) {
-      toast(`Fehler: ${error.message}`, 'error')
-      return
-    }
-    toast('💩 Alert gesendet! Alle anderen Bristol-Modus-Nutzer werden benachrichtigt.', 'success')
-    navigator.vibrate?.([100, 50, 100, 50, 200])
-    fetchAlerts()
-  }, [cooldownMs, listId, userName, toast, fetchAlerts])
 
   // ── Derived data ──
   const myTodayEntry = useMemo(
@@ -269,293 +149,201 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
     return days
   }, [entries])
 
-  const recentAlerts = useMemo(() => alerts.slice(0, 20), [alerts])
-  const otherAlerts = useMemo(
-    () => alerts.filter(a => a.participant_name !== userName),
-    [alerts, userName]
-  )
-
   // ── Render ──
   return (
     <div className="bristol-screen">
-      {/* ── Sub-toggle ── */}
-      <div className="bristol-sub-toggle-group">
-        <button
-          className={`bristol-sub-toggle-btn ${subView === 'tracking' ? 'active' : ''}`}
-          onClick={() => setSubView('tracking')}
-        >
-          Bristol-Tracking
-        </button>
-        <button
-          className={`bristol-sub-toggle-btn ${subView === 'shitwithme' ? 'active' : ''}`}
-          onClick={() => setSubView('shitwithme')}
-        >
-          Shit with me 💩
-        </button>
+      {/* ── Daily Entry ── */}
+      <div className="bristol-section">
+        <h3 className="bristol-section-title">Heutiger Eintrag</h3>
+        {myTodayEntry ? (
+          <div className="bristol-already-entered">
+            <div className="bristol-already-value" style={{ background: BRISTOL_COLORS[myTodayEntry.value] }}>
+              {myTodayEntry.value}
+            </div>
+            <p className="bristol-already-text">
+              Heute bereits eingetragen: <strong>{myTodayEntry.value}</strong> — {BRISTOL_ADJECTIVES[myTodayEntry.value]}
+            </p>
+            <p className="bristol-already-hint">Tippe einen anderen Wert, um ihn zu ändern.</p>
+          </div>
+        ) : (
+          <p className="bristol-hint">Wähle deinen Bristol-Wert für heute:</p>
+        )}
+        <div className="bristol-value-grid">
+          {Array.from({ length: 7 }, (_, i) => i + 1).map(v => (
+            <button
+              key={v}
+              className={`bristol-value-btn ${myTodayEntry?.value === v ? 'selected' : ''}`}
+              style={{ '--bristol-color': BRISTOL_COLORS[v] } as React.CSSProperties}
+              disabled={submitting}
+              onClick={() => handleSubmitEntry(v)}
+            >
+              <span className="bristol-value-num">{v}</span>
+              <span className="bristol-value-adj">{BRISTOL_ADJECTIVES[v]}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
-      {subView === 'tracking' && (
-        <>
-          {/* ── Daily Entry ── */}
-          <div className="bristol-section">
-            <h3 className="bristol-section-title">Heutiger Eintrag</h3>
-            {myTodayEntry ? (
-              <div className="bristol-already-entered">
-                <div className="bristol-already-value" style={{ background: BRISTOL_COLORS[myTodayEntry.value] }}>
-                  {myTodayEntry.value}
-                </div>
-                <p className="bristol-already-text">
-                  Heute bereits eingetragen: <strong>{myTodayEntry.value}</strong> — {BRISTOL_ADJECTIVES[myTodayEntry.value]}
-                </p>
-                <p className="bristol-already-hint">Tippe einen anderen Wert, um ihn zu ändern.</p>
-              </div>
-            ) : (
-              <p className="bristol-hint">Wähle deinen Bristol-Wert für heute:</p>
-            )}
-            <div className="bristol-value-grid">
-              {Array.from({ length: 7 }, (_, i) => i + 1).map(v => (
-                <button
-                  key={v}
-                  className={`bristol-value-btn ${myTodayEntry?.value === v ? 'selected' : ''}`}
-                  style={{ '--bristol-color': BRISTOL_COLORS[v] } as React.CSSProperties}
-                  disabled={submitting}
-                  onClick={() => handleSubmitEntry(v)}
-                >
-                  <span className="bristol-value-num">{v}</span>
-                  <span className="bristol-value-adj">{BRISTOL_ADJECTIVES[v]}</span>
-                </button>
+      {/* ── Today's Overview ── */}
+      <div className="bristol-section">
+        <h3 className="bristol-section-title">Heute Übersicht</h3>
+        {todayEntries.length === 0 ? (
+          <p className="bristol-empty">Noch keine Einträge heute.</p>
+        ) : (
+          <table className="bristol-table">
+            <thead>
+              <tr>
+                <th>Person</th>
+                <th>Wert</th>
+                <th>Typ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {todayEntries.map(e => (
+                <tr key={e.id}>
+                  <td className="bristol-td-name">
+                    {e.participant_name}
+                    {e.participant_name === userName && <span className="bristol-td-me"> (du)</span>}
+                  </td>
+                  <td className="bristol-td-value">
+                    <span className="bristol-value-badge" style={{ background: BRISTOL_COLORS[e.value] }}>
+                      {e.value}
+                    </span>
+                  </td>
+                  <td className="bristol-td-adj">{BRISTOL_ADJECTIVES[e.value]}</td>
+                </tr>
               ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* ── Statistics ── */}
+      {stats && (
+        <div className="bristol-section">
+          <h3 className="bristol-section-title">Statistik</h3>
+
+          <div className="bristol-stats-cards">
+            <div className="bristol-stat-card">
+              <div className="bristol-stat-value">{stats.total}</div>
+              <div className="bristol-stat-label">Einträge</div>
+            </div>
+            <div className="bristol-stat-card">
+              <div className="bristol-stat-value">{stats.avg.toFixed(1)}</div>
+              <div className="bristol-stat-label">Ø Wert</div>
+            </div>
+            <div className="bristol-stat-card">
+              <div className="bristol-stat-value">{stats.min}</div>
+              <div className="bristol-stat-label">Min</div>
+            </div>
+            <div className="bristol-stat-card">
+              <div className="bristol-stat-value">{stats.max}</div>
+              <div className="bristol-stat-label">Max</div>
+            </div>
+            <div className="bristol-stat-card">
+              <div className="bristol-stat-value">{stats.mode}</div>
+              <div className="bristol-stat-label">Häufigster</div>
             </div>
           </div>
 
-          {/* ── Today's Overview ── */}
-          <div className="bristol-section">
-            <h3 className="bristol-section-title">Heute Übersicht</h3>
-            {todayEntries.length === 0 ? (
-              <p className="bristol-empty">Noch keine Einträge heute.</p>
-            ) : (
-              <table className="bristol-table">
-                <thead>
-                  <tr>
-                    <th>Person</th>
-                    <th>Wert</th>
-                    <th>Typ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {todayEntries.map(e => (
-                    <tr key={e.id}>
-                      <td className="bristol-td-name">
-                        {e.participant_name}
-                        {e.participant_name === userName && <span className="bristol-td-me"> (du)</span>}
-                      </td>
-                      <td className="bristol-td-value">
-                        <span className="bristol-value-badge" style={{ background: BRISTOL_COLORS[e.value] }}>
-                          {e.value}
-                        </span>
-                      </td>
-                      <td className="bristol-td-adj">{BRISTOL_ADJECTIVES[e.value]}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+          {/* Distribution BarChart */}
+          <div className="bristol-chart-container">
+            <h4 className="bristol-chart-title">Verteilung der Werte</h4>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={distributionData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                <XAxis dataKey="label" tick={{ fontSize: 12, fill: 'var(--text-secondary)' }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: 'var(--text-secondary)' }} />
+                <Tooltip
+                  contentStyle={{
+                    background: 'var(--card-bg-solid)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '8px',
+                    fontSize: '0.85rem',
+                  }}
+                  formatter={(val: any) => [`${val} Einträge`, 'Anzahl']}
+                  labelFormatter={(label: any) => `Wert ${label}`}
+                />
+                <Bar dataKey="count" fill="var(--accent)" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
 
-          {/* ── Statistics ── */}
-          {stats && (
-            <div className="bristol-section">
-              <h3 className="bristol-section-title">Statistik</h3>
-
-              <div className="bristol-stats-cards">
-                <div className="bristol-stat-card">
-                  <div className="bristol-stat-value">{stats.total}</div>
-                  <div className="bristol-stat-label">Einträge</div>
-                </div>
-                <div className="bristol-stat-card">
-                  <div className="bristol-stat-value">{stats.avg.toFixed(1)}</div>
-                  <div className="bristol-stat-label">Ø Wert</div>
-                </div>
-                <div className="bristol-stat-card">
-                  <div className="bristol-stat-value">{stats.min}</div>
-                  <div className="bristol-stat-label">Min</div>
-                </div>
-                <div className="bristol-stat-card">
-                  <div className="bristol-stat-value">{stats.max}</div>
-                  <div className="bristol-stat-label">Max</div>
-                </div>
-                <div className="bristol-stat-card">
-                  <div className="bristol-stat-value">{stats.mode}</div>
-                  <div className="bristol-stat-label">Häufigster</div>
-                </div>
-              </div>
-
-              {/* Distribution BarChart */}
-              <div className="bristol-chart-container">
-                <h4 className="bristol-chart-title">Verteilung der Werte</h4>
-                <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={distributionData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                    <XAxis dataKey="label" tick={{ fontSize: 12, fill: 'var(--text-secondary)' }} />
-                    <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: 'var(--text-secondary)' }} />
-                    <Tooltip
-                      contentStyle={{
-                        background: 'var(--card-bg-solid)',
-                        border: '1px solid var(--border-color)',
-                        borderRadius: '8px',
-                        fontSize: '0.85rem',
-                      }}
-                      formatter={(val: any) => [`${val} Einträge`, 'Anzahl']}
-                      labelFormatter={(label: any) => `Wert ${label}`}
-                    />
-                    <Bar dataKey="count" fill="var(--accent)" radius={[6, 6, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-
-              {/* Trend LineChart */}
-              <div className="bristol-chart-container">
-                <h4 className="bristol-chart-title">Ø Wert Trend (14 Tage)</h4>
-                <ResponsiveContainer width="100%" height={220}>
-                  <LineChart data={trendData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                    <XAxis dataKey="label" tick={{ fontSize: 11, fill: 'var(--text-secondary)' }} />
-                    <YAxis domain={[1, 7]} tick={{ fontSize: 12, fill: 'var(--text-secondary)' }} />
-                    <Tooltip
-                      contentStyle={{
-                        background: 'var(--card-bg-solid)',
-                        border: '1px solid var(--border-color)',
-                        borderRadius: '8px',
-                        fontSize: '0.85rem',
-                      }}
-                      formatter={(val: any) => val !== null && val !== undefined ? [`Ø ${val}`, 'Durchschnitt'] : ['Keine Daten', '']}
-                      labelFormatter={(label: any) => label}
-                    />
-                    <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="avg"
-                      name="Durchschnitt"
-                      stroke="var(--accent)"
-                      strokeWidth={2}
-                      dot={{ fill: 'var(--accent)', r: 3 }}
-                      connectNulls
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          )}
-
-          {/* ── Full History ── */}
-          <div className="bristol-section">
-            <h3 className="bristol-section-title">Verlauf</h3>
-            {loadingEntries ? (
-              <p className="bristol-empty">Lädt…</p>
-            ) : entries.length === 0 ? (
-              <p className="bristol-empty">Noch keine Einträge.</p>
-            ) : (
-              <div className="bristol-history-wrap">
-                <table className="bristol-table bristol-history-table">
-                  <thead>
-                    <tr>
-                      <th>Datum</th>
-                      <th>Person</th>
-                      <th>Wert</th>
-                      <th>Typ</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {entries.map(e => (
-                      <tr key={e.id}>
-                        <td className="bristol-td-date">
-                          {new Date(e.entry_date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
-                        </td>
-                        <td className="bristol-td-name">
-                          {e.participant_name}
-                          {e.participant_name === userName && <span className="bristol-td-me"> (du)</span>}
-                        </td>
-                        <td className="bristol-td-value">
-                          <span className="bristol-value-badge" style={{ background: BRISTOL_COLORS[e.value] }}>
-                            {e.value}
-                          </span>
-                        </td>
-                        <td className="bristol-td-adj">{BRISTOL_ADJECTIVES[e.value]}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+          {/* Trend LineChart */}
+          <div className="bristol-chart-container">
+            <h4 className="bristol-chart-title">Ø Wert Trend (14 Tage)</h4>
+            <ResponsiveContainer width="100%" height={220}>
+              <LineChart data={trendData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: 'var(--text-secondary)' }} />
+                <YAxis domain={[1, 7]} tick={{ fontSize: 12, fill: 'var(--text-secondary)' }} />
+                <Tooltip
+                  contentStyle={{
+                    background: 'var(--card-bg-solid)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '8px',
+                    fontSize: '0.85rem',
+                  }}
+                  formatter={(val: any) => val !== null && val !== undefined ? [`Ø ${val}`, 'Durchschnitt'] : ['Keine Daten', '']}
+                  labelFormatter={(label: any) => label}
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="avg"
+                  name="Durchschnitt"
+                  stroke="var(--accent)"
+                  strokeWidth={2}
+                  dot={{ fill: 'var(--accent)', r: 3 }}
+                  connectNulls
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
-        </>
+        </div>
       )}
 
-      {subView === 'shitwithme' && (
-        <>
-          {/* ── Big Red Button ── */}
-          <div className="bristol-section bristol-shit-section">
-            <h3 className="bristol-section-title">Shit with me</h3>
-            <p className="bristol-hint">
-              Drücke den Knopf, um alle anderen Bristol-Modus-Nutzer zu benachrichtigen, dass du auf dem Klo bist.
-            </p>
-            <div className="bristol-shit-button-wrap">
-              <button
-                className="bristol-shit-button"
-                disabled={cooldownMs > 0 || submittingAlert}
-                onClick={handleShitWithMe}
-              >
-                {cooldownMs > 0 ? (
-                  <span className="bristol-shit-cooldown">
-                    ⏳ {Math.floor(cooldownMs / 60000)}:{String(Math.floor((cooldownMs % 60000) / 1000)).padStart(2, '0')}
-                  </span>
-                ) : (
-                  <span className="bristol-shit-label">
-                    <span className="bristol-shit-emoji">💩</span>
-                    SHIT WITH ME
-                  </span>
-                )}
-              </button>
-            </div>
-            {cooldownMs > 0 && (
-              <p className="bristol-cooldown-hint">
-                Cooldown aktiv — du kannst den Knopf in {Math.ceil(cooldownMs / 1000)} Sekunden wieder verwenden.
-              </p>
-            )}
-            {otherAlerts.length > 0 && (
-              <p className="bristol-active-alerts">
-                🔔 {otherAlerts.length} andere {otherAlerts.length === 1 ? 'Person ist' : 'Personen sind'} heute auf dem Klo!
-              </p>
-            )}
-          </div>
-
-          {/* ── Recent Alerts ── */}
-          <div className="bristol-section">
-            <h3 className="bristol-section-title">Aktuelle Alerts (heute)</h3>
-            {recentAlerts.length === 0 ? (
-              <p className="bristol-empty">Noch keine Alerts heute.</p>
-            ) : (
-              <div className="bristol-alerts-list">
-                {recentAlerts.map(a => (
-                  <div
-                    key={a.id}
-                    className={`bristol-alert-item ${a.participant_name === userName ? 'mine' : ''}`}
-                  >
-                    <span className="bristol-alert-emoji">💩</span>
-                    <div className="bristol-alert-body">
-                      <span className="bristol-alert-name">
-                        {a.participant_name}
-                        {a.participant_name === userName && <span className="bristol-td-me"> (du)</span>}
+      {/* ── Full History ── */}
+      <div className="bristol-section">
+        <h3 className="bristol-section-title">Verlauf</h3>
+        {loadingEntries ? (
+          <p className="bristol-empty">Lädt…</p>
+        ) : entries.length === 0 ? (
+          <p className="bristol-empty">Noch keine Einträge.</p>
+        ) : (
+          <div className="bristol-history-wrap">
+            <table className="bristol-table bristol-history-table">
+              <thead>
+                <tr>
+                  <th>Datum</th>
+                  <th>Person</th>
+                  <th>Wert</th>
+                  <th>Typ</th>
+                </tr>
+              </thead>
+              <tbody>
+                {entries.map(e => (
+                  <tr key={e.id}>
+                    <td className="bristol-td-date">
+                      {new Date(e.entry_date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
+                    </td>
+                    <td className="bristol-td-name">
+                      {e.participant_name}
+                      {e.participant_name === userName && <span className="bristol-td-me"> (du)</span>}
+                    </td>
+                    <td className="bristol-td-value">
+                      <span className="bristol-value-badge" style={{ background: BRISTOL_COLORS[e.value] }}>
+                        {e.value}
                       </span>
-                      <span className="bristol-alert-time">{timeAgo(a.created_at)}</span>
-                    </div>
-                  </div>
+                    </td>
+                    <td className="bristol-td-adj">{BRISTOL_ADJECTIVES[e.value]}</td>
+                  </tr>
                 ))}
-              </div>
-            )}
+              </tbody>
+            </table>
           </div>
-        </>
-      )}
+        )}
+      </div>
     </div>
   )
 }

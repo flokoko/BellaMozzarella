@@ -1,3 +1,6 @@
+-- Drop the deprecated shit_alerts table (feature removed)
+DROP TABLE IF EXISTS shit_alerts CASCADE;
+
 -- Block 1: Create tables
 CREATE TABLE IF NOT EXISTS bristol_entries (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -12,16 +15,8 @@ CREATE TABLE IF NOT EXISTS bristol_entries (
 ALTER TABLE bristol_entries DROP CONSTRAINT IF EXISTS bristol_entries_unique;
 ALTER TABLE bristol_entries ADD CONSTRAINT bristol_entries_unique UNIQUE (list_id, participant_name, entry_date);
 
-CREATE TABLE IF NOT EXISTS shit_alerts (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  list_id UUID NOT NULL REFERENCES lists(id) ON DELETE CASCADE,
-  participant_name TEXT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
 -- Block 2: Enable RLS
 ALTER TABLE bristol_entries ENABLE ROW LEVEL SECURITY;
-ALTER TABLE shit_alerts ENABLE ROW LEVEL SECURITY;
 
 -- Block 3: RLS Policies (using join code header pattern like existing tables)
 CREATE POLICY "bristol_entries_read_by_code" ON bristol_entries
@@ -39,20 +34,5 @@ CREATE POLICY "bristol_entries_write_by_code" ON bristol_entries
     AND l.join_code = (current_setting('request.headers', true)::json ->> 'x-join-code'))
   );
 
-CREATE POLICY "shit_alerts_read_by_code" ON shit_alerts
-  FOR SELECT USING (
-    EXISTS (SELECT 1 FROM lists l WHERE l.id = shit_alerts.list_id
-    AND l.join_code = (current_setting('request.headers', true)::json ->> 'x-join-code'))
-  );
-
-CREATE POLICY "shit_alerts_write_by_code" ON shit_alerts
-  FOR ALL USING (
-    EXISTS (SELECT 1 FROM lists l WHERE l.id = shit_alerts.list_id
-    AND l.join_code = (current_setting('request.headers', true)::json ->> 'x-join-code'))
-  ) WITH CHECK (
-    EXISTS (SELECT 1 FROM lists l WHERE l.id = shit_alerts.list_id
-    AND l.join_code = (current_setting('request.headers', true)::json ->> 'x-join-code'))
-  );
-
 -- Block 4: Verify
-SELECT tablename, policyname FROM pg_policies WHERE tablename IN ('bristol_entries', 'shit_alerts');
+SELECT tablename, policyname FROM pg_policies WHERE tablename IN ('bristol_entries');

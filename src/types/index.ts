@@ -105,10 +105,3 @@ export interface BristolEntry {
   entry_date: string  // YYYY-MM-DD
   created_at: string
 }
-
-export interface ShitAlert {
-  id: string
-  list_id: string
-  participant_name: string
-  created_at: string
-}

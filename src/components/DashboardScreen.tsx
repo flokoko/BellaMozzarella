@@ -1,5 +1,5 @@
-import { useState, type ReactNode } from 'react'
-import { ShoppingCart, Backpack, Pizza, Wallet, Smartphone, StickyNote, Trash2, ExternalLink } from 'lucide-react'
+import { useState, useEffect, type ReactNode } from 'react'
+import { ShoppingCart, Backpack, Pizza, Wallet, Smartphone, StickyNote, Trash2, ExternalLink, Activity } from 'lucide-react'
 import type { QuickNote, TabView } from '../types'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../context/ToastContext'
@@ -57,6 +57,7 @@ interface DashboardScreenProps {
   onNotesChange: () => void
   installPrompt: any
   onInstall: () => void
+  bristolEnabled: boolean
 }
 
 export default function DashboardScreen({
@@ -75,6 +76,7 @@ export default function DashboardScreen({
   onNotesChange,
   installPrompt,
   onInstall,
+  bristolEnabled,
 }: DashboardScreenProps) {
   const { toast, confirm } = useToast()
   const [showForm, setShowForm] = useState(false)
@@ -83,6 +85,22 @@ export default function DashboardScreen({
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [editContent, setEditContent] = useState('')
+  const [bristolCount, setBristolCount] = useState(0)
+
+  // Fetch today's bristol entry count
+  useEffect(() => {
+    if (!bristolEnabled) {
+      setBristolCount(0)
+      return
+    }
+    const today = new Date().toISOString().slice(0, 10)
+    supabase
+      .from('bristol_entries')
+      .select('id', { count: 'exact', head: true })
+      .eq('list_id', listId)
+      .eq('entry_date', today)
+      .then(({ count }) => setBristolCount(count ?? 0))
+  }, [bristolEnabled, listId])
 
   const handleSave = async () => {
     const content = formContent.trim()
@@ -152,6 +170,7 @@ export default function DashboardScreen({
     ? `${expenseCount} Ausgaben — Du: ${userBalance >= 0 ? 'bekommst' : 'schuldest'} €${Math.abs(userBalance).toFixed(2)}`
     : 'Noch keine Ausgaben'
   const expenseTotalFmt = expenseTotal.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })
+  const bristolStatus = bristolCount > 0 ? `${bristolCount} Einträge heute` : 'Noch keine Einträge'
 
   return (
     <div className="dashboard-screen">
@@ -211,6 +230,19 @@ export default function DashboardScreen({
             <span className="dash-card-badge">{expenseTotalFmt}</span>
           )}
         </button>
+
+        {bristolEnabled && (
+          <button className="dash-card" onClick={() => onNavigate('bristol')}>
+            <div className="dash-card-icon"><Activity size={28} strokeWidth={2} /></div>
+            <div className="dash-card-body">
+              <div className="dash-card-title">Bristol</div>
+              <div className="dash-card-sub">{bristolStatus}</div>
+            </div>
+            {bristolCount > 0 && (
+              <span className="dash-card-badge">{bristolCount}</span>
+            )}
+          </button>
+        )}
       </div>
       )}
 
