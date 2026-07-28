@@ -139,9 +139,6 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
                 <rect x="128" y="0" width="64" height="160" fill="#ce2b37" />
               </g>
             </svg>
-            <div className="mozza-3d-canvas">
-              <span className="join-mozza-emoji">🧀</span>
-            </div>
           </div>
         </div>
         <h1>Bella Mozzarella</h1>
