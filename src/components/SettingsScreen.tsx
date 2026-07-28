@@ -15,7 +15,7 @@ interface SettingsScreenProps {
   userName: string
   listName: string
   onLeave: () => void
-  onRename: (newName: string) => void
+  onRename: (newName: string) => Promise<string | null>
   categories: ItemCategory[]
   listId: string
   onCategoriesChange: () => void
@@ -101,10 +101,14 @@ export default function SettingsScreen({
     }
   }
 
-  const handleSaveName = () => {
+  const handleSaveName = async () => {
     const trimmed = newName.trim()
     if (trimmed && trimmed !== userName) {
-      onRename(trimmed)
+      const error = await onRename(trimmed)
+      if (error) {
+        toast(error, 'error')
+        return
+      }
     }
     setEditingName(false)
   }

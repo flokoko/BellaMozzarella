@@ -66,7 +66,7 @@ export default function App() {
     expenseTotal, checkedCount, isLoading, isOnline, queueLength, flushQueue,
     setList, setAdminUnlocked,
     fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes, fetchExpenses, fetchParticipants,
-    toggleShoppingItem, deleteShoppingItem, toggleBringItem, deleteBringItem, reorderItems,
+    toggleShoppingItem, deleteShoppingItem, batchToggleShoppingItems, toggleBringItem, deleteBringItem, reorderItems,
     handleJoin, handleLeave, handleRename,
   } = useListData()
 
@@ -309,6 +309,7 @@ export default function App() {
               userName={userName}
               isLoading={isLoading}
               onItemToggle={toggleShoppingItem}
+              onBatchToggle={batchToggleShoppingItems}
               onItemDelete={deleteShoppingItem}
               onItemChange={() => fetchItems(list.id, 'shopping')}
               onReorder={reorderItems}

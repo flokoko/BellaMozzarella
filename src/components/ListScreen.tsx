@@ -20,6 +20,7 @@ interface ListScreenProps {
   userName: string
   isLoading?: boolean
   onItemToggle?: (item: ListItem) => void
+  onBatchToggle?: (items: ListItem[], checked: boolean) => void
   onItemDelete?: (item: ListItem) => void
   onItemChange?: () => void
   onReorder?: (listType: ListType, newOrder: string[]) => void
@@ -31,12 +32,14 @@ function DraggableCategorySection({
   catItems,
   cat,
   onItemToggle,
+  onBatchToggle,
   onItemDelete,
   onReorder,
 }: {
   catItems: ListItem[]
   cat: ItemCategory
   onItemToggle?: (item: ListItem) => void
+  onBatchToggle?: (items: ListItem[], checked: boolean) => void
   onItemDelete?: (item: ListItem) => void
   onReorder?: (newOrder: string[]) => void
 }) {
@@ -83,9 +86,13 @@ function DraggableCategorySection({
   }
 
   const handleAggregatedToggle = (agg: AggregatedItem) => {
-    // Toggle all items in the group
-    for (const item of agg.items) {
-      onItemToggle?.(item)
+    // Use batch toggle (single API call) when available, fall back to per-item
+    if (onBatchToggle) {
+      onBatchToggle(agg.items, !agg.isChecked)
+    } else {
+      for (const item of agg.items) {
+        onItemToggle?.(item)
+      }
     }
   }
 
@@ -212,7 +219,7 @@ function DraggableCategorySection({
   )
 }
 
-export default function ListScreen({ items, categories, listId, userName, isLoading, onItemToggle, onItemDelete, onItemChange, onReorder, onCategoriesChange }: ListScreenProps) {
+export default function ListScreen({ items, categories, listId, userName, isLoading, onItemToggle, onBatchToggle, onItemDelete, onItemChange, onReorder, onCategoriesChange }: ListScreenProps) {
   const { confirm } = useToast()
   const [hideChecked, setHideChecked] = useState(() => localStorage.getItem('bella_hide_checked') === 'true')
 
@@ -299,6 +306,7 @@ export default function ListScreen({ items, categories, listId, userName, isLoad
             catItems={catItems}
             cat={cat}
             onItemToggle={onItemToggle}
+            onBatchToggle={onBatchToggle}
             onItemDelete={onItemDelete}
             onReorder={(newOrder) => onReorder?.('shopping', newOrder)}
           />
@@ -328,6 +336,7 @@ export default function ListScreen({ items, categories, listId, userName, isLoad
             catItems={orphanItems}
             cat={fallbackCat}
             onItemToggle={onItemToggle}
+            onBatchToggle={onBatchToggle}
             onItemDelete={onItemDelete}
             onReorder={(newOrder) => onReorder?.('shopping', newOrder)}
           />

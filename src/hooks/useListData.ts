@@ -249,14 +249,36 @@ export function useListData() {
     }
   }, [fetchAll])
 
-  // ── Instant re-fetch helper ────────────────────────────────────────
-  const instantRefetch = useCallback(() => {
-    if (!list) return
-    markActivity()
-    fetchAll(list.id)
-  }, [list, fetchAll, markActivity])
-
   // ── Optimistic update helpers ──────────────────────────────────────
+  // NOTE: refetch happens AFTER the server write completes, not immediately,
+  // to avoid the fetch racing with the write and overwriting optimistic state.
+
+  /** Toggle all items in a group at once (single API call instead of N). */
+  const batchToggleShoppingItems = useCallback((items: ListItem[], checked: boolean) => {
+    if (items.length === 0) return
+    markActivity()
+    const ids = items.map(i => i.id)
+    setShoppingItems(prev => prev.map(i => ids.includes(i.id) ? { ...i, is_checked: checked } : i))
+    if (isOnline) {
+      supabase.from('items').update({ is_checked: checked }).in('id', ids).then(({ error }) => {
+        if (error) {
+          console.error('batchToggleShoppingItems error:', error)
+          // Rollback: restore original checked states
+          setShoppingItems(prev => prev.map(i => {
+            const orig = items.find(o => o.id === i.id)
+            return orig ? { ...i, is_checked: orig.is_checked } : i
+          }))
+        }
+        if (list) fetchAll(list.id)
+      })
+    } else {
+      // Enqueue one op per item for offline (Supabase RLS needs per-row)
+      for (const item of items) {
+        enqueue({ type: 'update', table: 'items', payload: { is_checked: checked }, filterColumn: 'id', filterValue: item.id })
+      }
+    }
+  }, [markActivity, isOnline, enqueue, list, fetchAll])
+
   const toggleShoppingItem = useCallback((item: ListItem) => {
     markActivity()
     setShoppingItems(prev => prev.map(i => i.id === item.id ? { ...i, is_checked: !i.is_checked } : i))
@@ -266,12 +288,13 @@ export function useListData() {
           console.error('toggleShoppingItem error:', error)
           setShoppingItems(prev => prev.map(i => i.id === item.id ? { ...i, is_checked: item.is_checked } : i))
         }
+        // Refetch AFTER server write completes — prevents race with optimistic state
+        if (list) fetchAll(list.id)
       })
     } else {
       enqueue({ type: 'update', table: 'items', payload: { is_checked: !item.is_checked }, filterColumn: 'id', filterValue: item.id })
     }
-    instantRefetch()
-  }, [markActivity, instantRefetch, isOnline, enqueue])
+  }, [markActivity, isOnline, enqueue, list, fetchAll])
 
   const deleteShoppingItem = useCallback((item: ListItem) => {
     markActivity()
@@ -282,12 +305,12 @@ export function useListData() {
           console.error('deleteShoppingItem error:', error)
           setShoppingItems(prev => [item, ...prev])
         }
+        if (list) fetchAll(list.id)
       })
     } else {
       enqueue({ type: 'delete', table: 'items', payload: {}, filterColumn: 'id', filterValue: item.id })
     }
-    instantRefetch()
-  }, [markActivity, instantRefetch, isOnline, enqueue])
+  }, [markActivity, isOnline, enqueue, list, fetchAll])
 
   const toggleBringItem = useCallback((item: ListItem) => {
     markActivity()
@@ -298,12 +321,12 @@ export function useListData() {
           console.error('toggleBringItem error:', error)
           setBringItems(prev => prev.map(i => i.id === item.id ? { ...i, is_brought: item.is_brought } : i))
         }
+        if (list) fetchAll(list.id)
       })
     } else {
       enqueue({ type: 'update', table: 'items', payload: { is_brought: !item.is_brought }, filterColumn: 'id', filterValue: item.id })
     }
-    instantRefetch()
-  }, [markActivity, instantRefetch, isOnline, enqueue])
+  }, [markActivity, isOnline, enqueue, list, fetchAll])
 
   const deleteBringItem = useCallback((item: ListItem) => {
     markActivity()
@@ -314,12 +337,12 @@ export function useListData() {
           console.error('deleteBringItem error:', error)
           setBringItems(prev => [item, ...prev])
         }
+        if (list) fetchAll(list.id)
       })
     } else {
       enqueue({ type: 'delete', table: 'items', payload: {}, filterColumn: 'id', filterValue: item.id })
     }
-    instantRefetch()
-  }, [markActivity, instantRefetch, isOnline, enqueue])
+  }, [markActivity, isOnline, enqueue, list, fetchAll])
 
   const reorderItems = useCallback(async (listType: ListType, newOrder: string[]) => {
     if (!list) return
@@ -346,8 +369,9 @@ export function useListData() {
     } else {
       enqueue({ type: 'rpc', table: '', payload: { item_ids: newOrder }, rpcName: 'batch_reorder_items' })
     }
-    instantRefetch()
-  }, [list, markActivity, instantRefetch, isOnline, enqueue])
+    // Refetch after reorder completes
+    if (list) fetchAll(list.id)
+  }, [list, markActivity, fetchAll, isOnline, enqueue])
 
   // ── Derived values ─────────────────────────────────────────────────
   const shoppingCategories = useMemo(() => categories.filter((c) => c.list_type === 'shopping'), [categories])
@@ -416,14 +440,12 @@ export function useListData() {
     prevShoppingItemsRef.current = []
   }, [])
 
-  const handleRename = useCallback(async (newName: string) => {
+  const handleRename = useCallback(async (newName: string): Promise<string | null> => {
     const trimmed = newName.trim()
-    if (!trimmed || !list || trimmed === userName) return
+    if (!trimmed || !list || trimmed === userName) return null
     const existing = participants.find(p => p.name.toLowerCase() === trimmed.toLowerCase())
     if (existing) {
-      localStorage.setItem('user_name', existing.name)
-      setUserName(existing.name)
-      return
+      return 'Dieser Name wird bereits von einem anderen Teilnehmer verwendet. Bitte wähle einen anderen Namen.'
     }
     await supabase.from('participants').insert({ list_id: list.id, name: trimmed })
     await Promise.all([
@@ -435,6 +457,7 @@ export function useListData() {
     localStorage.setItem('user_name', trimmed)
     setUserName(trimmed)
     fetchAll(list.id)
+    return null
   }, [list, participants, userName, fetchAll])
 
   return {
@@ -480,6 +503,7 @@ export function useListData() {
     fetchParticipants,
     // mutations
     toggleShoppingItem,
+    batchToggleShoppingItems,
     deleteShoppingItem,
     toggleBringItem,
     deleteBringItem,

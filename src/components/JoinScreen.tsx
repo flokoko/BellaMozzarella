@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react'
 import type { ShoppingList } from '../types'
 import { supabase, loginParticipant } from '../lib/supabase'
-import MozzaScene from './MozzaScene'
 
 import './JoinScreen.css'
 
@@ -141,7 +140,7 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
               </g>
             </svg>
             <div className="mozza-3d-canvas">
-              <MozzaScene />
+              <span className="join-mozza-emoji">🧀</span>
             </div>
           </div>
         </div>

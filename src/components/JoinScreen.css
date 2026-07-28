@@ -85,6 +85,17 @@
   display: block;
 }
 
+.join-mozza-emoji {
+  font-size: 5rem;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+  animation: mozzaBounce 3s ease-in-out infinite;
+}
+
+@keyframes mozzaBounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-8px) scale(1.05); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .join-flag-svg {
     animation: none;
