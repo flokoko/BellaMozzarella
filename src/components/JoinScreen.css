@@ -10,6 +10,16 @@
   background: transparent;
 }
 
+/* MozzaScene Canvas wrapper — must not participate in flex layout */
+.join-screen > div:first-child {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 0;
+  pointer-events: none;
+}
+
 .join-screen canvas {
   position: fixed;
   top: 0;
