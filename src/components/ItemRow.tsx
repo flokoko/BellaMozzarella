@@ -55,9 +55,20 @@ export default function ItemRow({ item, onToggle, onDelete, dragHandleProps, isD
           <GripVertical size={16} strokeWidth={2} />
         </span>
       )}
-      <label className="item-checkbox-wrap">
-        <input type="checkbox" checked={item.is_checked} onChange={toggleChecked} />
-        <span className="item-checkmark" />
+      <label className="custom-checkbox" onClick={(e) => e.stopPropagation()}>
+        <input
+          type="checkbox"
+          checked={item.is_checked}
+          onChange={toggleChecked}
+          className="custom-checkbox-input"
+        />
+        <span className={`custom-checkbox-visual ${item.is_checked ? 'checked' : ''}`}>
+          {item.is_checked && (
+            <svg className="checkmark-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          )}
+        </span>
       </label>
       <div className="item-content">
         <span className="item-name">{item.name}</span>

@@ -67,9 +67,9 @@
   border: 1px solid var(--border-color);
   border-radius: 12px;
   background: var(--card-bg);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
   cursor: pointer;
   text-align: left;
   font-family: inherit;

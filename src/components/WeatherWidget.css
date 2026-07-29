@@ -1,11 +1,11 @@
 .weather-widget {
   background: var(--card-bg);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
   border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 0.5rem 0.7rem;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
   margin-bottom: 1rem;
   animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   border-left: 3px solid #009246;

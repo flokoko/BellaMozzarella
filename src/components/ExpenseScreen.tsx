@@ -203,6 +203,7 @@ export default function ExpenseScreen({
   }, [userName])
 
   const startAdd = useCallback(() => {
+    navigator.vibrate?.(8)
     setEditingId(null)
     setDescription('')
     setAmount('')
@@ -437,19 +438,19 @@ export default function ExpenseScreen({
       <div className="expense-toggle">
         <button
           className={`expense-toggle-btn ${section === 'expenses' ? 'active' : ''}`}
-          onClick={() => setSection('expenses')}
+          onClick={() => { navigator.vibrate?.(8); setSection('expenses') }}
         >
           <Wallet size={16} strokeWidth={2} /> Ausgaben{expenses.length > 0 && <span className="expense-toggle-badge">{expenses.length}</span>}
         </button>
         <button
           className={`expense-toggle-btn ${section === 'settlement' ? 'active' : ''}`}
-          onClick={() => setSection('settlement')}
+          onClick={() => { navigator.vibrate?.(8); setSection('settlement') }}
         >
           <Receipt size={16} strokeWidth={2} /> Abrechnung
         </button>
         <button
           className={`expense-toggle-btn ${section === 'matrix' ? 'active' : ''}`}
-          onClick={() => setSection('matrix')}
+          onClick={() => { navigator.vibrate?.(8); setSection('matrix') }}
         >
           <Table2 size={16} strokeWidth={2} /> Matrix
         </button>

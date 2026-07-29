@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import type { ShoppingList } from '../types'
 import { supabase, loginParticipant } from '../lib/supabase'
+import MozzaScene from './MozzaScene'
 
 import './JoinScreen.css'
 
@@ -122,6 +123,7 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
 
   return (
     <div className="join-screen">
+      <MozzaScene fullscreen />
       <div className="join-card">
         <div className="join-logo">
           <div className="join-orbit">

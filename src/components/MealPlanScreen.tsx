@@ -217,13 +217,13 @@ export default function MealPlanScreen({
       <div className="mealplan-toggle">
         <button
           className={`mealplan-toggle-btn ${section === 'week' ? 'active' : ''}`}
-          onClick={() => setSection('week')}
+          onClick={() => { navigator.vibrate?.(8); setSection('week') }}
         >
           <Calendar size={16} strokeWidth={2} /> Wochenplan{mealCount > 0 && <span className="mealplan-toggle-badge">{mealCount}</span>}
         </button>
         <button
           className={`mealplan-toggle-btn ${section === 'ideas' ? 'active' : ''}`}
-          onClick={() => setSection('ideas')}
+          onClick={() => { navigator.vibrate?.(8); setSection('ideas') }}
         >
           <Pizza size={16} strokeWidth={2} /> Ideen{ideaCount > 0 && <span className="mealplan-toggle-badge">{ideaCount}</span>}
         </button>

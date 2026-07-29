@@ -81,11 +81,13 @@ export default function SettingsScreen({
   }, [bristolEnabled])
 
   const handleThemeChange = (mode: ThemeMode) => {
+    navigator.vibrate?.(8)
     setThemeState(mode)
     setTheme(mode)
   }
 
   const handleTogglePush = async () => {
+    navigator.vibrate?.(8)
     if (pushEnabled) {
       localStorage.removeItem('push_notifications_enabled')
       setPushEnabled(false)
@@ -312,13 +314,13 @@ export default function SettingsScreen({
             <div className="bristol-toggle-group">
               <button
                 className={`bristol-toggle-btn ${!bristolEnabled ? 'active' : ''}`}
-                onClick={() => setBristolEnabled(false)}
+                onClick={() => { navigator.vibrate?.(8); setBristolEnabled(false) }}
               >
                 Aus
               </button>
               <button
                 className={`bristol-toggle-btn ${bristolEnabled ? 'active' : ''}`}
-                onClick={() => setBristolEnabled(true)}
+                onClick={() => { navigator.vibrate?.(8); setBristolEnabled(true) }}
               >
                 An
               </button>

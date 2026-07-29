@@ -6,19 +6,27 @@
   padding: 1.5rem;
   position: relative;
   z-index: 1;
-  background: linear-gradient(160deg, rgba(0,146,70,0.08) 0%, rgba(255,255,255,0.4) 50%, rgba(206,43,55,0.08) 100%);
+  overflow: hidden;
+  background: transparent;
+}
+
+.join-screen canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
 }
 
 .join-card {
-  background: color-mix(in srgb, var(--card-bg) 70%, transparent);
-  backdrop-filter: blur(12px) saturate(120%);
-  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  background: color-mix(in srgb, var(--card-bg) 50%, transparent);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
   border-radius: 28px;
   border: 1px solid rgba(255, 255, 255, 0.15);
   padding: 2.5rem 2rem;
   max-width: 380px;
   width: 100%;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   text-align: center;
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
   animation: fadeInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);

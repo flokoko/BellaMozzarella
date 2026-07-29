@@ -18,6 +18,15 @@ const ExpenseScreen = lazy(() => import('./components/ExpenseScreen'))
 const SettingsScreen = lazy(() => import('./components/SettingsScreen'))
 const BristolScreen = lazy(() => import('./components/BristolScreen'))
 
+function TabLoader() {
+  return (
+    <div className="tab-loader">
+      <span className="tab-loader-emoji">🧀</span>
+      <span className="tab-loader-text">Lädt…</span>
+    </div>
+  )
+}
+
 import './App.css'
 
 // ── Confetti helper: Italian flag colored burst ──────────────────────
@@ -286,7 +295,7 @@ export default function App() {
         </div>
       )}
 
-      <main className="app-main">
+      <main className="app-main" key={tab}>
         {tab === 'home' && (
           <DashboardScreen
             listId={list.id}
@@ -309,7 +318,7 @@ export default function App() {
           />
         )}
         {tab === 'list' && (
-          <Suspense fallback={null}>
+          <Suspense fallback={<TabLoader />}>
             <ListScreen
               items={shoppingItems}
               categories={shoppingCategories}
@@ -326,7 +335,7 @@ export default function App() {
           </Suspense>
         )}
         {tab === 'bring' && (
-          <Suspense fallback={null}>
+          <Suspense fallback={<TabLoader />}>
             <BringScreen
               items={bringItems}
               categories={bringCategories}
@@ -342,7 +351,7 @@ export default function App() {
           </Suspense>
         )}
         {tab === 'mealplan' && (
-          <Suspense fallback={null}>
+          <Suspense fallback={<TabLoader />}>
             <MealPlanScreen
               meals={meals}
               mealIdeas={mealIdeas}
@@ -354,7 +363,7 @@ export default function App() {
           </Suspense>
         )}
         {tab === 'expenses' && (
-          <Suspense fallback={null}>
+          <Suspense fallback={<TabLoader />}>
             <ExpenseScreen
               expenses={expenses}
               expenseSplits={expenseSplits}
@@ -369,7 +378,7 @@ export default function App() {
           </Suspense>
         )}
         {tab === 'bristol' && bristolEnabled && (
-          <Suspense fallback={null}>
+          <Suspense fallback={<TabLoader />}>
             <BristolScreen
               listId={list.id}
               userName={userName}
@@ -377,7 +386,7 @@ export default function App() {
           </Suspense>
         )}
         {tab === 'settings' && (
-          <Suspense fallback={null}>
+          <Suspense fallback={<TabLoader />}>
             <SettingsScreen
               userName={userName}
               listName={list.name}

@@ -224,6 +224,7 @@ export default function ListScreen({ items, categories, listId, userName, isLoad
   const [hideChecked, setHideChecked] = useState(() => localStorage.getItem('bella_hide_checked') === 'true')
 
   const toggleHideChecked = () => {
+    navigator.vibrate?.(8)
     const next = !hideChecked
     setHideChecked(next)
     localStorage.setItem('bella_hide_checked', String(next))

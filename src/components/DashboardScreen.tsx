@@ -93,6 +93,7 @@ export default function DashboardScreen({
   })
 
   const toggleNotes = () => {
+    navigator.vibrate?.(8)
     setNotesExpanded(prev => {
       const next = !prev
       localStorage.setItem('notes_expanded', String(next))
@@ -307,7 +308,7 @@ export default function DashboardScreen({
 
       {/* ── Bristol Row ── */}
       {bristolEnabled && (
-        <button className="dash-bristol-row" onClick={() => onNavigate('bristol')}>
+        <button className="dash-bristol-row" onClick={() => { navigator.vibrate?.(8); onNavigate('bristol') }}>
           <span className="dash-bristol-icon">💩</span>
           <span className="dash-bristol-text">Bristol: {bristolStatus}</span>
           <span className="dash-bristol-arrow">›</span>
@@ -324,7 +325,7 @@ export default function DashboardScreen({
         </div>
       ) : (
       <div className="dashboard-cards">
-        <button className="dash-card" onClick={() => onNavigate('list')}>
+        <button className="dash-card" onClick={() => { navigator.vibrate?.(8); onNavigate('list') }}>
           <div className="dash-card-icon"><ShoppingCart size={28} strokeWidth={2} /></div>
           <div className="dash-card-body">
             <div className="dash-card-title">Einkaufsliste</div>
@@ -335,7 +336,7 @@ export default function DashboardScreen({
           )}
         </button>
 
-        <button className="dash-card" onClick={() => onNavigate('bring')}>
+        <button className="dash-card" onClick={() => { navigator.vibrate?.(8); onNavigate('bring') }}>
           <div className="dash-card-icon"><Backpack size={28} strokeWidth={2} /></div>
           <div className="dash-card-body">
             <div className="dash-card-title">Mitbringen</div>
@@ -346,7 +347,7 @@ export default function DashboardScreen({
           )}
         </button>
 
-        <button className="dash-card" onClick={() => onNavigate('mealplan')}>
+        <button className="dash-card" onClick={() => { navigator.vibrate?.(8); onNavigate('mealplan') }}>
           <div className="dash-card-icon"><Pizza size={24} strokeWidth={2} /></div>
           <div className="dash-card-body">
             <div className="dash-card-title">Essensplan</div>
@@ -357,7 +358,7 @@ export default function DashboardScreen({
           )}
         </button>
 
-        <button className="dash-card" onClick={() => onNavigate('expenses')}>
+        <button className="dash-card" onClick={() => { navigator.vibrate?.(8); onNavigate('expenses') }}>
           <div className="dash-card-icon"><Wallet size={28} strokeWidth={2} /></div>
           <div className="dash-card-body">
             <div className="dash-card-title">Ausgaben</div>

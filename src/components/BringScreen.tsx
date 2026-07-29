@@ -129,19 +129,19 @@ export default function BringScreen({ items, categories, listId, userName, onIte
       <div className="bring-filters">
         <button
           className={`bring-filter-btn ${filter === 'all' ? 'active' : ''}`}
-          onClick={() => setFilter('all')}
+          onClick={() => { navigator.vibrate?.(8); setFilter('all') }}
         >
           Alle
         </button>
         <button
           className={`bring-filter-btn ${filter === 'mine' ? 'active' : ''}`}
-          onClick={() => setFilter('mine')}
+          onClick={() => { navigator.vibrate?.(8); setFilter('mine') }}
         >
           Nur meine
         </button>
         <button
           className={`bring-filter-btn ${filter === 'unfilled' ? 'active' : ''}`}
-          onClick={() => setFilter('unfilled')}
+          onClick={() => { navigator.vibrate?.(8); setFilter('unfilled') }}
         >
           Unzugewiesen
         </button>
