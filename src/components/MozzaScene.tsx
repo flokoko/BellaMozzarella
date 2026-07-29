@@ -195,7 +195,7 @@ export default function MozzaScene({ fullscreen }: { fullscreen?: boolean }) {
   return (
     <WebGLErrorBoundary>
       <Canvas
-        camera={{ position: [0, 0, fullscreen ? 8 : 5], fov: fullscreen ? 55 : 50 }}
+        camera={{ position: [0, 0.5, fullscreen ? 8 : 5], fov: fullscreen ? 55 : 50 }}
         style={fullscreen ? { width: '100%', height: '100%', pointerEvents: 'none' } : { width: 220, height: 220 }}
         shadows
         dpr={[1, 2]}
