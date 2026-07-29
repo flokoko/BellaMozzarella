@@ -308,7 +308,7 @@ export default function DashboardScreen({
       {/* ── Bristol Row ── */}
       {bristolEnabled && (
         <button className="dash-bristol-row" onClick={() => onNavigate('bristol')}>
-          <span className="dash-bristol-icon">📊</span>
+          <span className="dash-bristol-icon">💩</span>
           <span className="dash-bristol-text">Bristol: {bristolStatus}</span>
           <span className="dash-bristol-arrow">›</span>
         </button>
