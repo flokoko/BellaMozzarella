@@ -242,7 +242,7 @@ export default function App() {
                 <span className="header-flag-bar green"></span>
                 <span className="header-flag-bar white"></span>
                 <span className="header-flag-bar red"></span>
-                {list.name}
+                🧀 {list.name}
               </span>
               <span className="header-user">
                 Angemeldet als: <strong>{userName}</strong>
@@ -272,6 +272,11 @@ export default function App() {
             </button>
             <button className="header-leave" onClick={handleLeave}>Verlassen</button>
           </div>
+        </div>
+        <div className="header-flag-bar-full">
+          <span className="header-flag-green"></span>
+          <span className="header-flag-white"></span>
+          <span className="header-flag-red"></span>
         </div>
       </header>
 

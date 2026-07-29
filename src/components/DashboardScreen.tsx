@@ -176,14 +176,14 @@ export default function DashboardScreen({
     onNotesChange()
   }
 
-  const shoppingStatus = shoppingCount > 0 ? `${shoppingChecked}/${shoppingCount} erledigt` : 'Keine Items'
-  const bringStatus = bringCount > 0 ? `${bringCount} Items` : 'Nichts zu mitbringen'
-  const mealStatus = mealCount > 0 ? `${mealCount} Gerichte` : 'Noch nichts geplant'
+  const shoppingStatus = shoppingCount > 0 ? `${shoppingChecked}/${shoppingCount} erledigt` : '🍝 Niente auf der Liste!'
+  const bringStatus = bringCount > 0 ? `${bringCount} Items` : '🍷 Niente da portare!'
+  const mealStatus = mealCount > 0 ? `${mealCount} Gerichte` : '🍕 Noch niente geplant!'
   const expenseStatus = expenseCount > 0
     ? `${expenseCount} Ausgaben — Du: ${userBalance >= 0 ? 'bekommst' : 'schuldest'} €${Math.abs(userBalance).toFixed(2)}`
-    : 'Noch keine Ausgaben'
+    : '💶 Niente Ausgaben!'
   const expenseTotalFmt = expenseTotal.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })
-  const bristolStatus = bristolCount > 0 ? `${bristolCount} Einträge heute` : 'Noch keine Einträge'
+  const bristolStatus = bristolCount > 0 ? `${bristolCount} Einträge heute` : '💩 Ancora niente!'
 
   return (
     <div className="dashboard-screen">
@@ -248,7 +248,7 @@ export default function DashboardScreen({
           )}
 
           {notes.length === 0 && !showForm && (
-            <p className="dash-notes-empty">Noch keine Notizen — füge Infos wie die Hausadresse hinzu!</p>
+            <p className="dash-notes-empty">📝 Noch keine Notizen — füge Infos wie die Hausadresse hinzu! 🏠</p>
           )}
 
           <div className="dash-notes-list">

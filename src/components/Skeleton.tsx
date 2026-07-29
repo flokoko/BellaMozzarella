@@ -21,11 +21,26 @@ export function SkeletonLine() {
 }
 
 export function SkeletonCard() {
-  return <Skeleton className="skeleton-card" />
+  return (
+    <div className="skeleton-card">
+      <div className="skeleton-mozza">
+        <span className="skeleton-mozza-emoji">🧀</span>
+      </div>
+      <div className="skeleton-lines">
+        <div className="skeleton-line skeleton-line-title" />
+        <div className="skeleton-line skeleton-line-sub" />
+      </div>
+    </div>
+  )
 }
 
 export function SkeletonNote() {
-  return <Skeleton className="skeleton-note" />
+  return (
+    <div className="skeleton-note">
+      <div className="skeleton-line skeleton-line-title" />
+      <div className="skeleton-line skeleton-line-sub" />
+    </div>
+  )
 }
 
 export function SkeletonCatHeader() {
