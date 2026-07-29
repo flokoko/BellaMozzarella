@@ -190,79 +190,6 @@ export default function DashboardScreen({
       {/* ── Weather Widget ── */}
       <WeatherWidget />
 
-      {/* ── Bristol Row ── */}
-      {bristolEnabled && (
-        <button className="dash-bristol-row" onClick={() => onNavigate('bristol')}>
-          <span className="dash-bristol-icon">📊</span>
-          <span className="dash-bristol-text">Bristol: {bristolStatus}</span>
-          <span className="dash-bristol-arrow">›</span>
-        </button>
-      )}
-
-      {/* ── Feature Cards ── */}
-      {isLoading ? (
-        <div className="dashboard-cards">
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-        </div>
-      ) : (
-      <div className="dashboard-cards">
-        <button className="dash-card" onClick={() => onNavigate('list')}>
-          <div className="dash-card-icon"><ShoppingCart size={28} strokeWidth={2} /></div>
-          <div className="dash-card-body">
-            <div className="dash-card-title">Einkaufsliste</div>
-            <div className="dash-card-sub">{shoppingStatus}</div>
-          </div>
-          {shoppingCount > 0 && (
-            <span className="dash-card-badge">{shoppingChecked}/{shoppingCount}</span>
-          )}
-        </button>
-
-        <button className="dash-card" onClick={() => onNavigate('bring')}>
-          <div className="dash-card-icon"><Backpack size={28} strokeWidth={2} /></div>
-          <div className="dash-card-body">
-            <div className="dash-card-title">Mitbringen</div>
-            <div className="dash-card-sub">{bringStatus}</div>
-          </div>
-          {bringCount > 0 && (
-            <span className="dash-card-badge">{bringCount}</span>
-          )}
-        </button>
-
-        <button className="dash-card" onClick={() => onNavigate('mealplan')}>
-          <div className="dash-card-icon"><Pizza size={24} strokeWidth={2} /></div>
-          <div className="dash-card-body">
-            <div className="dash-card-title">Essensplan</div>
-            <div className="dash-card-sub">{mealStatus}</div>
-          </div>
-          {mealCount > 0 && (
-            <span className="dash-card-badge">{mealCount}</span>
-          )}
-        </button>
-
-        <button className="dash-card" onClick={() => onNavigate('expenses')}>
-          <div className="dash-card-icon"><Wallet size={28} strokeWidth={2} /></div>
-          <div className="dash-card-body">
-            <div className="dash-card-title">Ausgaben</div>
-            <div className="dash-card-sub">{expenseStatus}</div>
-          </div>
-          {expenseCount > 0 && (
-            <span className="dash-card-badge">{expenseTotalFmt}</span>
-          )}
-        </button>
-      </div>
-      )}
-
-      {/* ── Install Banner ── */}
-      {installPrompt && (
-        <button className="dash-install-banner" onClick={onInstall}>
-          <span className="dash-install-icon"><Smartphone size={22} strokeWidth={2} /></span>
-          App installieren — für schnelleren Zugriff
-        </button>
-      )}
-
       {/* ── Quick Notes ── */}
       <section className="dash-notes-section">
         <h2
@@ -377,6 +304,79 @@ export default function DashboardScreen({
           )
         )}
       </section>
+
+      {/* ── Bristol Row ── */}
+      {bristolEnabled && (
+        <button className="dash-bristol-row" onClick={() => onNavigate('bristol')}>
+          <span className="dash-bristol-icon">📊</span>
+          <span className="dash-bristol-text">Bristol: {bristolStatus}</span>
+          <span className="dash-bristol-arrow">›</span>
+        </button>
+      )}
+
+      {/* ── Feature Cards ── */}
+      {isLoading ? (
+        <div className="dashboard-cards">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+      ) : (
+      <div className="dashboard-cards">
+        <button className="dash-card" onClick={() => onNavigate('list')}>
+          <div className="dash-card-icon"><ShoppingCart size={28} strokeWidth={2} /></div>
+          <div className="dash-card-body">
+            <div className="dash-card-title">Einkaufsliste</div>
+            <div className="dash-card-sub">{shoppingStatus}</div>
+          </div>
+          {shoppingCount > 0 && (
+            <span className="dash-card-badge">{shoppingChecked}/{shoppingCount}</span>
+          )}
+        </button>
+
+        <button className="dash-card" onClick={() => onNavigate('bring')}>
+          <div className="dash-card-icon"><Backpack size={28} strokeWidth={2} /></div>
+          <div className="dash-card-body">
+            <div className="dash-card-title">Mitbringen</div>
+            <div className="dash-card-sub">{bringStatus}</div>
+          </div>
+          {bringCount > 0 && (
+            <span className="dash-card-badge">{bringCount}</span>
+          )}
+        </button>
+
+        <button className="dash-card" onClick={() => onNavigate('mealplan')}>
+          <div className="dash-card-icon"><Pizza size={24} strokeWidth={2} /></div>
+          <div className="dash-card-body">
+            <div className="dash-card-title">Essensplan</div>
+            <div className="dash-card-sub">{mealStatus}</div>
+          </div>
+          {mealCount > 0 && (
+            <span className="dash-card-badge">{mealCount}</span>
+          )}
+        </button>
+
+        <button className="dash-card" onClick={() => onNavigate('expenses')}>
+          <div className="dash-card-icon"><Wallet size={28} strokeWidth={2} /></div>
+          <div className="dash-card-body">
+            <div className="dash-card-title">Ausgaben</div>
+            <div className="dash-card-sub">{expenseStatus}</div>
+          </div>
+          {expenseCount > 0 && (
+            <span className="dash-card-badge">{expenseTotalFmt}</span>
+          )}
+        </button>
+      </div>
+      )}
+
+      {/* ── Install Banner ── */}
+      {installPrompt && (
+        <button className="dash-install-banner" onClick={onInstall}>
+          <span className="dash-install-icon"><Smartphone size={22} strokeWidth={2} /></span>
+          App installieren — für schnelleren Zugriff
+        </button>
+      )}
     </div>
   )
 }
