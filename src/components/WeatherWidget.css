@@ -4,15 +4,17 @@
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--border-color);
   border-radius: 16px;
-  padding: 0.7rem 0.85rem;
+  padding: 0.5rem 0.7rem;
   box-shadow: var(--shadow-sm);
   margin-bottom: 1rem;
   animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   border-left: 3px solid #009246;
+  cursor: pointer;
 }
 
 .weather-widget-prompt {
   text-align: center;
+  cursor: default;
 }
 
 .weather-prompt-text {
@@ -34,41 +36,31 @@
   line-height: 1;
 }
 
-.weather-current {
+/* ── Compact single-row view ── */
+.weather-compact-row {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 0.4rem;
 }
 
-.weather-current-main {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.weather-temp-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
+.weather-emoji {
+  font-size: 1.5rem;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 .weather-temp {
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   font-weight: 800;
   color: var(--text-primary);
   line-height: 1;
+  flex-shrink: 0;
 }
 
 .weather-desc {
   font-size: 0.78rem;
   color: var(--text-secondary);
-}
-
-.weather-location-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.4rem;
+  flex-shrink: 0;
 }
 
 .weather-location-name {
@@ -78,6 +70,15 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.weather-chevron {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .weather-change-btn,
@@ -93,6 +94,7 @@
   white-space: nowrap;
   font-family: inherit;
   transition: all 0.2s;
+  flex-shrink: 0;
 }
 
 .weather-change-btn:hover,

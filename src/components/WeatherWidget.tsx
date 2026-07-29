@@ -71,6 +71,19 @@ export default function WeatherWidget() {
   const [geoLoading, setGeoLoading] = useState(false)
   const cacheRef = useRef<{ data: WeatherData; ts: number } | null>(null)
 
+  // ── Collapsible state from localStorage ──
+  const [expanded, setExpanded] = useState(() => {
+    return localStorage.getItem('weather_expanded') === 'true'
+  })
+
+  const toggleExpanded = () => {
+    setExpanded(prev => {
+      const next = !prev
+      localStorage.setItem('weather_expanded', String(next))
+      return next
+    })
+  }
+
   // ── Read stored location from localStorage ──
   const storedLocation = useMemo(() => {
     const lat = localStorage.getItem('weather_lat')
@@ -190,10 +203,10 @@ export default function WeatherWidget() {
   }
 
   return (
-    <div className="weather-widget">
+    <div className="weather-widget" onClick={toggleExpanded}>
       {/* Location input overlay */}
       {showLocationInput && (
-        <div className="weather-location-form">
+        <div className="weather-location-form" onClick={(e) => e.stopPropagation()}>
           <input
             className="weather-location-input"
             type="text"
@@ -228,28 +241,23 @@ export default function WeatherWidget() {
       {/* Weather display */}
       {weather && currentInfo && !showLocationInput && (
         <>
-          <div className="weather-current">
-            <div className="weather-current-main">
-              <span className="weather-emoji-large">{currentInfo.emoji}</span>
-              <div className="weather-temp-info">
-                <span className="weather-temp">
-                  {Math.round(weather.current.temperature)}°C
-                </span>
-                <span className="weather-desc">{currentInfo.desc}</span>
-              </div>
-            </div>
-            <div className="weather-location-row">
-              <span className="weather-location-name">{weather.locationName}</span>
-              <button
-                className="weather-change-btn"
-                onClick={() => setShowLocationInput(true)}
-              >
-                Ort ändern
-              </button>
-            </div>
+          <div className="weather-compact-row">
+            <span className="weather-emoji">{currentInfo.emoji}</span>
+            <span className="weather-temp">
+              {Math.round(weather.current.temperature)}°C
+            </span>
+            <span className="weather-desc">{currentInfo.desc}</span>
+            <span className="weather-location-name">{weather.locationName}</span>
+            <button
+              className="weather-change-btn"
+              onClick={(e) => { e.stopPropagation(); setShowLocationInput(true) }}
+            >
+              Ort ändern
+            </button>
+            <span className="weather-chevron">{expanded ? '▲' : '▼'}</span>
           </div>
 
-          {weather.daily.length > 0 && (
+          {expanded && weather.daily.length > 0 && (
             <div className="weather-forecast">
               {weather.daily.map((day, i) => {
                 const info = getWeatherInfo(day.weatherCode)
