@@ -189,22 +189,16 @@ export default function App() {
 
   const handleUnlockAdmin = async (password: string): Promise<boolean> => {
     if (!list) return false
-    if (list.admin_password && password === list.admin_password) {
-      setAdminUnlocked(true)
-      navigator.vibrate?.(10)
-      return true
-    }
-    const { data, error } = await supabase
-      .from('lists')
-      .select('admin_password')
-      .eq('id', list.id)
-      .single()
+    // Serverseitige Prüfung via RPC — Passwort bleibt auf dem Server
+    const { data, error } = await supabase.rpc('verify_admin_password', {
+      p_list_id: list.id,
+      p_password: password,
+    })
     if (error || !data) {
       return false
     }
-    if (data.admin_password && password === data.admin_password) {
+    if (data) {
       setAdminUnlocked(true)
-      setList(prev => prev ? { ...prev, admin_password: data.admin_password } : prev)
       navigator.vibrate?.(10)
       return true
     }

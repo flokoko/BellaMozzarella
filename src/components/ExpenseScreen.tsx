@@ -276,8 +276,6 @@ export default function ExpenseScreen({
 
     if (editingId) {
       // ── Update existing expense ──
-      // 1. Save old splits for fallback before deleting
-      const oldSplits = getSplitsForExpense(editingId)
       const { error: updErr } = await supabase
         .from('expenses')
         .update({
@@ -294,36 +292,42 @@ export default function ExpenseScreen({
         toast(`Fehler beim Speichern: ${updErr.message}`, 'error')
         return
       }
-      // 2. Delete old splits
-      const { error: delErr } = await supabase
-        .from('expense_splits')
-        .delete()
-        .eq('expense_id', editingId)
-      if (delErr) {
-        toast(`Fehler beim Aktualisieren der Aufteilung: ${delErr.message}`, 'error')
-        return
-      }
-      // 3. Insert new splits — with fallback to old splits on failure
-      if (shares.length > 0) {
-        const { error: splitErr } = await supabase.from('expense_splits').insert(
-          shares.map((s) => ({
-            expense_id: editingId,
-            person_name: s.person_name,
-            share_amount: s.share_amount,
-          })),
+      // ── Diff-basiertes Splits-Update: nur geänderte Splits anpassen ──
+      const oldSplits = getSplitsForExpense(editingId)
+      const oldMap = new Map(oldSplits.map(s => [s.person_name, s.share_amount]))
+      const newMap = new Map(shares.map(s => [s.person_name, s.share_amount]))
+
+      // Zu löschende Splits (in old, nicht in new)
+      const toDelete = oldSplits.filter(s => !newMap.has(s.person_name))
+      // Hinzuzufügende Splits (in new, nicht in old)
+      const toInsert = shares.filter(s => !oldMap.has(s.person_name))
+      // Zu aktualisierende Splits (unterschiedlicher Betrag)
+      const toUpdate = shares.filter(s => oldMap.has(s.person_name) && oldMap.get(s.person_name) !== s.share_amount)
+
+      const ops: PromiseLike<any>[] = []
+      if (toDelete.length > 0) {
+        ops.push(
+          supabase.from('expense_splits').delete().eq('expense_id', editingId).in('person_name', toDelete.map(s => s.person_name))
         )
-        if (splitErr) {
-          toast(`Fehler beim Speichern der Aufteilung: ${splitErr.message}`, 'error')
-          // Rollback: re-insert old splits so the expense isn't left with zero splits
-          if (oldSplits.length > 0) {
-            await supabase.from('expense_splits').insert(
-              oldSplits.map((s) => ({
-                expense_id: editingId,
-                person_name: s.person_name,
-                share_amount: s.share_amount,
-              })),
-            )
-          }
+      }
+      if (toInsert.length > 0) {
+        ops.push(
+          supabase.from('expense_splits').insert(
+            toInsert.map(s => ({ expense_id: editingId, person_name: s.person_name, share_amount: s.share_amount }))
+          )
+        )
+      }
+      for (const s of toUpdate) {
+        ops.push(
+          supabase.from('expense_splits').update({ share_amount: s.share_amount }).eq('expense_id', editingId).eq('person_name', s.person_name)
+        )
+      }
+
+      if (ops.length > 0) {
+        const results = await Promise.allSettled(ops)
+        const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && r.value.error))
+        if (failed.length > 0) {
+          toast('Fehler beim Aktualisieren der Aufteilung. Bitte erneut versuchen.', 'error')
           return
         }
       }

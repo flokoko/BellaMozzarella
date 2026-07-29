@@ -141,9 +141,10 @@ export function useListData() {
     setParticipants((data || []) as Participant[])
   }, [])
 
-  const fetchAll = useCallback(async (listId: string) => {
-    // Guard against overlapping fetches (instant re-fetch from mutations)
-    if (isFetchingRef.current) return
+  const fetchAll = useCallback(async (listId: string, force = false) => {
+    // Guard against overlapping fetches — Mutation-Refetches können mit force=true
+    // den Guard umgehen, damit sie nicht vom Polling blockiert werden.
+    if (!force && isFetchingRef.current) return
     isFetchingRef.current = true
     lastFetchTime.current = Date.now()
     try {
@@ -269,7 +270,7 @@ export function useListData() {
             return orig ? { ...i, is_checked: orig.is_checked } : i
           }))
         }
-        if (list) fetchAll(list.id)
+        if (list) fetchAll(list.id, true)
       })
     } else {
       // Enqueue one op per item for offline (Supabase RLS needs per-row)
@@ -289,7 +290,7 @@ export function useListData() {
           setShoppingItems(prev => prev.map(i => i.id === item.id ? { ...i, is_checked: item.is_checked } : i))
         }
         // Refetch AFTER server write completes — prevents race with optimistic state
-        if (list) fetchAll(list.id)
+        if (list) fetchAll(list.id, true)
       })
     } else {
       enqueue({ type: 'update', table: 'items', payload: { is_checked: !item.is_checked }, filterColumn: 'id', filterValue: item.id })
@@ -305,7 +306,7 @@ export function useListData() {
           console.error('deleteShoppingItem error:', error)
           setShoppingItems(prev => [item, ...prev])
         }
-        if (list) fetchAll(list.id)
+        if (list) fetchAll(list.id, true)
       })
     } else {
       enqueue({ type: 'delete', table: 'items', payload: {}, filterColumn: 'id', filterValue: item.id })
@@ -321,7 +322,7 @@ export function useListData() {
           console.error('toggleBringItem error:', error)
           setBringItems(prev => prev.map(i => i.id === item.id ? { ...i, is_brought: item.is_brought } : i))
         }
-        if (list) fetchAll(list.id)
+        if (list) fetchAll(list.id, true)
       })
     } else {
       enqueue({ type: 'update', table: 'items', payload: { is_brought: !item.is_brought }, filterColumn: 'id', filterValue: item.id })
@@ -337,7 +338,7 @@ export function useListData() {
           console.error('deleteBringItem error:', error)
           setBringItems(prev => [item, ...prev])
         }
-        if (list) fetchAll(list.id)
+        if (list) fetchAll(list.id, true)
       })
     } else {
       enqueue({ type: 'delete', table: 'items', payload: {}, filterColumn: 'id', filterValue: item.id })
@@ -447,17 +448,49 @@ export function useListData() {
     if (existing) {
       return 'Dieser Name wird bereits von einem anderen Teilnehmer verwendet. Bitte wähle einen anderen Namen.'
     }
-    await supabase.from('participants').insert({ list_id: list.id, name: trimmed })
-    await Promise.all([
-      supabase.from('expenses').update({ paid_by: trimmed }).eq('list_id', list.id).eq('paid_by', userName),
-      supabase.from('items').update({ assigned_to: trimmed }).eq('list_id', list.id).eq('assigned_to', userName),
-      supabase.from('expense_splits').update({ person_name: trimmed }).eq('person_name', userName),
-    ])
-    await supabase.from('participants').delete().eq('list_id', list.id).eq('name', userName)
-    localStorage.setItem('user_name', trimmed)
-    setUserName(trimmed)
-    fetchAll(list.id)
-    return null
+    // Alle Schritte in try-catch mit Rollback bei Fehler
+    try {
+      // 1. Neuen Participant inserten
+      const { error: insertErr } = await supabase
+        .from('participants')
+        .insert({ list_id: list.id, name: trimmed })
+      if (insertErr) throw new Error(`Insert fehlgeschlagen: ${insertErr.message}`)
+
+      // 2-4. References updaten
+      const updateResults = await Promise.allSettled([
+        supabase.from('expenses').update({ paid_by: trimmed }).eq('list_id', list.id).eq('paid_by', userName),
+        supabase.from('items').update({ assigned_to: trimmed }).eq('list_id', list.id).eq('assigned_to', userName),
+        supabase.from('expense_splits').update({ person_name: trimmed }).eq('person_name', userName),
+      ])
+
+      const failed = updateResults.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && r.value.error))
+      if (failed.length > 0) {
+        // Rollback: neuen Participant löschen
+        await supabase.from('participants').delete().eq('list_id', list.id).eq('name', trimmed)
+        return 'Fehler beim Aktualisieren der Daten. Bitte versuche es erneut.'
+      }
+
+      // 5. Alten Participant löschen
+      const { error: deleteErr } = await supabase
+        .from('participants')
+        .delete()
+        .eq('list_id', list.id)
+        .eq('name', userName)
+      if (deleteErr) {
+        // Rollback: neuen Participant löschen
+        await supabase.from('participants').delete().eq('list_id', list.id).eq('name', trimmed)
+        return 'Fehler beim Löschen des alten Eintrags. Bitte versuche es erneut.'
+      }
+
+      localStorage.setItem('user_name', trimmed)
+      setUserName(trimmed)
+      fetchAll(list.id, true)
+      return null
+    } catch (err) {
+      // Rollback: neuen Participant löschen falls er schon existiert
+      await supabase.from('participants').delete().eq('list_id', list.id).eq('name', trimmed)
+      return 'Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.'
+    }
   }, [list, participants, userName, fetchAll])
 
   return {
