@@ -76,7 +76,7 @@ export default function App() {
     expenseTotal, checkedCount, isLoading, isOnline, queueLength, flushQueue,
     setList, setAdminUnlocked,
     fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes, fetchExpenses, fetchParticipants,
-    toggleShoppingItem, deleteShoppingItem, batchToggleShoppingItems, toggleBringItem, deleteBringItem, reorderItems,
+    toggleShoppingItem, deleteShoppingItem, batchToggleShoppingItems, toggleBringItem, deleteBringItem, reorderItems, reorderNotes,
     handleJoin, handleLeave, handleRename,
   } = useListData()
 
@@ -312,6 +312,7 @@ export default function App() {
             isLoading={isLoading}
             onNavigate={setTab}
             onNotesChange={() => fetchNotes(list.id)}
+            onReorderNotes={reorderNotes}
             installPrompt={installPrompt}
             onInstall={handleInstall}
             bristolEnabled={bristolEnabled}

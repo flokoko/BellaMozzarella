@@ -115,7 +115,8 @@ export function useListData() {
       .from('notes')
       .select('*')
       .eq('list_id', listId)
-      .order('created_at', { ascending: false })
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: true })
     if (err) { console.error('fetchNotes error:', err); return }
     setNotes((data || []) as QuickNote[])
   }, [])
@@ -189,6 +190,12 @@ export function useListData() {
     }
 
     if (!document.hidden) start()
+    // Keep polling in background too (slower) so push notifications can fire
+    const bgInterval = setInterval(() => {
+      if (document.hidden) {
+        fetchAll(list.id)
+      }
+    }, 15000)
 
     const onVisibility = () => {
       if (document.hidden) {
@@ -205,6 +212,7 @@ export function useListData() {
     document.addEventListener('visibilitychange', onVisibility)
     return () => {
       stop()
+      clearInterval(bgInterval)
       document.removeEventListener('visibilitychange', onVisibility)
     }
   }, [list, fetchAll])
@@ -371,6 +379,25 @@ export function useListData() {
       enqueue({ type: 'rpc', table: '', payload: { item_ids: newOrder }, rpcName: 'batch_reorder_items' })
     }
     // Refetch after reorder completes
+    if (list) fetchAll(list.id)
+  }, [list, markActivity, fetchAll, isOnline, enqueue])
+
+  const reorderNotes = useCallback(async (newOrder: string[]) => {
+    if (!list) return
+    markActivity()
+    // Optimistic update
+    setNotes(prev => {
+      const map = new Map(prev.map(n => [n.id, n]))
+      return newOrder.map((id, idx) => {
+        const note = map.get(id)
+        return note ? { ...note, sort_order: idx } : note!
+      }).filter(Boolean)
+    })
+    if (isOnline) {
+      await supabase.rpc('batch_reorder_notes', { note_ids: newOrder })
+    } else {
+      enqueue({ type: 'rpc', table: '', payload: { note_ids: newOrder }, rpcName: 'batch_reorder_notes' })
+    }
     if (list) fetchAll(list.id)
   }, [list, markActivity, fetchAll, isOnline, enqueue])
 
@@ -541,6 +568,7 @@ export function useListData() {
     toggleBringItem,
     deleteBringItem,
     reorderItems,
+    reorderNotes,
     // join/leave/rename
     handleJoin,
     handleLeave,

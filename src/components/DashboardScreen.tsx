@@ -1,8 +1,9 @@
 import { useState, useEffect, type ReactNode } from 'react'
-import { ShoppingCart, Backpack, Pizza, Wallet, Smartphone, StickyNote, Trash2, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react'
+import { ShoppingCart, Backpack, Pizza, Wallet, Smartphone, StickyNote, Trash2, ExternalLink, ChevronDown, ChevronUp, GripVertical } from 'lucide-react'
 import type { QuickNote, TabView } from '../types'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../context/ToastContext'
+import { useDragReorder } from '../hooks/useDragReorder'
 import { SkeletonCard, SkeletonNote } from './Skeleton'
 import WeatherWidget from './WeatherWidget'
 import './DashboardScreen.css'
@@ -55,6 +56,7 @@ interface DashboardScreenProps {
   isLoading?: boolean
   onNavigate: (tab: TabView) => void
   onNotesChange: () => void
+  onReorderNotes: (newOrder: string[]) => void
   installPrompt: any
   onInstall: () => void
   bristolEnabled: boolean
@@ -74,6 +76,7 @@ export default function DashboardScreen({
   isLoading,
   onNavigate,
   onNotesChange,
+  onReorderNotes,
   installPrompt,
   onInstall,
   bristolEnabled,
@@ -100,6 +103,14 @@ export default function DashboardScreen({
       return next
     })
   }
+
+  const {
+    dragState,
+    handlePointerDown,
+    handlePointerMove,
+    handlePointerUp,
+    registerItem,
+  } = useDragReorder(notes, onReorderNotes)
 
   // Fetch today's bristol entry count
   useEffect(() => {
@@ -378,6 +389,120 @@ export default function DashboardScreen({
           App installieren — für schnelleren Zugriff
         </button>
       )}
+
+      {/* ── Quick Notes ── */}
+      <section className="dash-notes-section">
+        <h2 className="dash-section-title"><StickyNote size={18} strokeWidth={2} /> Kurznotizen</h2>
+
+        {isLoading ? (
+          <div className="dash-notes-list">
+            <SkeletonNote />
+            <SkeletonNote />
+          </div>
+        ) : (
+        <>
+        {!showForm && (
+          <button className="dash-add-btn" onClick={() => setShowForm(true)}>
+            + Notiz hinzufügen
+          </button>
+        )}
+
+        {showForm && (
+          <div className="dash-note-form">
+            <input
+              className="dash-note-input"
+              type="text"
+              placeholder="Titel (z.B. Hausadresse)"
+              value={formTitle}
+              onChange={(e) => setFormTitle(e.target.value)}
+            />
+            <textarea
+              className="dash-note-textarea"
+              placeholder="Notiz eingeben…"
+              value={formContent}
+              onChange={(e) => setFormContent(e.target.value)}
+              rows={3}
+            />
+            <div className="dash-note-form-actions">
+              <button className="dash-btn-cancel" onClick={() => { setShowForm(false); setFormTitle(''); setFormContent('') }}>
+                Abbrechen
+              </button>
+              <button className="dash-btn-save" onClick={handleSave} disabled={!formContent.trim()}>
+                Speichern
+              </button>
+            </div>
+          </div>
+        )}
+
+        {notes.length === 0 && !showForm && (
+          <p className="dash-notes-empty">Noch keine Notizen — füge Infos wie die Hausadresse hinzu!</p>
+        )}
+
+        <div className="dash-notes-list">
+          {notes.map((note) => {
+            const isEditing = editingId === note.id
+            const isDragging = dragState.draggingId === note.id
+            const isDragOver = dragState.dragOverId === note.id
+            if (isEditing) {
+              return (
+                <div key={note.id} className="dash-note-card dash-note-card-editing">
+                  <input
+                    className="dash-note-input"
+                    type="text"
+                    placeholder="Titel (optional)"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                  />
+                  <textarea
+                    className="dash-note-textarea"
+                    placeholder="Notiz eingeben…"
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    rows={3}
+                  />
+                  <div className="dash-note-form-actions">
+                    <button className="dash-btn-cancel" onClick={cancelEdit}>Abbrechen</button>
+                    <button className="dash-btn-save" onClick={() => handleUpdate(note)} disabled={!editContent.trim()}>
+                      Speichern
+                    </button>
+                  </div>
+                </div>
+              )
+            }
+            return (
+              <div
+                key={note.id}
+                ref={(el) => registerItem(note.id, el)}
+                className={`dash-note-card ${isDragging ? 'dash-note-dragging' : ''} ${isDragOver ? 'dash-note-dragover' : ''}`}
+                onPointerDown={(e) => handlePointerDown(e, note.id)}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                style={{ touchAction: 'none' }}
+              >
+                <div className="dash-note-card-top">
+                  <div className="dash-note-drag-handle" onPointerDown={(e) => { e.stopPropagation(); handlePointerDown(e, note.id) }}>
+                    <GripVertical size={14} strokeWidth={2} />
+                  </div>
+                  <div className="dash-note-card-content" onClick={() => startEdit(note)}>
+                    {note.title && <div className="dash-note-title">{note.title}</div>}
+                    <div className="dash-note-text">{renderTextWithLinks(note.content)}</div>
+                  </div>
+                  <button
+                    className="dash-note-delete"
+                    onClick={(e) => { e.stopPropagation(); handleDelete(note) }}
+                    aria-label="Löschen"
+                  >
+                    <Trash2 size={16} strokeWidth={2} />
+                  </button>
+                </div>
+                {note.created_by && <div className="dash-note-by">von {note.created_by}</div>}
+              </div>
+            )
+          })}
+        </div>
+        </>
+        )}
+      </section>
     </div>
   )
 }
