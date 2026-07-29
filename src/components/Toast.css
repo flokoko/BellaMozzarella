@@ -24,9 +24,9 @@
   background: var(--card-bg-solid, #fff);
   box-shadow: var(--shadow-lg);
   border-left: 4px solid var(--text-muted, #888);
-  animation: toast-slide-in 0.3s ease-out;
+  animation: toast-slide-in 0.5s ease-out;
   cursor: pointer;
-  transition: opacity 0.3s, transform 0.3s;
+  transition: opacity 0.5s, transform 0.5s;
 }
 
 .toast.toast-success {
@@ -47,7 +47,7 @@
 }
 
 .toast.toast-dismissing {
-  animation: toast-slide-out 0.3s ease-in forwards;
+  animation: toast-slide-out 0.5s ease-in forwards;
 }
 
 .toast-icon {
@@ -84,7 +84,7 @@
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: filter 0.15s;
+  transition: filter 0.25s;
 }
 
 .toast-btn:hover {

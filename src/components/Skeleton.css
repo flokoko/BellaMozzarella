@@ -1,7 +1,7 @@
 .skeleton {
   background: var(--button-bg, rgba(0, 0, 0, 0.06));
   border-radius: 8px;
-  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  animation: skeleton-pulse 2s ease-in-out infinite;
 }
 
 @keyframes skeleton-pulse {
@@ -38,7 +38,7 @@
   border: 1px solid var(--border-color);
   border-radius: 12px;
   background: var(--card-bg);
-  animation: mozzaPulse 1.5s ease-in-out infinite;
+  animation: mozzaPulse 2s ease-in-out infinite;
 }
 
 .skeleton-mozza {
@@ -49,7 +49,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: mozzaSpin 2s ease-in-out infinite;
+  animation: mozzaSpin 3s ease-in-out infinite;
 }
 
 .skeleton-mozza-emoji {
@@ -72,7 +72,7 @@
   border: 1px solid var(--border-color);
   border-radius: 12px;
   background: var(--card-bg);
-  animation: mozzaPulse 1.5s ease-in-out infinite;
+  animation: mozzaPulse 2s ease-in-out infinite;
 }
 
 @keyframes mozzaPulse {

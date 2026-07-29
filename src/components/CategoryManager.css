@@ -17,7 +17,7 @@
   font-weight: 600;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   box-shadow: var(--shadow-sm);
 }
 
@@ -53,7 +53,7 @@
 
 .cat-manager-chevron {
   font-size: 0.7rem;
-  transition: transform 0.3s ease;
+  transition: transform 0.4s ease;
   color: var(--text-muted);
 }
 
@@ -64,7 +64,7 @@
 .cat-manager-panel {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .cat-manager-panel.expanded {
@@ -80,7 +80,7 @@
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn 0.5s ease;
 }
 
 .cat-manager-empty {
@@ -95,7 +95,7 @@
   align-items: center;
   gap: 0.35rem;
   padding: 0.4rem 0;
-  transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.25s ease, opacity 0.25s ease, box-shadow 0.25s ease;
   border-radius: 10px;
 }
 
@@ -121,7 +121,7 @@
   color: var(--text-muted);
   opacity: 0.4;
   border-radius: 8px;
-  transition: opacity 0.2s, color 0.2s, background 0.2s;
+  transition: opacity 0.35s, color 0.35s, background 0.35s;
   touch-action: none;
 }
 
@@ -146,7 +146,7 @@
   color: var(--text-primary);
   outline: none;
   flex-shrink: 0;
-  transition: all 0.2s;
+  transition: all 0.35s;
 }
 
 .cat-manager-icon-input:focus {
@@ -164,7 +164,7 @@
   background: var(--input-bg);
   color: var(--text-primary);
   outline: none;
-  transition: all 0.2s;
+  transition: all 0.35s;
 }
 
 .cat-manager-name-input:focus {
@@ -183,7 +183,7 @@
   align-items: center;
   color: var(--text-secondary);
   opacity: 0.5;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .cat-manager-delete-btn:hover {
@@ -208,7 +208,7 @@
   font-weight: 600;
   color: var(--accent);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .cat-manager-add-btn:hover {

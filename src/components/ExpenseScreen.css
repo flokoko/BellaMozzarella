@@ -1,6 +1,6 @@
 .expense-screen {
   padding: 0.5rem 0;
-  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ── Sub-Toggle ── */
@@ -23,7 +23,7 @@
   color: var(--text-muted);
   cursor: pointer;
   border-radius: 999px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -63,7 +63,7 @@
   font-weight: 700;
   font-family: inherit;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   margin-bottom: 0.75rem;
 }
 
@@ -86,7 +86,7 @@
   border-radius: 12px;
   box-shadow: var(--shadow-sm);
   margin-bottom: 0.75rem;
-  animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: slideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .expense-form-row {
@@ -154,7 +154,7 @@
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   user-select: none;
 }
 
@@ -187,7 +187,7 @@
   color: var(--text-muted);
   cursor: pointer;
   border-radius: 999px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .expense-mode-btn.active {
@@ -275,9 +275,9 @@
   font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 0.2s;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.35s;
   box-shadow: 0 2px 8px rgba(0, 146, 70, 0.2);
 }
 
@@ -304,7 +304,7 @@
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .expense-btn-cancel:hover {
@@ -343,9 +343,9 @@
   border-radius: 12px;
   padding: 0.6rem 0.7rem;
   box-shadow: var(--shadow-sm);
-  animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   border-left: 3px solid #009246;
 }
 
@@ -395,7 +395,7 @@
   align-items: center;
   color: var(--text-secondary);
   opacity: 0.5;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .expense-card-btn:hover {
@@ -434,7 +434,7 @@
   font-size: 0.85rem;
   border: 1px dashed var(--dashed-border);
   border-radius: 14px;
-  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -460,7 +460,7 @@
   font-size: 0.95rem;
   font-weight: 800;
   color: #009246;
-  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .expense-balance-list {
@@ -479,7 +479,7 @@
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border-color);
   background: var(--card-bg);
-  animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: slideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .expense-balance-card.positive {
@@ -543,7 +543,7 @@
   background: var(--card-bg);
   border: 1px solid var(--border-color);
   font-size: 0.82rem;
-  animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: slideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .expense-txn-from {
@@ -574,7 +574,7 @@
   font-size: 0.82rem;
   border: 1px dashed var(--dashed-border);
   border-radius: 12px;
-  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ── Expense Category Chips (Form) ── */
@@ -594,7 +594,7 @@
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   user-select: none;
 }
 
@@ -623,7 +623,7 @@
   border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 0.5rem;
-  animation: slideIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .expense-cat-editor-list {
@@ -729,7 +729,7 @@
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   margin-bottom: 0.75rem;
-  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .expense-matrix {
@@ -788,7 +788,7 @@
 .expense-matrix-cell {
   font-weight: 600;
   color: var(--text-muted);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   min-width: 4.5rem;
 }
 

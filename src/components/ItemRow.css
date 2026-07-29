@@ -58,7 +58,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   background: var(--input-bg);
   flex-shrink: 0;
 }
@@ -66,14 +66,14 @@
 .custom-checkbox-visual.checked {
   background: var(--accent);
   border-color: var(--accent);
-  animation: checkBounce 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: checkBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .checkmark-icon {
   width: 14px;
   height: 14px;
   color: white;
-  animation: checkmarkDraw 0.3s ease-out;
+  animation: checkmarkDraw 0.45s ease-out;
 }
 
 @keyframes checkBounce {
