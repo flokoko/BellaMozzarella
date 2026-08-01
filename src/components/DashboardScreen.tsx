@@ -1,4 +1,4 @@
-import { useState, useEffect, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { ShoppingCart, Backpack, Pizza, Wallet, Smartphone, StickyNote, Trash2, ExternalLink, ChevronDown, ChevronUp, GripVertical, Star } from 'lucide-react'
 import type { QuickNote, TabView } from '../types'
 import { supabase } from '../lib/supabase'
@@ -6,6 +6,7 @@ import { useToast } from '../context/ToastContext'
 import { useDragReorder } from '../hooks/useDragReorder'
 import { SkeletonCard, SkeletonNote } from './Skeleton'
 import WeatherWidget from './WeatherWidget'
+import BristolWidget from './BristolWidget'
 import './DashboardScreen.css'
 
 /** Detect URLs in text and render them as clickable links. */
@@ -95,7 +96,6 @@ export default function DashboardScreen({
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [editContent, setEditContent] = useState('')
-  const [bristolCount, setBristolCount] = useState(0)
 
   // ── Notes collapsible state from localStorage ──
   const [notesExpanded, setNotesExpanded] = useState(() => {
@@ -118,21 +118,6 @@ export default function DashboardScreen({
     handlePointerUp,
     registerItem,
   } = useDragReorder(notes, onReorderNotes)
-
-  // Fetch today's bristol entry count
-  useEffect(() => {
-    if (!bristolEnabled) {
-      setBristolCount(0)
-      return
-    }
-    const today = new Date().toISOString().slice(0, 10)
-    supabase
-      .from('bristol_entries')
-      .select('id', { count: 'exact', head: true })
-      .eq('list_id', listId)
-      .eq('entry_date', today)
-      .then(({ count }) => setBristolCount(count ?? 0))
-  }, [bristolEnabled, listId])
 
   const handleSave = async () => {
     const content = formContent.trim()
@@ -202,20 +187,19 @@ export default function DashboardScreen({
     ? `${expenseCount} Ausgaben — Du: ${userBalance >= 0 ? 'bekommst' : 'schuldest'} €${Math.abs(userBalance).toFixed(2)}`
     : '💶 Niente Ausgaben!'
   const expenseTotalFmt = expenseTotal.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })
-  const bristolStatus = bristolCount > 0 ? `${bristolCount} Einträge heute` : '💩 Ancora niente!'
 
   return (
     <div className="dashboard-screen">
       {/* ── Weather Widget ── */}
       <WeatherWidget />
 
-      {/* ── Bristol Row ── */}
+      {/* ── Bristol Widget ── */}
       {bristolEnabled && (
-        <button className="dash-bristol-row" onClick={() => { navigator.vibrate?.(8); onNavigate('bristol') }}>
-          <span className="dash-bristol-icon">💩</span>
-          <span className="dash-bristol-text">Bristol: {bristolStatus}</span>
-          <span className="dash-bristol-arrow">›</span>
-        </button>
+        <BristolWidget
+          listId={listId}
+          userName={userName}
+          onNavigate={() => { navigator.vibrate?.(8); onNavigate('bristol') }}
+        />
       )}
 
       {/* ── Feature Cards ── */}
