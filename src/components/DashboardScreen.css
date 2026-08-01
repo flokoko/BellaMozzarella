@@ -442,6 +442,47 @@
   cursor: grabbing;
 }
 
+/* ── Note Star/Favorite Button ── */
+.dash-note-star {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  opacity: 0.4;
+  transition: opacity 0.2s, color 0.2s, transform 0.2s;
+}
+
+.dash-note-card:hover .dash-note-star {
+  opacity: 0.7;
+}
+
+.dash-note-star:hover {
+  opacity: 1;
+  color: #eab308;
+  transform: scale(1.15);
+}
+
+.dash-note-star:active {
+  transform: scale(0.9);
+}
+
+/* Favorited notes: always show star, golden tint */
+.dash-note-favorite .dash-note-star {
+  opacity: 1;
+  color: #eab308;
+}
+
+/* Favorited note card: subtle left border accent + background tint */
+.dash-note-favorite {
+  border-left: 3px solid #eab308;
+  background: color-mix(in srgb, #eab308 6%, var(--card-bg, #fff));
+}
+
 .dash-note-card-editing {
   cursor: default;
   border: 2px solid var(--accent);

@@ -69,6 +69,7 @@ export interface QuickNote {
   created_by: string | null
   created_at: string
   sort_order: number
+  is_favorite: boolean
 }
 
 export interface Expense {

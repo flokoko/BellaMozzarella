@@ -1,5 +1,5 @@
 import { useState, useEffect, type ReactNode } from 'react'
-import { ShoppingCart, Backpack, Pizza, Wallet, Smartphone, StickyNote, Trash2, ExternalLink, ChevronDown, ChevronUp, GripVertical } from 'lucide-react'
+import { ShoppingCart, Backpack, Pizza, Wallet, Smartphone, StickyNote, Trash2, ExternalLink, ChevronDown, ChevronUp, GripVertical, Star } from 'lucide-react'
 import type { QuickNote, TabView } from '../types'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../context/ToastContext'
@@ -57,6 +57,7 @@ interface DashboardScreenProps {
   onNavigate: (tab: TabView) => void
   onNotesChange: () => void
   onReorderNotes: (newOrder: string[]) => void
+  onToggleFavorite: (noteId: string) => void
   installPrompt: any
   onInstall: () => void
   bristolEnabled: boolean
@@ -77,6 +78,7 @@ export default function DashboardScreen({
   onNavigate,
   onNotesChange,
   onReorderNotes,
+  onToggleFavorite,
   installPrompt,
   onInstall,
   bristolEnabled,
@@ -473,7 +475,7 @@ export default function DashboardScreen({
               <div
                 key={note.id}
                 ref={(el) => registerItem(note.id, el)}
-                className={`dash-note-card ${isDragging ? 'dash-note-dragging' : ''} ${isDragOver ? 'dash-note-dragover' : ''}`}
+                className={`dash-note-card ${isDragging ? 'dash-note-dragging' : ''} ${isDragOver ? 'dash-note-dragover' : ''} ${note.is_favorite ? 'dash-note-favorite' : ''}`}
                 onPointerDown={(e) => handlePointerDown(e, note.id)}
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
@@ -483,6 +485,13 @@ export default function DashboardScreen({
                   <div className="dash-note-drag-handle" onPointerDown={(e) => { e.stopPropagation(); handlePointerDown(e, note.id) }}>
                     <GripVertical size={14} strokeWidth={2} />
                   </div>
+                  <button
+                    className="dash-note-star"
+                    onClick={(e) => { e.stopPropagation(); onToggleFavorite(note.id) }}
+                    aria-label={note.is_favorite ? 'Favorit entfernen' : 'Als Favorit markieren'}
+                  >
+                    <Star size={16} strokeWidth={2} fill={note.is_favorite ? 'currentColor' : 'none'} />
+                  </button>
                   <div className="dash-note-card-content" onClick={() => startEdit(note)}>
                     {note.title && <div className="dash-note-title">{note.title}</div>}
                     <div className="dash-note-text">{renderTextWithLinks(note.content)}</div>

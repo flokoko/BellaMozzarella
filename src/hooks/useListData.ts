@@ -115,6 +115,7 @@ export function useListData() {
       .from('notes')
       .select('*')
       .eq('list_id', listId)
+      .order('is_favorite', { ascending: false })
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true })
     if (err) { console.error('fetchNotes error:', err); return }
@@ -401,6 +402,17 @@ export function useListData() {
     if (list) fetchAll(list.id)
   }, [list, markActivity, fetchAll, isOnline, enqueue])
 
+  const toggleNoteFavorite = useCallback(async (noteId: string) => {
+    if (!list) return
+    markActivity()
+    const { error } = await supabase.rpc('toggle_note_favorite', { note_id: noteId })
+    if (error) {
+      console.error('toggleNoteFavorite error:', error)
+      return
+    }
+    fetchAll(list.id, true)
+  }, [list, markActivity, fetchAll])
+
   // ── Derived values ─────────────────────────────────────────────────
   const shoppingCategories = useMemo(() => categories.filter((c) => c.list_type === 'shopping'), [categories])
   const bringCategories = useMemo(() => categories.filter((c) => c.list_type === 'bring'), [categories])
@@ -569,6 +581,7 @@ export function useListData() {
     deleteBringItem,
     reorderItems,
     reorderNotes,
+    toggleNoteFavorite,
     // join/leave/rename
     handleJoin,
     handleLeave,
