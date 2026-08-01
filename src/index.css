@@ -2,7 +2,7 @@
 :root {
   --bg-gradient: linear-gradient(160deg, #e8f5e9 0%, #f5f0e0 25%, #fff5f5 50%, #f0faf0 75%, #e8f5e9 100%);
   --header-bg: rgba(255, 255, 255, 0.30);
-  --card-bg: rgba(255, 255, 255, 0.35);
+  --card-bg: rgba(255, 255, 255, 0.45);
   --card-bg-solid: #ffffff;
   --text-primary: #1a2e1a;
   --text-secondary: #6b806b;
