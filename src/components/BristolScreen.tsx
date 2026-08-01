@@ -16,11 +16,6 @@ const BRISTOL_ADJECTIVES: Record<number, string> = {
   5: 'weich',
   6: 'breiig',
   7: 'flüssig',
-  8: 'stückig',
-  9: 'pastös',
-  10: 'schleimig',
-  11: 'wässrig',
-  12: 'spritzig',
   13: 'explosiv',
 }
 
@@ -32,11 +27,6 @@ const BRISTOL_COLORS: Record<number, string> = {
   5: '#9ACD32',
   6: '#FFD700',
   7: '#FF6347',
-  8: '#8B0000',
-  9: '#DC143C',
-  10: '#FF1493',
-  11: '#FF69B4',
-  12: '#FFB6C1',
   13: '#FFE4E1',
 }
 
@@ -48,15 +38,10 @@ const BRISTOL_EMOJIS: Record<number, string> = {
   5: '🍦',
   6: '🥣',
   7: '💧',
-  8: '🧩',
-  9: '🥔',
-  10: '🫧',
-  11: '💦',
-  12: '🚿',
   13: '💥',
 }
 
-const BRISTOL_VALUES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+const BRISTOL_VALUES = [1, 2, 3, 4, 5, 6, 7, 13]
 
 interface BristolScreenProps {
   listId: string
@@ -223,12 +208,12 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
 
       {/* ── Value Picker (Grid) ── */}
       <div className="bristol-picker">
-        <div className="bristol-picker-label">Bristol-Skala 1–13</div>
+        <div className="bristol-picker-label">Bristol-Skala 1–7 + 13</div>
         <div className="bristol-picker-grid">
           {BRISTOL_VALUES.map(v => (
             <button
               key={v}
-              className={`bristol-picker-btn ${myTodayEntry?.value === v ? 'selected' : ''}`}
+              className={`bristol-picker-btn ${v === 13 ? 'bristol-picker-btn-bonus' : ''} ${myTodayEntry?.value === v ? 'selected' : ''}`}
               style={{ '--bristol-color': BRISTOL_COLORS[v] } as React.CSSProperties}
               disabled={submitting}
               onClick={() => handleSubmitEntry(v)}

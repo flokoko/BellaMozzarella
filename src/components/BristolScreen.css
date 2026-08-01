@@ -167,6 +167,34 @@
   color: white;
 }
 
+/* ── Bonus-Wert 13 ── */
+.bristol-picker-btn-bonus {
+  border-style: dashed;
+  border-color: var(--bristol-color, #FFE4E1);
+  background: linear-gradient(135deg, var(--card-bg-solid) 0%, rgba(255, 228, 225, 0.15) 100%);
+  position: relative;
+}
+
+.bristol-picker-btn-bonus::after {
+  content: '🔥';
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+.bristol-picker-btn-bonus:hover {
+  border-color: var(--bristol-color, #FFE4E1);
+  box-shadow: 0 6px 20px rgba(255, 228, 225, 0.3);
+}
+
+.bristol-picker-btn-bonus.selected {
+  border-style: solid;
+  background: var(--bristol-color, #FFE4E1);
+  box-shadow: 0 4px 20px rgba(255, 228, 225, 0.4);
+}
+
 .bristol-picker-emoji {
   font-size: 1rem;
   line-height: 1;
