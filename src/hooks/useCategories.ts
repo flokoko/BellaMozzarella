@@ -34,8 +34,8 @@ export function useCategories(onChange: () => void) {
       list_id: listId,
       list_type: listType,
       name: 'Neue Kategorie',
-      color: '#9b6dd9',
-      bg: '#e8dcf7',
+      color: '#ffffff',
+      bg: '#009246',
       sort_order: sortOrder,
     })
     if (error) {
