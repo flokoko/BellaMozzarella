@@ -1,11 +1,9 @@
+-- Optimiertes Batch-Reorder mit unnest (ein UPDATE statt N)
 CREATE OR REPLACE FUNCTION batch_reorder_items(item_ids UUID[])
 RETURNS void
-LANGUAGE plpgsql SECURITY DEFINER AS $$
-DECLARE
-  i INT;
-BEGIN
-  FOR i IN 1..array_length(item_ids, 1) LOOP
-    UPDATE items SET sort_order = i - 1 WHERE id = item_ids[i];
-  END LOOP;
-END;
+LANGUAGE sql SECURITY DEFINER
+AS $$
+  UPDATE items SET sort_order = new.sort_order
+  FROM (SELECT unnest(item_ids) AS id, generate_subscripts(item_ids, 1) - 1 AS sort_order) AS new
+  WHERE items.id = new.id;
 $$;

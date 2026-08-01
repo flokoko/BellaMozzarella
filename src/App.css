@@ -316,3 +316,34 @@
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
+
+/* ── PWA Update Banner ── */
+.update-banner {
+  background: var(--accent-gradient);
+  color: white;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.6rem 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.update-banner-btn {
+  border: 2px solid white;
+  background: transparent;
+  color: white;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.3s;
+}
+.update-banner-btn:hover {
+  background: white;
+  color: var(--accent);
+}

@@ -1,19 +1,11 @@
--- ═══════════════════════════════════════════════════════════════
--- Bella Mozzarella: Kategorien per Drag-and-Drop sortieren
--- ═══════════════════════════════════════════════════════════════
--- Im Supabase Dashboard → SQL Editor → New Query → dies ausführen
--- ═══════════════════════════════════════════════════════════════
-
+-- Optimiertes Batch-Reorder für Kategorien mit unnest
 CREATE OR REPLACE FUNCTION batch_reorder_categories(category_data JSONB)
 RETURNS void
-LANGUAGE plpgsql SECURITY DEFINER AS $$
-DECLARE
-  rec JSONB;
+LANGUAGE plpgsql SECURITY DEFINER
+AS $$
 BEGIN
-  FOR rec IN SELECT * FROM jsonb_array_elements(category_data) LOOP
-    UPDATE categories
-    SET sort_order = (rec->>'sort_order')::INT
-    WHERE id = (rec->>'id')::UUID;
-  END LOOP;
+  UPDATE categories SET sort_order = (c.data->>'sort_order')::int
+  FROM (SELECT jsonb_array_elements(category_data) AS data) AS c
+  WHERE categories.id = (c.data->>'id')::uuid;
 END;
 $$;

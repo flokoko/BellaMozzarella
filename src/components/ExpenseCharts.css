@@ -90,3 +90,20 @@
   font-weight: 700;
   color: var(--text-primary);
 }
+
+/* ── Dark mode chart colors ── */
+[data-theme="dark"] .expense-chart-bar-red {
+  background: #ff6b6b;
+}
+[data-theme="dark"] .expense-chart-bar-green {
+  background: #00b35e;
+}
+[data-theme="dark"] .expense-chart-bar-gold {
+  background: #eab308;
+}
+[data-theme="dark"] .expense-chart-label {
+  color: #99b899;
+}
+[data-theme="dark"] .expense-chart-amount {
+  color: #99b899;
+}

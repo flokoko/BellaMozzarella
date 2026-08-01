@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import type { ItemCategory, ListType } from '../types'
 import { supabase } from '../lib/supabase'
+import { logError } from '../lib/logger'
 import { useToast } from '../context/ToastContext'
 import { useOfflineQueue } from './useOfflineQueue'
 
@@ -11,7 +12,7 @@ export function useCategories(onChange: () => void) {
   const updateCategory = useCallback(async (id: string, fields: Partial<ItemCategory>) => {
     const { error } = await supabase.from('categories').update(fields).eq('id', id)
     if (error) {
-      console.error('updateCategory error:', error)
+      logError('updateCategory error:', error)
       toast(`Fehler beim Speichern: ${error.message}`, 'error')
       return
     }
@@ -21,7 +22,7 @@ export function useCategories(onChange: () => void) {
   const deleteCategory = useCallback(async (id: string) => {
     const { error } = await supabase.from('categories').delete().eq('id', id)
     if (error) {
-      console.error('deleteCategory error:', error)
+      logError('deleteCategory error:', error)
       toast(`Fehler beim Löschen: ${error.message}`, 'error')
       return
     }
@@ -38,7 +39,7 @@ export function useCategories(onChange: () => void) {
       sort_order: sortOrder,
     })
     if (error) {
-      console.error('addCategory error:', error)
+      logError('addCategory error:', error)
       toast(`Fehler beim Hinzufügen: ${error.message}`, 'error')
       return
     }
@@ -56,7 +57,7 @@ export function useCategories(onChange: () => void) {
         category_data: updates,
       })
       if (error) {
-        console.error('reorderCategories error:', error)
+        logError('reorderCategories error:', error)
         toast(`Fehler beim Sortieren: ${error.message}`, 'error')
         return
       }

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
+import { logError } from '../lib/logger'
 import { useToast } from '../context/ToastContext'
 import type { BristolEntry } from '../types'
 import {
@@ -72,7 +73,7 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
       .order('entry_date', { ascending: false })
       .order('created_at', { ascending: false })
     if (error) {
-      console.error('fetchEntries error:', error)
+      logError('fetchEntries error:', error)
       return
     }
     setEntries(data as BristolEntry[] ?? [])

@@ -13,6 +13,8 @@ import type {
 } from '../types'
 import { supabase } from '../lib/supabase'
 import { useOfflineQueue } from './useOfflineQueue'
+import { useRealtimeSync } from './useRealtimeSync'
+import { logError } from '../lib/logger'
 
 export function useListData() {
   // ── Offline queue ──────────────────────────────────────────────────
@@ -34,17 +36,17 @@ export function useListData() {
   const [adminUnlocked, setAdminUnlocked] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  // ── Activity + fetch guards for adaptive polling ───────────────────
-  const lastActivityRef = useRef(Date.now())
-  const lastFetchTime = useRef(0)
+  // ── Fetch guard for realtime sync debounce ─────────────────────────
   const isFetchingRef = useRef(false)
 
   // ── Track previous shopping items for push notifications ───────────
   const prevShoppingItemsRef = useRef<ListItem[]>([])
 
-  const markActivity = useCallback(() => {
-    lastActivityRef.current = Date.now()
-  }, [])
+  // ── Undo state for delete operations ───────────────────────────────
+  const [undoState, setUndoState] = useState<{
+    items: ListItem[]
+    timeout: ReturnType<typeof setTimeout> | null
+  } | null>(null)
 
   // ── Fetch functions ────────────────────────────────────────────────
   const fetchItems = useCallback(async (listId: string, listType: ListType) => {
@@ -55,7 +57,7 @@ export function useListData() {
       .eq('list_type', listType)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true })
-    if (err) { console.error('fetchItems error:', err); return }
+    if (err) { logError('fetchItems error:', err); return }
     const items = (data || []) as ListItem[]
     if (listType === 'shopping') {
       // ── Push notification: check for new items added by others ──
@@ -86,7 +88,7 @@ export function useListData() {
       .select('*')
       .eq('list_id', listId)
       .order('sort_order', { ascending: true })
-    if (err) { console.error('fetchCategories error:', err); return }
+    if (err) { logError('fetchCategories error:', err); return }
     setCategories((data || []) as ItemCategory[])
   }, [])
 
@@ -96,7 +98,7 @@ export function useListData() {
       .select('*')
       .eq('list_id', listId)
       .order('created_at', { ascending: true })
-    if (err) { console.error('fetchMeals error:', err); return }
+    if (err) { logError('fetchMeals error:', err); return }
     setMeals((data || []) as Meal[])
   }, [])
 
@@ -106,7 +108,7 @@ export function useListData() {
       .select('*')
       .eq('list_id', listId)
       .order('created_at', { ascending: true })
-    if (err) { console.error('fetchMealIdeas error:', err); return }
+    if (err) { logError('fetchMealIdeas error:', err); return }
     setMealIdeas((data || []) as MealIdea[])
   }, [])
 
@@ -118,7 +120,7 @@ export function useListData() {
       .order('is_favorite', { ascending: false })
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true })
-    if (err) { console.error('fetchNotes error:', err); return }
+    if (err) { logError('fetchNotes error:', err); return }
     setNotes((data || []) as QuickNote[])
   }, [])
 
@@ -129,7 +131,7 @@ export function useListData() {
       .eq('list_id', listId)
       .order('expense_date', { ascending: false })
       .order('created_at', { ascending: false })
-    if (err) { console.error('fetchExpenses error:', err); return }
+    if (err) { logError('fetchExpenses error:', err); return }
     setExpenses((data || []) as Expense[])
   }, [])
 
@@ -139,16 +141,15 @@ export function useListData() {
       .select('*')
       .eq('list_id', listId)
       .order('name', { ascending: true })
-    if (err) { console.error('fetchParticipants error:', err); return }
+    if (err) { logError('fetchParticipants error:', err); return }
     setParticipants((data || []) as Participant[])
   }, [])
 
   const fetchAll = useCallback(async (listId: string, force = false) => {
     // Guard against overlapping fetches — Mutation-Refetches können mit force=true
-    // den Guard umgehen, damit sie nicht vom Polling blockiert werden.
+    // den Guard umgehen, damit sie nicht vom Realtime-Sync blockiert werden.
     if (!force && isFetchingRef.current) return
     isFetchingRef.current = true
-    lastFetchTime.current = Date.now()
     try {
       await Promise.all([
         fetchItems(listId, 'shopping'),
@@ -166,57 +167,33 @@ export function useListData() {
     }
   }, [fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes, fetchExpenses, fetchParticipants])
 
-  // ── Adaptive polling ───────────────────────────────────────────────
-  useEffect(() => {
+  // ── Realtime sync (replaces adaptive polling) ──────────────────────
+  const handleRealtimeChange = useCallback((table: string) => {
     if (!list) return
-    // Don't poll when offline — optimistic updates stay in local state.
-    if (!navigator.onLine) return
-
-    let interval: ReturnType<typeof setInterval> | null = null
-
-    const getInterval = () => {
-      // 3s when active (interaction in last 30s), 8s when idle
-      return Date.now() - lastActivityRef.current < 30000 ? 3000 : 8000
-    }
-
-    const start = () => {
-      if (interval) clearInterval(interval)
-      interval = setInterval(() => {
-        fetchAll(list.id)
-      }, getInterval())
-    }
-
-    const stop = () => {
-      if (interval) { clearInterval(interval); interval = null }
-    }
-
-    if (!document.hidden) start()
-    // Keep polling in background too (slower) so push notifications can fire
-    const bgInterval = setInterval(() => {
-      if (document.hidden) {
-        fetchAll(list.id)
-      }
-    }, 15000)
-
-    const onVisibility = () => {
-      if (document.hidden) {
-        stop()
-      } else {
-        const now = Date.now()
-        if (now - lastFetchTime.current > 3000) {
-          fetchAll(list.id)
-        }
-        start()
+    // Debounce: nur refetchen wenn nicht gerade ein fetch läuft
+    if (!isFetchingRef.current) {
+      if (table === 'items') {
+        fetchItems(list.id, 'shopping')
+        fetchItems(list.id, 'bring')
+      } else if (table === 'categories') {
+        fetchCategories(list.id)
+      } else if (table === 'meals') {
+        fetchMeals(list.id)
+        fetchMealIdeas(list.id)
+      } else if (table === 'notes') {
+        fetchNotes(list.id)
+      } else if (table === 'expenses') {
+        fetchExpenses(list.id)
+      } else if (table === 'participants') {
+        fetchParticipants(list.id)
       }
     }
+  }, [list, fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes, fetchExpenses, fetchParticipants])
 
-    document.addEventListener('visibilitychange', onVisibility)
-    return () => {
-      stop()
-      clearInterval(bgInterval)
-      document.removeEventListener('visibilitychange', onVisibility)
-    }
-  }, [list, fetchAll])
+  useRealtimeSync({
+    listId: list?.id ?? null,
+    onTableChange: handleRealtimeChange,
+  })
 
   // ── Fetch expense splits whenever expenses change ──────────────────
   useEffect(() => {
@@ -227,7 +204,7 @@ export function useListData() {
       .select('*')
       .in('expense_id', expenseIds)
       .then(({ data, error }) => {
-        if (error) { console.error('fetchSplits error:', error); return }
+        if (error) { logError('fetchSplits error:', error); return }
         setExpenseSplits((data || []) as ExpenseSplit[])
       })
   }, [expenses])
@@ -266,13 +243,12 @@ export function useListData() {
   /** Toggle all items in a group at once (single API call instead of N). */
   const batchToggleShoppingItems = useCallback((items: ListItem[], checked: boolean) => {
     if (items.length === 0) return
-    markActivity()
     const ids = items.map(i => i.id)
     setShoppingItems(prev => prev.map(i => ids.includes(i.id) ? { ...i, is_checked: checked } : i))
     if (isOnline) {
       supabase.from('items').update({ is_checked: checked }).in('id', ids).then(({ error }) => {
         if (error) {
-          console.error('batchToggleShoppingItems error:', error)
+          logError('batchToggleShoppingItems error:', error)
           // Rollback: restore original checked states
           setShoppingItems(prev => prev.map(i => {
             const orig = items.find(o => o.id === i.id)
@@ -287,15 +263,14 @@ export function useListData() {
         enqueue({ type: 'update', table: 'items', payload: { is_checked: checked }, filterColumn: 'id', filterValue: item.id })
       }
     }
-  }, [markActivity, isOnline, enqueue, list, fetchAll])
+  }, [isOnline, enqueue, list, fetchAll])
 
   const toggleShoppingItem = useCallback((item: ListItem) => {
-    markActivity()
     setShoppingItems(prev => prev.map(i => i.id === item.id ? { ...i, is_checked: !i.is_checked } : i))
     if (isOnline) {
       supabase.from('items').update({ is_checked: !item.is_checked }).eq('id', item.id).then(({ error }) => {
         if (error) {
-          console.error('toggleShoppingItem error:', error)
+          logError('toggleShoppingItem error:', error)
           setShoppingItems(prev => prev.map(i => i.id === item.id ? { ...i, is_checked: item.is_checked } : i))
         }
         // Refetch AFTER server write completes — prevents race with optimistic state
@@ -304,31 +279,63 @@ export function useListData() {
     } else {
       enqueue({ type: 'update', table: 'items', payload: { is_checked: !item.is_checked }, filterColumn: 'id', filterValue: item.id })
     }
-  }, [markActivity, isOnline, enqueue, list, fetchAll])
+  }, [isOnline, enqueue, list, fetchAll])
+
+  // ── Undo helper ─────────────────────────────────────────────────────
+  const withUndo = useCallback((items: ListItem[], doAction: () => void) => {
+    // Clear previous undo timeout
+    if (undoState?.timeout) {
+      clearTimeout(undoState.timeout)
+    }
+    // Store items for undo
+    const timeout = setTimeout(() => {
+      setUndoState(null)
+    }, 5000)
+    setUndoState({ items, timeout })
+    // Execute the action
+    doAction()
+  }, [undoState])
 
   const deleteShoppingItem = useCallback((item: ListItem) => {
-    markActivity()
-    setShoppingItems(prev => prev.filter(i => i.id !== item.id))
-    if (isOnline) {
-      supabase.from('items').delete().eq('id', item.id).then(({ error }) => {
-        if (error) {
-          console.error('deleteShoppingItem error:', error)
-          setShoppingItems(prev => [item, ...prev])
-        }
-        if (list) fetchAll(list.id, true)
-      })
-    } else {
-      enqueue({ type: 'delete', table: 'items', payload: {}, filterColumn: 'id', filterValue: item.id })
+    withUndo([item], () => {
+      setShoppingItems(prev => prev.filter(i => i.id !== item.id))
+      if (isOnline) {
+        supabase.from('items').delete().eq('id', item.id).then(({ error }) => {
+          if (error) {
+            logError('deleteShoppingItem error:', error)
+            setShoppingItems(prev => [item, ...prev])
+          }
+          if (list) fetchAll(list.id, true)
+        })
+      } else {
+        enqueue({ type: 'delete', table: 'items', payload: {}, filterColumn: 'id', filterValue: item.id })
+      }
+    })
+  }, [withUndo, isOnline, enqueue, list, fetchAll])
+
+  const undoDelete = useCallback(() => {
+    if (!undoState) return
+    if (undoState.timeout) clearTimeout(undoState.timeout)
+    // Re-insert the deleted items
+    for (const item of undoState.items) {
+      if (isOnline) {
+        supabase.from('items').insert(item as any).then(() => {
+          if (list) fetchAll(list.id, true)
+        })
+      } else {
+        enqueue({ type: 'insert', table: 'items', payload: item as unknown as Record<string, unknown> })
+      }
     }
-  }, [markActivity, isOnline, enqueue, list, fetchAll])
+    setShoppingItems(prev => [...undoState.items, ...prev])
+    setUndoState(null)
+  }, [undoState, isOnline, enqueue, list, fetchAll])
 
   const toggleBringItem = useCallback((item: ListItem) => {
-    markActivity()
     setBringItems(prev => prev.map(i => i.id === item.id ? { ...i, is_brought: !i.is_brought } : i))
     if (isOnline) {
       supabase.from('items').update({ is_brought: !item.is_brought }).eq('id', item.id).then(({ error }) => {
         if (error) {
-          console.error('toggleBringItem error:', error)
+          logError('toggleBringItem error:', error)
           setBringItems(prev => prev.map(i => i.id === item.id ? { ...i, is_brought: item.is_brought } : i))
         }
         if (list) fetchAll(list.id, true)
@@ -336,15 +343,14 @@ export function useListData() {
     } else {
       enqueue({ type: 'update', table: 'items', payload: { is_brought: !item.is_brought }, filterColumn: 'id', filterValue: item.id })
     }
-  }, [markActivity, isOnline, enqueue, list, fetchAll])
+  }, [isOnline, enqueue, list, fetchAll])
 
   const deleteBringItem = useCallback((item: ListItem) => {
-    markActivity()
     setBringItems(prev => prev.filter(i => i.id !== item.id))
     if (isOnline) {
       supabase.from('items').delete().eq('id', item.id).then(({ error }) => {
         if (error) {
-          console.error('deleteBringItem error:', error)
+          logError('deleteBringItem error:', error)
           setBringItems(prev => [item, ...prev])
         }
         if (list) fetchAll(list.id, true)
@@ -352,11 +358,10 @@ export function useListData() {
     } else {
       enqueue({ type: 'delete', table: 'items', payload: {}, filterColumn: 'id', filterValue: item.id })
     }
-  }, [markActivity, isOnline, enqueue, list, fetchAll])
+  }, [isOnline, enqueue, list, fetchAll])
 
   const reorderItems = useCallback(async (listType: ListType, newOrder: string[]) => {
     if (!list) return
-    markActivity()
     if (listType === 'shopping') {
       setShoppingItems(prev => {
         const map = new Map(prev.map(i => [i.id, i]))
@@ -381,11 +386,10 @@ export function useListData() {
     }
     // Refetch after reorder completes
     if (list) fetchAll(list.id)
-  }, [list, markActivity, fetchAll, isOnline, enqueue])
+  }, [list, fetchAll, isOnline, enqueue])
 
   const reorderNotes = useCallback(async (newOrder: string[]) => {
     if (!list) return
-    markActivity()
     // Optimistic update
     setNotes(prev => {
       const map = new Map(prev.map(n => [n.id, n]))
@@ -400,18 +404,17 @@ export function useListData() {
       enqueue({ type: 'rpc', table: '', payload: { note_ids: newOrder }, rpcName: 'batch_reorder_notes' })
     }
     if (list) fetchAll(list.id)
-  }, [list, markActivity, fetchAll, isOnline, enqueue])
+  }, [list, fetchAll, isOnline, enqueue])
 
   const toggleNoteFavorite = useCallback(async (noteId: string) => {
     if (!list) return
-    markActivity()
     const { error } = await supabase.rpc('toggle_note_favorite', { note_id: noteId })
     if (error) {
-      console.error('toggleNoteFavorite error:', error)
+      logError('toggleNoteFavorite error:', error)
       return
     }
     fetchAll(list.id, true)
-  }, [list, markActivity, fetchAll])
+  }, [list, fetchAll])
 
   // ── Derived values ─────────────────────────────────────────────────
   const shoppingCategories = useMemo(() => categories.filter((c) => c.list_type === 'shopping'), [categories])
@@ -450,7 +453,6 @@ export function useListData() {
     setUserName(name)
     setParticipantId(pid)
     setList(l)
-    markActivity()
     setIsLoading(true)
     fetchAll(l.id)
     const { data: fullList } = await supabase
@@ -459,7 +461,7 @@ export function useListData() {
       .eq('id', l.id)
       .single()
     if (fullList) setList(fullList as ShoppingList)
-  }, [fetchAll, markActivity])
+  }, [fetchAll])
 
   const handleLeave = useCallback(() => {
     localStorage.removeItem('user_name')
@@ -477,6 +479,7 @@ export function useListData() {
     setExpenseSplits([])
     setParticipants([])
     setAdminUnlocked(false)
+    setUndoState(null)
     prevShoppingItemsRef.current = []
   }, [])
 
@@ -516,6 +519,7 @@ export function useListData() {
     participants,
     adminUnlocked,
     isLoading,
+    undoState,
     // offline
     isOnline,
     queueLength,
@@ -545,6 +549,7 @@ export function useListData() {
     toggleShoppingItem,
     batchToggleShoppingItems,
     deleteShoppingItem,
+    undoDelete,
     toggleBringItem,
     deleteBringItem,
     reorderItems,

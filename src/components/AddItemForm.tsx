@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { ItemCategory, ListType } from '../types'
 import { supabase } from '../lib/supabase'
+import { logError } from '../lib/logger'
 import { useToast } from '../context/ToastContext'
 import './AddItemForm.css'
 
@@ -54,7 +55,7 @@ export default function AddItemForm({
       list_type: listType,
     })
     if (error) {
-      console.error('Insert failed:', error)
+      logError('Insert failed:', error)
       toast(`Fehler beim Speichern: ${error.message}`, 'error')
       return
     }

@@ -81,12 +81,36 @@ export default function App() {
     expenseTotal, checkedCount, isLoading, isOnline, queueLength, flushQueue,
     setList, setAdminUnlocked,
     fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes, fetchExpenses, fetchParticipants,
-    toggleShoppingItem, deleteShoppingItem, batchToggleShoppingItems, toggleBringItem, deleteBringItem, reorderItems, reorderNotes, toggleNoteFavorite,
+    toggleShoppingItem, deleteShoppingItem, undoDelete, batchToggleShoppingItems, toggleBringItem, deleteBringItem, reorderItems, reorderNotes, toggleNoteFavorite,
     handleJoin, handleLeave, handleRename,
+    undoState,
   } = useListData()
 
   // ── Tab state ──────────────────────────────────────────────────────
   const [tab, setTab] = useState<TabView>('home')
+
+  // ── PWA update available banner ─────────────────────────────────────
+  const [updateAvailable, setUpdateAvailable] = useState(false)
+
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        setUpdateAvailable(true)
+      })
+    }
+  }, [])
+
+  // ── Undo toast when items are deleted ───────────────────────────────
+  useEffect(() => {
+    if (undoState) {
+      const itemNames = undoState.items.map(i => i.name).join(', ')
+      toast(
+        `${undoState.items.length} Item(s) gelöscht: ${itemNames}`,
+        'info',
+        { label: 'Rückgängig', onClick: undoDelete },
+      )
+    }
+  }, [undoState, undoDelete, toast])
 
   // ── Bristol Modus (per-user via localStorage) ──────────────────────
   const [bristolEnabled, setBristolEnabled] = useState(
@@ -304,6 +328,15 @@ export default function App() {
       {!isOnline && (
         <div className="offline-banner">
           <WifiOff size={16} strokeWidth={2} /> Du bist offline — {queueLength > 0 ? `${queueLength} ${queueLength === 1 ? 'Änderung wird' : 'Änderungen werden'} synchronisiert` : 'Änderungen können momentan nicht gespeichert werden'}.
+        </div>
+      )}
+
+      {updateAvailable && (
+        <div className="update-banner">
+          <span>🆕 Neue Version verfügbar!</span>
+          <button className="update-banner-btn" onClick={() => window.location.reload()}>
+            Aktualisieren
+          </button>
         </div>
       )}
 

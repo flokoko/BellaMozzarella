@@ -3,6 +3,7 @@ import { Trash2, Pizza, GripVertical, ChevronDown } from 'lucide-react'
 import type { ListItem, ItemCategory, ListType } from '../types'
 import type { PointerEvent as ReactPointerEvent } from 'react'
 import { supabase } from '../lib/supabase'
+import { logError } from '../lib/logger'
 import { useToast } from '../context/ToastContext'
 import { aggregateItems, type AggregatedItem } from '../lib/aggregate'
 import ItemRow from './ItemRow'
@@ -25,6 +26,7 @@ interface ListScreenProps {
   onItemChange?: () => void
   onReorder?: (listType: ListType, newOrder: string[]) => void
   onCategoriesChange?: () => void
+  onDuplicate?: (item: ListItem) => void
 }
 
 /** Wraps one category's items with independent drag-reorder + aggregation. */
@@ -34,6 +36,7 @@ function DraggableCategorySection({
   onItemToggle,
   onBatchToggle,
   onItemDelete,
+  onDuplicate,
   onReorder,
 }: {
   catItems: ListItem[]
@@ -41,6 +44,7 @@ function DraggableCategorySection({
   onItemToggle?: (item: ListItem) => void
   onBatchToggle?: (items: ListItem[], checked: boolean) => void
   onItemDelete?: (item: ListItem) => void
+  onDuplicate?: (item: ListItem) => void
   onReorder?: (newOrder: string[]) => void
 }) {
   const { confirm } = useToast()
@@ -126,6 +130,7 @@ function DraggableCategorySection({
               item={item}
               onToggle={onItemToggle}
               onDelete={onItemDelete}
+              onDuplicate={onDuplicate}
               dragHandleProps={{
                 onPointerDown: (e: ReactPointerEvent) => handlePointerDown(e, agg.groupKey),
                 onPointerMove: handlePointerMove,
@@ -233,6 +238,25 @@ export default function ListScreen({ items, categories, listId, userName, isLoad
 
   const checkedItems = items.filter((i) => i.is_checked)
 
+  const handleDuplicate = async (item: ListItem) => {
+    const { error } = await supabase.from('items').insert({
+      list_id: listId,
+      name: item.name,
+      quantity: item.quantity,
+      category: item.category,
+      assigned_to: item.assigned_to,
+      is_checked: false,
+      is_brought: false,
+      created_by: userName,
+      list_type: 'shopping',
+    })
+    if (error) {
+      logError('Duplicate error:', error)
+      return
+    }
+    onItemChange?.()
+  }
+
   const handleDeleteChecked = () => {
     if (checkedItems.length === 0) return
     confirm('Alle erledigten Items löschen?', async () => {
@@ -337,6 +361,7 @@ export default function ListScreen({ items, categories, listId, userName, isLoad
             onItemToggle={onItemToggle}
             onBatchToggle={onBatchToggle}
             onItemDelete={onItemDelete}
+            onDuplicate={handleDuplicate}
             onReorder={(newOrder) => onReorder?.('shopping', newOrder)}
           />
         )
@@ -367,6 +392,7 @@ export default function ListScreen({ items, categories, listId, userName, isLoad
             onItemToggle={onItemToggle}
             onBatchToggle={onBatchToggle}
             onItemDelete={onItemDelete}
+            onDuplicate={handleDuplicate}
             onReorder={(newOrder) => onReorder?.('shopping', newOrder)}
           />
         )
