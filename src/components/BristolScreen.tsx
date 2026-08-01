@@ -60,6 +60,7 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
   const [loadingEntries, setLoadingEntries] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null)
+  const [selectedDate, setSelectedDate] = useState(todayStr())
 
   const today = todayStr()
 
@@ -91,7 +92,7 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
           list_id: listId,
           participant_name: userName,
           value,
-          entry_date: today,
+          entry_date: selectedDate,
         },
         { onConflict: 'list_id,participant_name,entry_date' }
       )
@@ -100,7 +101,9 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
       toast(`Fehler: ${error.message}`, 'error')
       return
     }
-    toast(`Bristol-Wert ${value} (${BRISTOL_ADJECTIVES[value]}) eingetragen!`, 'success')
+    const isToday = selectedDate === today
+    const dateLabel = isToday ? '' : ` (${new Date(selectedDate).toLocaleDateString('de-DE')})`
+    toast(`Bristol-Wert ${value} (${BRISTOL_ADJECTIVES[value]})${dateLabel} eingetragen!`, 'success')
     navigator.vibrate?.(20)
     // Plasma-Effekt bei Wert 13
     if (value === 13) {
@@ -115,7 +118,7 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
       })
     }
     fetchEntries()
-  }, [listId, userName, today, toast, fetchEntries])
+  }, [listId, userName, selectedDate, today, toast, fetchEntries])
 
   const handleUpdateEntry = useCallback(async (entryId: string, value: number) => {
     setSubmitting(true)
@@ -134,9 +137,9 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
     fetchEntries()
   }, [toast, fetchEntries])
 
-  const myTodayEntry = useMemo(
-    () => entries.find(e => e.participant_name === userName && e.entry_date === today),
-    [entries, userName, today]
+  const mySelectedEntry = useMemo(
+    () => entries.find(e => e.participant_name === userName && e.entry_date === selectedDate),
+    [entries, userName, selectedDate]
   )
 
   const todayEntries = useMemo(
@@ -194,27 +197,46 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
 
   return (
     <div className="bristol-screen">
-      {/* ── Hero: Today's Entry ── */}
+      {/* ── Hero: Entry for selected date ── */}
       <div className="bristol-hero">
-        <div className="bristol-hero-label">Dein heutiger Wert</div>
-        {myTodayEntry ? (
+        <div className="bristol-hero-label">Dein Wert</div>
+        <div className="bristol-hero-date-row">
+          <input
+            type="date"
+            className="bristol-hero-date-input"
+            value={selectedDate}
+            max={today}
+            onChange={(e) => setSelectedDate(e.target.value)}
+          />
+          {selectedDate !== today && (
+            <button
+              className="bristol-hero-today-btn"
+              onClick={() => setSelectedDate(today)}
+            >
+              Heute
+            </button>
+          )}
+        </div>
+        {mySelectedEntry ? (
           <div className="bristol-hero-value-wrap">
             <div
-              className={`bristol-hero-circle ${myTodayEntry.value === 13 ? 'bristol-hero-plasma' : ''}`}
-              style={{ background: BRISTOL_COLORS[myTodayEntry.value] }}
+              className={`bristol-hero-circle ${mySelectedEntry.value === 13 ? 'bristol-hero-plasma' : ''}`}
+              style={{ background: BRISTOL_COLORS[mySelectedEntry.value] }}
             >
-              <span className="bristol-hero-emoji">{BRISTOL_EMOJIS[myTodayEntry.value]}</span>
-              <span className="bristol-hero-number">{myTodayEntry.value}</span>
+              <span className="bristol-hero-emoji">{BRISTOL_EMOJIS[mySelectedEntry.value]}</span>
+              <span className="bristol-hero-number">{mySelectedEntry.value}</span>
             </div>
             <div className="bristol-hero-text">
-              <span className="bristol-hero-adjective">{BRISTOL_ADJECTIVES[myTodayEntry.value]}</span>
-              <span className="bristol-hero-change-hint">Tippe unten, um zu ändern</span>
+              <span className="bristol-hero-adjective">{BRISTOL_ADJECTIVES[mySelectedEntry.value]}</span>
+              <span className="bristol-hero-change-hint">
+                {selectedDate === today ? 'Tippe unten, um zu ändern' : 'Wähle unten einen neuen Wert'}
+              </span>
             </div>
           </div>
         ) : (
           <div className="bristol-hero-prompt">
             <span className="bristol-hero-question">❓</span>
-            <span>Noch nicht eingetragen</span>
+            <span>Noch kein Eintrag für diesen Tag</span>
           </div>
         )}
       </div>
@@ -226,7 +248,7 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
           {BRISTOL_VALUES.map(v => (
             <button
               key={v}
-              className={`bristol-picker-btn ${v === 13 ? 'bristol-picker-btn-bonus' : ''} ${myTodayEntry?.value === v ? 'selected' : ''}`}
+              className={`bristol-picker-btn ${v === 13 ? 'bristol-picker-btn-bonus' : ''} ${mySelectedEntry?.value === v ? 'selected' : ''}`}
               style={{ '--bristol-color': BRISTOL_COLORS[v] } as React.CSSProperties}
               disabled={submitting}
               onClick={() => handleSubmitEntry(v)}
