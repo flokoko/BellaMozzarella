@@ -233,8 +233,27 @@ export default function App() {
   // ── Render ─────────────────────────────────────────────────────────
   const expenseCategories = useMemo(() => categories.filter(c => c.list_type === 'expense'), [categories])
 
+  // ── Rotierende italienische Begrüßung ──────────────────────────────
+  const ITALIAN_GREETINGS = [
+    'Buongiorno! ☀️', 'Ciao! 👋', 'Andiamo! 🚗', 'Mamma Mia! 🍕',
+    'Che bello! ✨', 'Dolce Vita! 🍷', 'Bellissimo! 🇮🇹', 'Forza! 💪',
+    'Fantastico! 🎉', 'Pronto? 📞', 'Amore! ❤️', 'Grazie! 🙏',
+    'Benvenuto! 🏠', 'Che caldo! 🥵', 'Viva l\'Italia! 🎊',
+  ]
+  const greeting = useMemo(
+    () => ITALIAN_GREETINGS[Math.floor(Math.random() * ITALIAN_GREETINGS.length)],
+    []
+  )
+
   return (
     <>
+      {/* ── Floating Food Emojis ── */}
+      <span className="food-particle" style={{top:'15%',left:'8%',animationDelay:'0s'}}>🍕</span>
+      <span className="food-particle" style={{top:'75%',left:'92%',animationDelay:'2s',fontSize:'1rem'}}>🍷</span>
+      <span className="food-particle" style={{top:'40%',left:'5%',animationDelay:'4s',fontSize:'0.9rem'}}>🧀</span>
+      <span className="food-particle" style={{top:'85%',left:'15%',animationDelay:'6s',fontSize:'1.1rem'}}>🍝</span>
+      <span className="food-particle" style={{top:'20%',left:'88%',animationDelay:'8s',fontSize:'0.8rem'}}>🍦</span>
+      <span className="food-particle" style={{top:'60%',left:'50%',animationDelay:'10s',fontSize:'1.3rem'}}>🍋</span>
       {/* MozzaScene: immer gemountet, nie unmountet — per CSS versteckt nach Login */}
       <div className={`mozza-bg ${!userName || !list ? '' : 'mozza-bg-hidden'}`}>
         <MozzaScene fullscreen />
@@ -252,6 +271,7 @@ export default function App() {
                 <span className="header-flag-bar white"></span>
                 <span className="header-flag-bar red"></span>
                 🍕 {list.name}
+                <span className="header-greeting">{greeting}</span>
               </span>
               <span className="header-user">
                 Angemeldet als: <strong>{userName}</strong>

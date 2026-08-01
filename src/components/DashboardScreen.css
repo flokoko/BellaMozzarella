@@ -80,7 +80,7 @@
   transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
               box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
               border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: slideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: cardEntrance 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
   overflow: hidden;
 }
 
@@ -96,6 +96,12 @@
   border-radius: 14px 14px 0 0;
 }
 
+@keyframes cardEntrance {
+  0% { opacity: 0; transform: translateY(30px) scale(0.9); }
+  60% { opacity: 1; transform: translateY(-4px) scale(1.02); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 /* Italian flag color accents per card */
 .dash-card:nth-child(1) { border-left: 3px solid var(--italian-green); animation-delay: 0s; }
 .dash-card:nth-child(2) { border-left: 3px solid #0284c7; animation-delay: 0.08s; }
@@ -103,13 +109,21 @@
 .dash-card:nth-child(4) { border-left: 3px solid var(--italian-gold); animation-delay: 0.24s; }
 
 .dash-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-2px) rotate(-0.5deg);
   box-shadow: var(--shadow-md), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
   border-color: var(--accent);
 }
 
 .dash-card:active {
-  transform: scale(0.97);
+  transform: scale(0.95) rotate(0.5deg);
+}
+
+.dash-card:nth-child(2):hover {
+  transform: translateY(-2px) rotate(0.5deg);
+}
+
+.dash-card:nth-child(4):hover {
+  transform: translateY(-2px) rotate(0.5deg);
 }
 
 .dash-card::after {
@@ -424,7 +438,11 @@
 
 .dash-note-card:hover {
   box-shadow: var(--shadow-md), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
-  transform: translateY(-1px);
+  transform: translateY(-1px) rotate(-0.3deg);
+}
+
+.dash-note-card:nth-child(even):hover {
+  transform: translateY(-1px) rotate(0.3deg);
 }
 
 .dash-note-dragging {
