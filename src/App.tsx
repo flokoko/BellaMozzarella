@@ -264,13 +264,6 @@ export default function App() {
 
   return (
     <>
-      {/* ── Floating Food Emojis ── */}
-      <span className="food-particle" style={{top:'15%',left:'8%',animationDelay:'0s'}}>🍕</span>
-      <span className="food-particle" style={{top:'75%',left:'92%',animationDelay:'2s',fontSize:'1rem'}}>🍷</span>
-      <span className="food-particle" style={{top:'40%',left:'5%',animationDelay:'4s',fontSize:'0.9rem'}}>🧀</span>
-      <span className="food-particle" style={{top:'85%',left:'15%',animationDelay:'6s',fontSize:'1.1rem'}}>🍝</span>
-      <span className="food-particle" style={{top:'20%',left:'88%',animationDelay:'8s',fontSize:'0.8rem'}}>🍦</span>
-      <span className="food-particle" style={{top:'60%',left:'50%',animationDelay:'10s',fontSize:'1.3rem'}}>🍋</span>
       {/* MozzaScene: immer gemountet, nie unmountet — per CSS versteckt nach Login */}
       <div className={`mozza-bg ${!userName || !list ? '' : 'mozza-bg-hidden'}`}>
         <MozzaScene fullscreen />

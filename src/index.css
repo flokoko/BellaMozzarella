@@ -133,23 +133,7 @@ body::after {
   animation: particleFloat 8s ease-in-out infinite alternate;
 }
 
-/* ── Floating Food Emojis ── */
-.food-particle {
-  position: fixed;
-  pointer-events: none;
-  z-index: 0;
-  font-size: 1.2rem;
-  opacity: 0.12;
-  animation: foodFloat 12s ease-in-out infinite;
-}
-
-@keyframes foodFloat {
-  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.08; }
-  25% { transform: translateY(-15px) rotate(5deg); opacity: 0.15; }
-  50% { transform: translateY(-8px) rotate(-3deg); opacity: 0.12; }
-  75% { transform: translateY(-20px) rotate(4deg); opacity: 0.15; }
-}
-
+/* ── Keyframe Animations ──────────────────────────────────────────── */
 @keyframes particleFloat {
   0% { transform: translateY(0) scale(1); opacity: 0.6; }
   50% { transform: translateY(-20px) scale(1.1); opacity: 1; }
