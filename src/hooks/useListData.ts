@@ -166,7 +166,6 @@ export function useListData() {
       setIsLoading(false)
     }
   }, [fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes, fetchExpenses, fetchParticipants])
-
   // ── Realtime sync (replaces adaptive polling) ──────────────────────
   const handleRealtimeChange = useCallback((table: string) => {
     if (!list) return

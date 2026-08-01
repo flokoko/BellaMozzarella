@@ -32,20 +32,56 @@ function saveQueue(queue: QueuedOp[]) {
 
 let opIdCounter = 0
 
+/**
+ * Ping Supabase to verify real connectivity.
+ * Returns true if the server responds, false otherwise.
+ */
+async function checkConnectivity(): Promise<boolean> {
+  try {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 5000)
+    const { error } = await supabase.from('participants').select('id').limit(1).maybeSingle()
+    clearTimeout(timeout)
+    return !error
+  } catch {
+    return false
+  }
+}
+
 export function useOfflineQueue() {
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   const [queueLength, setQueueLength] = useState(() => loadQueue().length)
   const isFlushingRef = useRef(false)
 
-  // Track online/offline status
+  // Track online/offline status via browser events + periodic ping
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true)
+    const handleOnline = () => {
+      // Browser says online — verify with a real ping before trusting it
+      checkConnectivity().then((connected) => {
+        if (connected) setIsOnline(true)
+      })
+    }
     const handleOffline = () => setIsOnline(false)
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
+
+    // Periodic connectivity check every 30s — catches false offline
+    const pingInterval = setInterval(async () => {
+      const connected = await checkConnectivity()
+      setIsOnline(connected)
+    }, 30_000)
+
+    // Also run an initial ping to correct a potentially wrong navigator.onLine
+    checkConnectivity().then((connected) => {
+      if (connected !== navigator.onLine) {
+        setIsOnline(connected)
+      }
+    })
+
     return () => {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
+      clearInterval(pingInterval)
     }
   }, [])
 
