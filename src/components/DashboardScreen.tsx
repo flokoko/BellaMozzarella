@@ -58,9 +58,14 @@ interface DashboardScreenProps {
   onNotesChange: () => void
   onReorderNotes: (newOrder: string[]) => void
   onToggleFavorite: (noteId: string) => void
-  installPrompt: any
+  installPrompt: BeforeInstallPromptEvent | null
   onInstall: () => void
   bristolEnabled: boolean
+}
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
 export default function DashboardScreen({

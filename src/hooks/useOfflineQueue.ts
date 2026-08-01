@@ -70,25 +70,59 @@ export function useOfflineQueue() {
         try {
           if (op.type === 'rpc') {
             const { error } = await supabase.rpc(op.rpcName!, op.payload)
-            if (error) opError = true
+            if (error) throw error
           } else if (op.type === 'insert') {
             const { error } = await supabase.from(op.table).insert(op.payload)
-            if (error) opError = true
+            if (error) throw error
           } else if (op.type === 'update') {
             const { error } = await supabase
               .from(op.table)
               .update(op.payload)
               .eq(op.filterColumn!, op.filterValue!)
-            if (error) opError = true
+            if (error) throw error
           } else if (op.type === 'delete') {
             const { error } = await supabase
               .from(op.table)
               .delete()
               .eq(op.filterColumn!, op.filterValue!)
-            if (error) opError = true
+            if (error) throw error
           }
         } catch {
-          opError = true
+          // Retry mit exponentiellem Backoff (max 3 Versuche)
+          let retries = 0
+          let lastError: unknown
+          while (retries < 2) {
+            retries++
+            await new Promise(r => setTimeout(r, 1000 * Math.pow(2, retries - 1)))
+            try {
+              if (op.type === 'rpc') {
+                const { error } = await supabase.rpc(op.rpcName!, op.payload)
+                if (error) throw error
+              } else if (op.type === 'insert') {
+                const { error } = await supabase.from(op.table).insert(op.payload)
+                if (error) throw error
+              } else if (op.type === 'update') {
+                const { error } = await supabase
+                  .from(op.table)
+                  .update(op.payload)
+                  .eq(op.filterColumn!, op.filterValue!)
+                if (error) throw error
+              } else if (op.type === 'delete') {
+                const { error } = await supabase
+                  .from(op.table)
+                  .delete()
+                  .eq(op.filterColumn!, op.filterValue!)
+                if (error) throw error
+              }
+              lastError = null
+              break // Erfolg
+            } catch (e) {
+              lastError = e
+            }
+          }
+          if (lastError) {
+            opError = true
+          }
         }
 
         if (opError) {
@@ -114,7 +148,21 @@ export function useOfflineQueue() {
       id: `op-${++opIdCounter}-${Date.now()}`,
       timestamp: Date.now(),
     }
-    const queue = loadQueue()
+    let queue = loadQueue()
+
+    // Dedup: für update/delete mit gleicher ID, ersetze letzten Eintrag
+    if (op.type === 'update' || op.type === 'delete') {
+      const existingIdx = queue.findIndex(
+        q => q.type === op.type && q.filterColumn === op.filterColumn && q.filterValue === op.filterValue
+      )
+      if (existingIdx !== -1) {
+        queue[existingIdx] = fullOp
+        saveQueue(queue)
+        updateQueueLength()
+        return
+      }
+    }
+
     queue.push(fullOp)
     saveQueue(queue)
     updateQueueLength()

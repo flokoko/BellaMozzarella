@@ -10,7 +10,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 // Fester Join-Code für die Liste (wird für RLS benötigt, für Benutzer unsichtbar)
-const LIST_JOIN_CODE = 'BELLA26'
+const LIST_JOIN_CODE = import.meta.env.VITE_JOIN_CODE || 'BELLA26'
 
 // Module-level variable for the current join code (used for RLS)
 let currentJoinCode = LIST_JOIN_CODE

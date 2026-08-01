@@ -1,27 +1,22 @@
--- Run this in your Supabase SQL editor (https://supabase.com/dashboard/project/qmlovitzrupolqitwobv/sql/new)
--- 
--- This RPC verifies the admin password server-side, so the password
--- never leaves the database in plaintext.
+-- Admin-Passwort-Verifikation mit bcrypt
+CREATE OR REPLACE FUNCTION verify_admin_password(
+  p_list_id UUID,
+  p_password TEXT
+) RETURNS BOOLEAN
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = extensions, public
+AS $$
+DECLARE
+  v_admin_password TEXT;
+BEGIN
+  SELECT admin_password INTO v_admin_password
+  FROM lists WHERE id = p_list_id;
 
-create or replace function verify_admin_password(
-  p_list_id uuid,
-  p_password text
-) returns boolean
-language plpgsql
-security definer
-as $$
-declare
-  v_admin_password text;
-begin
-  select admin_password into v_admin_password
-  from lists
-  where id = p_list_id;
+  IF v_admin_password IS NULL THEN
+    RETURN false;
+  END IF;
 
-  -- If no admin password is set, any password is valid (first-time setup)
-  if v_admin_password is null then
-    return true;
-  end if;
-
-  return v_admin_password = p_password;
-end;
+  -- bcrypt Vergleich
+  RETURN v_admin_password = crypt(p_password, v_admin_password);
+END;
 $$;

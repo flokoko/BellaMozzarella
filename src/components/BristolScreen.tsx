@@ -334,8 +334,8 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
                     fontSize: '0.8rem',
                     boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
                   }}
-                  formatter={(val: any) => [`${val} Einträge`, 'Anzahl']}
-                  labelFormatter={(label: any) => `Wert ${label}`}
+                  formatter={(val) => [`${val} Einträge`, 'Anzahl']}
+                  labelFormatter={(label) => `Wert ${label}`}
                 />
                 <Bar dataKey="count" radius={[8, 8, 0, 0]} maxBarSize={24} fill="var(--accent)" />
               </BarChart>
@@ -358,8 +358,8 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
                     fontSize: '0.8rem',
                     boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
                   }}
-                  formatter={(val: any) => val !== null ? [`Ø ${val}`, 'Durchschnitt'] : ['—', '']}
-                  labelFormatter={(label: any) => label}
+                  formatter={(val) => val !== null ? [`Ø ${val}`, 'Durchschnitt'] : ['—', '']}
+                  labelFormatter={(label) => label}
                 />
                 <Legend wrapperStyle={{ fontSize: '0.75rem', marginTop: '4px' }} />
                 <Line

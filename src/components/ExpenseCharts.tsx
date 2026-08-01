@@ -1,11 +1,9 @@
 import { useMemo } from 'react'
-import type { Expense, ExpenseSplit } from '../types'
+import type { Expense } from '../types'
 import './ExpenseCharts.css'
 
 interface ExpenseChartsProps {
   expenses: Expense[]
-  expenseSplits: ExpenseSplit[]
-  knownPersons: string[]
 }
 
 const fmtEUR = (amount: number) =>
@@ -27,8 +25,6 @@ interface BarData {
 
 export default function ExpenseCharts({
   expenses,
-  expenseSplits,
-  knownPersons,
 }: ExpenseChartsProps) {
   // ── Ausgaben pro Tag (newest first, max 7) ──
   const dailyData = useMemo<BarData[]>(() => {
@@ -64,10 +60,6 @@ export default function ExpenseCharts({
       .map(([name, amount]) => ({ label: name, amount }))
       .sort((a, b) => b.amount - a.amount)
   }, [expenses])
-
-  // suppress unused warning
-  void expenseSplits
-  void knownPersons
 
   if (expenses.length === 0) {
     return (

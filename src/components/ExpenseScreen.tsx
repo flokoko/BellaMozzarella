@@ -305,7 +305,7 @@ export default function ExpenseScreen({
       // Zu aktualisierende Splits (unterschiedlicher Betrag)
       const toUpdate = shares.filter(s => oldMap.has(s.person_name) && oldMap.get(s.person_name) !== s.share_amount)
 
-      const ops: PromiseLike<any>[] = []
+      const ops: PromiseLike<{ error: unknown }>[] = []
       if (toDelete.length > 0) {
         ops.push(
           supabase.from('expense_splits').delete().eq('expense_id', editingId).in('person_name', toDelete.map(s => s.person_name))
@@ -765,8 +765,6 @@ export default function ExpenseScreen({
           {/* ── Charts ── */}
           <ExpenseCharts
             expenses={expenses}
-            expenseSplits={expenseSplits}
-            knownPersons={knownPersons}
           />
 
           {expenses.length === 0 ? (

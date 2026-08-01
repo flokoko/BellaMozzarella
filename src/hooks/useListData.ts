@@ -483,54 +483,22 @@ export function useListData() {
   const handleRename = useCallback(async (newName: string): Promise<string | null> => {
     const trimmed = newName.trim()
     if (!trimmed || !list || trimmed === userName) return null
-    const existing = participants.find(p => p.name.toLowerCase() === trimmed.toLowerCase())
-    if (existing) {
-      return 'Dieser Name wird bereits von einem anderen Teilnehmer verwendet. Bitte wähle einen anderen Namen.'
+
+    const { data, error } = await supabase.rpc('rename_participant', {
+      p_list_id: list.id,
+      p_old_name: userName,
+      p_new_name: trimmed,
+    })
+
+    if (error || data?.error) {
+      return data?.error || 'Fehler beim Umbenennen.'
     }
-    // Alle Schritte in try-catch mit Rollback bei Fehler
-    try {
-      // 1. Neuen Participant inserten
-      const { error: insertErr } = await supabase
-        .from('participants')
-        .insert({ list_id: list.id, name: trimmed })
-      if (insertErr) throw new Error(`Insert fehlgeschlagen: ${insertErr.message}`)
 
-      // 2-4. References updaten
-      const updateResults = await Promise.allSettled([
-        supabase.from('expenses').update({ paid_by: trimmed }).eq('list_id', list.id).eq('paid_by', userName),
-        supabase.from('items').update({ assigned_to: trimmed }).eq('list_id', list.id).eq('assigned_to', userName),
-        supabase.from('expense_splits').update({ person_name: trimmed }).eq('person_name', userName),
-      ])
-
-      const failed = updateResults.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && r.value.error))
-      if (failed.length > 0) {
-        // Rollback: neuen Participant löschen
-        await supabase.from('participants').delete().eq('list_id', list.id).eq('name', trimmed)
-        return 'Fehler beim Aktualisieren der Daten. Bitte versuche es erneut.'
-      }
-
-      // 5. Alten Participant löschen
-      const { error: deleteErr } = await supabase
-        .from('participants')
-        .delete()
-        .eq('list_id', list.id)
-        .eq('name', userName)
-      if (deleteErr) {
-        // Rollback: neuen Participant löschen
-        await supabase.from('participants').delete().eq('list_id', list.id).eq('name', trimmed)
-        return 'Fehler beim Löschen des alten Eintrags. Bitte versuche es erneut.'
-      }
-
-      localStorage.setItem('user_name', trimmed)
-      setUserName(trimmed)
-      fetchAll(list.id, true)
-      return null
-    } catch (err) {
-      // Rollback: neuen Participant löschen falls er schon existiert
-      await supabase.from('participants').delete().eq('list_id', list.id).eq('name', trimmed)
-      return 'Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.'
-    }
-  }, [list, participants, userName, fetchAll])
+    localStorage.setItem('user_name', trimmed)
+    setUserName(trimmed)
+    fetchAll(list.id, true)
+    return null
+  }, [list, userName, fetchAll])
 
   return {
     // state

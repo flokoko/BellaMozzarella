@@ -235,7 +235,7 @@ export default function ListScreen({ items, categories, listId, userName, isLoad
   const handleDeleteChecked = () => {
     if (checkedItems.length === 0) return
     confirm('Alle erledigten Items löschen?', async () => {
-      await Promise.all(checkedItems.map((item) => supabase.from('items').delete().eq('id', item.id)))
+      await supabase.rpc('batch_delete_items', { item_ids: checkedItems.map(i => i.id) })
       onItemChange?.()
     })
   }

@@ -4,7 +4,7 @@
 -- Im Supabase Dashboard → SQL Editor → New Query → dies ausführen
 -- ═══════════════════════════════════════════════════════════════
 
--- 0. pgcrypto Extension aktivieren (für digest/sha256)
+-- 0. pgcrypto Extension aktivieren (für bcrypt/crypt)
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- 1. password_hash Spalte zu participants hinzufügen
@@ -45,7 +45,7 @@ BEGIN
     END IF;
 
     -- Mit Initial-Passwort anlegen
-    v_password_hash := encode(digest(p_password::bytea, 'sha256'::text), 'hex');
+    v_password_hash := crypt(p_password, gen_salt('bf', 10));
     INSERT INTO participants (list_id, name, password_hash, is_admin)
     VALUES (
       v_list.id,
@@ -57,12 +57,12 @@ BEGIN
     v_is_new := true;
   ELSE
     -- Existierender Teilnehmer: Passwort prüfen
-    v_password_hash := encode(digest(p_password::bytea, 'sha256'::text), 'hex');
     IF v_participant.password_hash IS NULL OR v_participant.password_hash = '' THEN
       -- Erstes Login: Passwort setzen
+      v_password_hash := crypt(p_password, gen_salt('bf', 10));
       UPDATE participants SET password_hash = v_password_hash
       WHERE id = v_participant.id;
-    ELSIF v_participant.password_hash != v_password_hash THEN
+    ELSIF v_participant.password_hash != crypt(p_password, v_participant.password_hash) THEN
       RETURN jsonb_build_object('error', 'Falsches Passwort');
     END IF;
   END IF;
@@ -99,9 +99,7 @@ BEGIN
     RETURN jsonb_build_object('error', 'Teilnehmer nicht gefunden');
   END IF;
 
-  v_old_hash := encode(digest(p_old_password::bytea, 'sha256'::text), 'hex');
-
-  IF v_participant.password_hash != v_old_hash THEN
+  IF v_participant.password_hash != crypt(p_old_password, v_participant.password_hash) THEN
     RETURN jsonb_build_object('error', 'Altes Passwort falsch');
   END IF;
 
@@ -109,7 +107,7 @@ BEGIN
     RETURN jsonb_build_object('error', 'Passwort muss mindestens 3 Zeichen lang sein');
   END IF;
 
-  v_new_hash := encode(digest(p_new_password::bytea, 'sha256'::text), 'hex');
+  v_new_hash := crypt(p_new_password, gen_salt('bf', 10));
   UPDATE participants SET password_hash = v_new_hash WHERE id = p_participant_id;
 
   RETURN jsonb_build_object('success', true);

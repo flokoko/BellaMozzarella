@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, Suspense, lazy } from 'react'
-import { ArrowLeft, Settings, Sun, Moon, WifiOff, ShoppingCart, Backpack, Pizza, Wallet, type LucideIcon } from 'lucide-react'
+import { ArrowLeft, Settings, Sun, Moon, WifiOff, ShoppingCart, Backpack, Pizza, Wallet, Activity, type LucideIcon } from 'lucide-react'
 import confetti from 'canvas-confetti'
 import type { TabView } from './types'
 import { getResolvedTheme, toggleTheme, applyTheme, initThemeListener } from './lib/theme'
@@ -28,6 +28,11 @@ function TabLoader() {
 }
 
 import './App.css'
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+}
 
 // ── Confetti helper: Italian flag colored burst ──────────────────────
 function fireConfetti() {
@@ -140,14 +145,14 @@ export default function App() {
   }, [isOnline, queueLength, flushQueue, toast, list, fetchItems, fetchCategories, fetchMeals, fetchNotes, fetchExpenses, fetchParticipants])
 
   // ── beforeinstallprompt: capture for custom install UI ─────────────
-  const [installPrompt, setInstallPrompt] = useState<any>(null)
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null)
 
   useEffect(() => {
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches
     if (isStandalone) return
     const handler = (e: Event) => {
       e.preventDefault()
-      setInstallPrompt(e)
+      setInstallPrompt(e as BeforeInstallPromptEvent)
     }
     window.addEventListener('beforeinstallprompt', handler)
     return () => window.removeEventListener('beforeinstallprompt', handler)
@@ -178,15 +183,15 @@ export default function App() {
 
   const handleSetAdminPassword = async (password: string) => {
     if (!list) return
-    const { error } = await supabase
-      .from('lists')
-      .update({ admin_password: password })
-      .eq('id', list.id)
-    if (error) {
-      toast(`Fehler beim Speichern: ${error.message}`, 'error')
+    const { data, error } = await supabase.rpc('set_admin_password', {
+      p_list_id: list.id,
+      p_password: password,
+    })
+    if (error || !data) {
+      toast(`Fehler beim Speichern: ${error?.message || 'Unbekannter Fehler'}`, 'error')
       return
     }
-    setList({ ...list, admin_password: password })
+    setList({ ...list, admin_password: 'hashed' })
     setAdminUnlocked(true)
     navigator.vibrate?.(10)
   }
@@ -226,7 +231,7 @@ export default function App() {
     bring: { icon: Backpack, label: 'Mitbringen' },
     mealplan: { icon: Pizza, label: 'Essensplan' },
     expenses: { icon: Wallet, label: 'Ausgaben' },
-    bristol: { icon: Wallet, label: 'Bristol' },
+    bristol: { icon: Activity, label: 'Bristol' },
     settings: { icon: Settings, label: 'Einstellungen' },
   }
 
