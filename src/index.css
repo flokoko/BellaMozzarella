@@ -1,8 +1,8 @@
 /* ── CSS Variables: Light mode (default) ──────────────────────────── */
 :root {
-  --bg-gradient: linear-gradient(160deg, #f0fff4 0%, #fafff0 50%, #fff0f0 100%);
-  --header-bg: rgba(255, 255, 255, 0.35);
-  --card-bg: rgba(255, 255, 255, 0.40);
+  --bg-gradient: linear-gradient(160deg, #e8f5e9 0%, #f5f0e0 30%, #fff5f5 60%, #e8f5e9 100%);
+  --header-bg: rgba(255, 255, 255, 0.50);
+  --card-bg: rgba(255, 255, 255, 0.55);
   --card-bg-solid: #ffffff;
   --text-primary: #1a2e1a;
   --text-secondary: #6b806b;
@@ -16,9 +16,9 @@
   --button-bg: rgba(0, 0, 0, 0.04);
   --button-text: #6b806b;
   --shadow: rgba(0, 146, 70, 0.06);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.10);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.15);
   --checkbox-border: #d0e0d0;
   --input-bg: rgba(255, 255, 255, 0.9);
   --select-bg: rgba(255, 255, 255, 0.9);
@@ -33,9 +33,9 @@
 
 /* ── CSS Variables: Dark mode ─────────────────────────────────────── */
 [data-theme="dark"] {
-  --bg-gradient: linear-gradient(160deg, #0f1e0f 0%, #1a2e1a 50%, #1e1a16 100%);
-  --header-bg: rgba(20, 35, 20, 0.30);
-  --card-bg: rgba(30, 50, 30, 0.30);
+  --bg-gradient: linear-gradient(160deg, #0a1a0a 0%, #1a2e1a 30%, #2a1a1a 60%, #0a1a0a 100%);
+  --header-bg: rgba(20, 35, 20, 0.45);
+  --card-bg: rgba(30, 50, 30, 0.45);
   --card-bg-solid: #254025;
   --text-primary: #f0faf0;
   --text-secondary: #99b899;
@@ -49,9 +49,9 @@
   --button-bg: rgba(255, 255, 255, 0.06);
   --button-text: #99b899;
   --shadow: rgba(0, 0, 0, 0.4);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.45);
   --checkbox-border: #446644;
   --input-bg: rgba(40, 60, 40, 0.8);
   --select-bg: rgba(40, 60, 40, 0.8);
@@ -90,8 +90,22 @@ body {
   transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease;
 }
 
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(0, 146, 70, 0.04) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(206, 43, 55, 0.04) 0%, transparent 50%),
+    radial-gradient(circle at 50% 80%, rgba(0, 146, 70, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
 #root {
   min-height: 100vh;
+  position: relative;
+  z-index: 1;
 }
 
 /* ── Inline Mozzarella Icon ──────────────────────────────────────── */

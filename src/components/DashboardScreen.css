@@ -80,13 +80,26 @@
               box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
               border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   animation: slideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+
+.dash-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%);
+  pointer-events: none;
+  border-radius: 12px 12px 0 0;
 }
 
 /* Italian flag color accents per card */
-.dash-card:nth-child(1) { border-left: 3px solid #009246; }
-.dash-card:nth-child(2) { border-left: 3px solid #0284c7; }
-.dash-card:nth-child(3) { border-left: 3px solid #ce2b37; }
-.dash-card:nth-child(4) { border-left: 3px solid #d97706; }
+.dash-card:nth-child(1) { border-left: 3px solid #009246; animation-delay: 0s; }
+.dash-card:nth-child(2) { border-left: 3px solid #0284c7; animation-delay: 0.08s; }
+.dash-card:nth-child(3) { border-left: 3px solid #ce2b37; animation-delay: 0.16s; }
+.dash-card:nth-child(4) { border-left: 3px solid #d97706; animation-delay: 0.24s; }
 
 .dash-card:hover {
   transform: translateY(-2px);
@@ -189,6 +202,12 @@
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
   margin-bottom: 0.75rem;
+  transition: box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dash-notes-section:hover {
+  box-shadow: var(--shadow-md), 0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+  border-color: var(--accent);
 }
 
 
