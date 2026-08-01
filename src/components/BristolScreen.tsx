@@ -6,6 +6,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   LineChart, Line, CartesianGrid, Legend,
 } from 'recharts'
+import confetti from 'canvas-confetti'
 import './BristolScreen.css'
 
 const BRISTOL_ADJECTIVES: Record<number, string> = {
@@ -16,7 +17,7 @@ const BRISTOL_ADJECTIVES: Record<number, string> = {
   5: 'weich',
   6: 'breiig',
   7: 'flüssig',
-  13: 'explosiv',
+  13: 'Plasma',
 }
 
 const BRISTOL_COLORS: Record<number, string> = {
@@ -27,7 +28,7 @@ const BRISTOL_COLORS: Record<number, string> = {
   5: '#9ACD32',
   6: '#FFD700',
   7: '#FF6347',
-  13: '#FFE4E1',
+  13: '#ff0040',
 }
 
 const BRISTOL_EMOJIS: Record<number, string> = {
@@ -38,7 +39,7 @@ const BRISTOL_EMOJIS: Record<number, string> = {
   5: '🍦',
   6: '🥣',
   7: '💧',
-  13: '💥',
+  13: '⚡',
 }
 
 const BRISTOL_VALUES = [1, 2, 3, 4, 5, 6, 7, 13]
@@ -101,6 +102,18 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
     }
     toast(`Bristol-Wert ${value} (${BRISTOL_ADJECTIVES[value]}) eingetragen!`, 'success')
     navigator.vibrate?.(20)
+    // Plasma-Effekt bei Wert 13
+    if (value === 13) {
+      navigator.vibrate?.([50, 30, 50, 30, 100, 50, 200])
+      confetti({
+        particleCount: 120,
+        spread: 100,
+        origin: { y: 0.5 },
+        colors: ['#ff0040', '#ff0066', '#ff3388', '#ffffff'],
+        startVelocity: 40,
+        scalar: 1.1,
+      })
+    }
     fetchEntries()
   }, [listId, userName, today, toast, fetchEntries])
 
@@ -187,7 +200,7 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
         {myTodayEntry ? (
           <div className="bristol-hero-value-wrap">
             <div
-              className="bristol-hero-circle"
+              className={`bristol-hero-circle ${myTodayEntry.value === 13 ? 'bristol-hero-plasma' : ''}`}
               style={{ background: BRISTOL_COLORS[myTodayEntry.value] }}
             >
               <span className="bristol-hero-emoji">{BRISTOL_EMOJIS[myTodayEntry.value]}</span>
@@ -208,7 +221,7 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
 
       {/* ── Value Picker (Grid) ── */}
       <div className="bristol-picker">
-        <div className="bristol-picker-label">Bristol-Skala 1–7 + 13</div>
+        <div className="bristol-picker-label">Bristol-Skala 1–7 + Plasma ⚡</div>
         <div className="bristol-picker-grid">
           {BRISTOL_VALUES.map(v => (
             <button
@@ -372,7 +385,7 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
                       {BRISTOL_VALUES.map(v => (
                         <button
                           key={v}
-                          className={`bristol-history-edit-btn ${e.value === v ? 'selected' : ''}`}
+                          className={`bristol-history-edit-btn ${v === 13 ? 'bristol-history-edit-btn-bonus' : ''} ${e.value === v ? 'selected' : ''}`}
                           style={{ '--bristol-color': BRISTOL_COLORS[v] } as React.CSSProperties}
                           disabled={submitting}
                           onClick={() => handleUpdateEntry(e.id, v)}
