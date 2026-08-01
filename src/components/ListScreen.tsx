@@ -222,6 +222,7 @@ function DraggableCategorySection({
 export default function ListScreen({ items, categories, listId, userName, isLoading, onItemToggle, onBatchToggle, onItemDelete, onItemChange, onReorder, onCategoriesChange }: ListScreenProps) {
   const { confirm } = useToast()
   const [hideChecked, setHideChecked] = useState(() => localStorage.getItem('bella_hide_checked') === 'true')
+  const [searchQuery, setSearchQuery] = useState('')
 
   const toggleHideChecked = () => {
     navigator.vibrate?.(8)
@@ -240,7 +241,29 @@ export default function ListScreen({ items, categories, listId, userName, isLoad
     })
   }
 
+  const handleExportCSV = () => {
+    const headers = ['Name', 'Menge', 'Kategorie', 'Erledigt', 'Erstellt von']
+    const rows = items.map(i => [
+      i.name,
+      i.quantity,
+      i.category,
+      i.is_checked ? 'Ja' : 'Nein',
+      i.created_by || ''
+    ])
+    const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${c.replace(/"/g, '""')}"`).join(','))].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `einkaufsliste-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   const visibleItems = hideChecked ? items.filter((i) => !i.is_checked) : items
+  const searchFiltered = searchQuery.trim()
+    ? visibleItems.filter((i) => i.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : visibleItems
 
   // Skeleton loading state
   if (isLoading) {
@@ -278,7 +301,12 @@ export default function ListScreen({ items, categories, listId, userName, isLoad
             <Trash2 size={16} strokeWidth={2} /> Erledigte löschen ({checkedItems.length})
           </button>
         )}
+        <button className="list-top-bar-btn" onClick={handleExportCSV}>
+          📥 CSV
+        </button>
       </div>
+
+      <input type="text" className="list-search-input" placeholder="🔍 Suchen…" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
 
       <CategoryManager
         categories={categories}
@@ -294,12 +322,12 @@ export default function ListScreen({ items, categories, listId, userName, isLoad
         listType="shopping"
       />
 
-      {visibleItems.length === 0 && (
+      {searchFiltered.length === 0 && (
         <p className="list-empty"><Pizza size={24} strokeWidth={1.5} /> {hideChecked ? 'Alle erledigten Items ausgeblendet!' : 'Noch keine Items — füge welche hinzu!'}</p>
       )}
 
       {categories.map((cat) => {
-        const catItems = visibleItems.filter((i) => i.category === cat.name)
+        const catItems = searchFiltered.filter((i) => i.category === cat.name)
         if (catItems.length === 0) return null
         return (
           <DraggableCategorySection
@@ -317,8 +345,8 @@ export default function ListScreen({ items, categories, listId, userName, isLoad
       {/* Fallback: items whose category was deleted or doesn't match any existing category */}
       {(() => {
         const orphanItems = categories.length === 0
-          ? visibleItems
-          : visibleItems.filter(item => !categories.some(cat => cat.name === item.category))
+          ? searchFiltered
+          : searchFiltered.filter(item => !categories.some(cat => cat.name === item.category))
         if (orphanItems.length === 0) return null
         const fallbackCat: ItemCategory = {
           id: '__uncategorized__',

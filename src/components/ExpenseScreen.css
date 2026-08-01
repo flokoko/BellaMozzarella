@@ -40,6 +40,25 @@
   transform: scale(0.97);
 }
 
+.expense-search-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  background: var(--card-bg);
+  backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(var(--glass-saturate));
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  margin-bottom: 0.75rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.expense-search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
 .expense-toggle-badge {
   font-size: 0.68rem;
   font-weight: 700;
@@ -74,6 +93,26 @@
 
 .expense-add-trigger:active {
   transform: scale(0.97);
+}
+
+.expense-export-btn {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--glass-border);
+  border-radius: 12px;
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  margin-bottom: 0.75rem;
+  transition: all 0.3s;
+}
+.expense-export-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
 }
 
 .expense-form {

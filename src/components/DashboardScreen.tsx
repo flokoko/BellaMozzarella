@@ -320,12 +320,14 @@ export default function DashboardScreen({
                 placeholder="Titel (z.B. Hausadresse)"
                 value={formTitle}
                 onChange={(e) => setFormTitle(e.target.value)}
+                maxLength={200}
               />
               <textarea
                 className="dash-note-textarea"
                 placeholder="Notiz eingeben…"
                 value={formContent}
                 onChange={(e) => setFormContent(e.target.value)}
+                maxLength={200}
                 rows={3}
               />
               <div className="dash-note-form-actions">
@@ -357,12 +359,14 @@ export default function DashboardScreen({
                       placeholder="Titel (optional)"
                       value={editTitle}
                       onChange={(e) => setEditTitle(e.target.value)}
+                      maxLength={200}
                     />
                     <textarea
                       className="dash-note-textarea"
                       placeholder="Notiz eingeben…"
                       value={editContent}
                       onChange={(e) => setEditContent(e.target.value)}
+                      maxLength={200}
                       rows={3}
                     />
                     <div className="dash-note-form-actions">

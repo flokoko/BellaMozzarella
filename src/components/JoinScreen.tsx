@@ -153,6 +153,7 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="z.B. Florian"
+          maxLength={50}
           onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
         />
 
@@ -163,6 +164,7 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Initial: BELLA26"
+          maxLength={50}
           onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
         />
 

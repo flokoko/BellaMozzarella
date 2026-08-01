@@ -101,12 +101,15 @@ function DraggableBringGroup({
 
 export default function BringScreen({ items, categories, listId, userName, onItemToggle, onItemDelete, onItemChange, onReorder, onCategoriesChange, persons }: BringScreenProps) {
   const [filter, setFilter] = useState<BringFilter>('all')
+  const [searchQuery, setSearchQuery] = useState('')
 
   const filtered = useMemo(() => {
-    if (filter === 'mine') return items.filter((i) => i.assigned_to === userName)
-    if (filter === 'unfilled') return items.filter((i) => !i.assigned_to)
-    return items
-  }, [items, filter, userName])
+    let result = items
+    if (filter === 'mine') result = result.filter((i) => i.assigned_to === userName)
+    if (filter === 'unfilled') result = result.filter((i) => !i.assigned_to)
+    if (searchQuery.trim()) result = result.filter((i) => i.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    return result
+  }, [items, filter, userName, searchQuery])
 
   const grouped = useMemo(() => {
     const map = new Map<string, ListItem[]>()
@@ -146,6 +149,8 @@ export default function BringScreen({ items, categories, listId, userName, onIte
           Unzugewiesen
         </button>
       </div>
+
+      <input type="text" className="bring-search-input" placeholder="🔍 Suchen…" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
 
       <CategoryManager
         categories={categories}

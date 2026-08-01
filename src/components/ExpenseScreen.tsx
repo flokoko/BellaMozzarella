@@ -65,6 +65,7 @@ export default function ExpenseScreen({
   const [catEditorOpen, setCatEditorOpen] = useState(false)
   const [catLocalNames, setCatLocalNames] = useState<Record<string, string>>({})
   const [newCatName, setNewCatName] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
 
   // ── All known persons (from props + current form state) ──
   const allPersons = useMemo(() => {
@@ -79,17 +80,20 @@ export default function ExpenseScreen({
     [expenseSplits],
   )
 
-  // ── Group expenses by date (newest first) ──
+  // ── Group expenses by date (newest first), filtered by search ──
   const groupedExpenses = useMemo(() => {
+    const filtered = searchQuery.trim()
+      ? expenses.filter((e) => e.description.toLowerCase().includes(searchQuery.toLowerCase()))
+      : expenses
     const groups: Record<string, Expense[]> = {}
-    for (const e of expenses) {
+    for (const e of filtered) {
       if (!groups[e.expense_date]) groups[e.expense_date] = []
       groups[e.expense_date].push(e)
     }
     return Object.entries(groups).sort((a, b) =>
       b[0].localeCompare(a[0]),
     )
-  }, [expenses])
+  }, [expenses, searchQuery])
 
   // ── Total expenses ──
   const totalExpenses = useMemo(
@@ -392,6 +396,27 @@ export default function ExpenseScreen({
     })
   }
 
+  // ── CSV Export ──
+  const handleExportCSV = () => {
+    const headers = ['Datum', 'Beschreibung', 'Betrag', 'Bezahlt von', 'Kategorie', 'Notiz']
+    const rows = expenses.map(e => [
+      e.expense_date,
+      e.description,
+      e.amount.toFixed(2),
+      e.paid_by,
+      e.category || '',
+      e.note || ''
+    ])
+    const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${c.replace(/"/g, '""')}"`).join(','))].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `ausgaben-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   // ── Preview for equal split (shows the actual saved amount per person) ──
   const equalPreview = useMemo(() => {
     if (splitMode !== 'equal' || splitPeople.length === 0 || amountNum <= 0) return null
@@ -459,6 +484,7 @@ export default function ExpenseScreen({
       {/* ── Ausgaben Section ── */}
       {section === 'expenses' && (
         <div key="expenses">
+          <input type="text" className="expense-search-input" placeholder="🔍 Suchen…" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
           {/* Add form */}
           {!formExpanded ? (
             <button className="expense-add-trigger" onClick={startAdd}>
@@ -686,6 +712,10 @@ export default function ExpenseScreen({
               </div>
             </div>
           )}
+
+          <button className="expense-export-btn" onClick={handleExportCSV}>
+            📥 CSV exportieren
+          </button>
 
           {/* Expense list grouped by date */}
           {isLoading ? (

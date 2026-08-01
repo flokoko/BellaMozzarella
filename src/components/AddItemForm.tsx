@@ -77,6 +77,7 @@ export default function AddItemForm({
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+            maxLength={100}
             autoFocus
           />
           <div className="add-row">
@@ -87,6 +88,7 @@ export default function AddItemForm({
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+              maxLength={100}
             />
             <select
               className="add-select"
@@ -124,6 +126,7 @@ export default function AddItemForm({
                 value={assignedTo}
                 onChange={(e) => setAssignedTo(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+                maxLength={100}
               />
             )
           )}
