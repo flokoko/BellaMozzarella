@@ -374,13 +374,15 @@ export default function DashboardScreen({
                   key={note.id}
                   ref={(el) => registerItem(note.id, el)}
                   className={`dash-note-card ${isDragging ? 'dash-note-dragging' : ''} ${isDragOver ? 'dash-note-dragover' : ''} ${note.is_favorite ? 'dash-note-favorite' : ''}`}
-                  onPointerDown={(e) => handlePointerDown(e, note.id)}
-                  onPointerMove={handlePointerMove}
-                  onPointerUp={handlePointerUp}
-                  style={{ touchAction: 'none' }}
                 >
                   <div className="dash-note-card-top">
-                    <div className="dash-note-drag-handle" onPointerDown={(e) => { e.stopPropagation(); handlePointerDown(e, note.id) }}>
+                    <div
+                      className="dash-note-drag-handle"
+                      onPointerDown={(e) => { e.stopPropagation(); handlePointerDown(e, note.id) }}
+                      onPointerMove={handlePointerMove}
+                      onPointerUp={handlePointerUp}
+                      style={{ touchAction: 'none' }}
+                    >
                       <GripVertical size={14} strokeWidth={2} />
                     </div>
                     <button
