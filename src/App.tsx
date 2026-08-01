@@ -21,7 +21,7 @@ const BristolScreen = lazy(() => import('./components/BristolScreen'))
 function TabLoader() {
   return (
     <div className="tab-loader">
-      <span className="tab-loader-emoji">🧀</span>
+      <span className="tab-loader-emoji">🍕</span>
       <span className="tab-loader-text">Lädt…</span>
     </div>
   )
@@ -251,7 +251,7 @@ export default function App() {
                 <span className="header-flag-bar green"></span>
                 <span className="header-flag-bar white"></span>
                 <span className="header-flag-bar red"></span>
-                🧀 {list.name}
+                🍕 {list.name}
               </span>
               <span className="header-user">
                 Angemeldet als: <strong>{userName}</strong>

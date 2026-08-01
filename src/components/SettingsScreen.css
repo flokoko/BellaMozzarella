@@ -164,11 +164,13 @@
 .settings-inline-input {
   flex: 1;
   padding: 0.5rem 0.75rem;
-  border: 2px solid var(--input-border);
+  border: 1px solid var(--glass-border);
   border-radius: 10px;
   font-size: 0.9rem;
   outline: none;
-  background: var(--input-bg);
+  background: var(--card-bg);
+  backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(var(--glass-saturate));
   color: var(--text-primary);
   transition: all 0.35s;
 }
@@ -205,6 +207,8 @@
   filter: brightness(1.08);
   transform: translateY(-1px);
   box-shadow: 0 4px 16px rgba(0, 146, 70, 0.25);
+  background-size: 200% 200%;
+  animation: gradientShift 2s ease infinite;
 }
 
 .settings-btn-secondary {
@@ -347,9 +351,11 @@
   text-align: center;
   font-size: 1.1rem;
   padding: 0.3rem;
-  border: 2px solid var(--input-border);
+  border: 1px solid var(--glass-border);
   border-radius: 10px;
-  background: var(--input-bg);
+  background: var(--card-bg);
+  backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(var(--glass-saturate));
   color: var(--text-primary);
   outline: none;
   flex-shrink: 0;
@@ -366,9 +372,11 @@
   min-width: 0;
   padding: 0.3rem 0.5rem;
   font-size: 0.85rem;
-  border: 2px solid var(--input-border);
+  border: 1px solid var(--glass-border);
   border-radius: 10px;
-  background: var(--input-bg);
+  background: var(--card-bg);
+  backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(var(--glass-saturate));
   color: var(--text-primary);
   outline: none;
   transition: all 0.35s;

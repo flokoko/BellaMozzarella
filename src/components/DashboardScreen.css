@@ -289,9 +289,11 @@
 .dash-note-input {
   width: 100%;
   padding: 0.45rem 0.6rem;
-  border: 2px solid var(--input-border);
+  border: 1px solid var(--glass-border);
   border-radius: 8px;
-  background: var(--input-bg);
+  background: var(--card-bg);
+  backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(var(--glass-saturate));
   color: var(--text-primary);
   font-size: 0.85rem;
   font-family: inherit;
@@ -308,9 +310,11 @@
 .dash-note-textarea {
   width: 100%;
   padding: 0.45rem 0.6rem;
-  border: 2px solid var(--input-border);
+  border: 1px solid var(--glass-border);
   border-radius: 8px;
-  background: var(--input-bg);
+  background: var(--card-bg);
+  backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(var(--glass-saturate));
   color: var(--text-primary);
   font-size: 0.85rem;
   font-family: inherit;
@@ -350,6 +354,8 @@
 .dash-btn-save:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 146, 70, 0.3);
+  background-size: 200% 200%;
+  animation: gradientShift 2s ease infinite;
 }
 
 .dash-btn-save:active:not(:disabled) {

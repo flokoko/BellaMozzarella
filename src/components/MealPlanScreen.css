@@ -278,9 +278,11 @@
 .meal-input {
   width: 100%;
   padding: 0.4rem 0.6rem;
-  border: 2px solid var(--input-border);
+  border: 1px solid var(--glass-border);
   border-radius: 8px;
-  background: var(--input-bg);
+  background: var(--card-bg);
+  backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(var(--glass-saturate));
   color: var(--text-primary);
   font-size: 0.82rem;
   font-family: inherit;
@@ -304,9 +306,11 @@
 
 .meal-select {
   padding: 0.35rem 0.5rem;
-  border: 2px solid var(--input-border);
+  border: 1px solid var(--glass-border);
   border-radius: 8px;
-  background: var(--select-bg);
+  background: var(--card-bg);
+  backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(var(--glass-saturate));
   color: var(--text-primary);
   font-size: 0.8rem;
   font-family: inherit;
@@ -346,6 +350,8 @@
 .meal-btn-save:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 146, 70, 0.3);
+  background-size: 200% 200%;
+  animation: gradientShift 2s ease infinite;
 }
 
 .meal-btn-save:active:not(:disabled) {
@@ -483,6 +489,8 @@
 .meal-idea-plan-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(0, 146, 70, 0.25);
+  background-size: 200% 200%;
+  animation: gradientShift 2s ease infinite;
 }
 
 .meal-idea-plan-btn:active {

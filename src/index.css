@@ -115,10 +115,55 @@ body::before {
   z-index: 0;
 }
 
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: 
+    radial-gradient(2px 2px at 10% 20%, rgba(0, 146, 70, 0.15) 0%, transparent 100%),
+    radial-gradient(2px 2px at 30% 60%, rgba(206, 43, 55, 0.12) 0%, transparent 100%),
+    radial-gradient(3px 3px at 50% 10%, rgba(0, 146, 70, 0.1) 0%, transparent 100%),
+    radial-gradient(2px 2px at 70% 40%, rgba(212, 160, 23, 0.1) 0%, transparent 100%),
+    radial-gradient(2px 2px at 90% 70%, rgba(206, 43, 55, 0.12) 0%, transparent 100%),
+    radial-gradient(3px 3px at 20% 80%, rgba(0, 146, 70, 0.1) 0%, transparent 100%),
+    radial-gradient(2px 2px at 60% 90%, rgba(212, 160, 23, 0.08) 0%, transparent 100%),
+    radial-gradient(2px 2px at 80% 15%, rgba(0, 146, 70, 0.1) 0%, transparent 100%);
+  animation: particleFloat 8s ease-in-out infinite alternate;
+}
+
+@keyframes particleFloat {
+  0% { transform: translateY(0) scale(1); opacity: 0.6; }
+  50% { transform: translateY(-20px) scale(1.1); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 0.6; }
+}
+
 #root {
   min-height: 100vh;
   position: relative;
   z-index: 1;
+}
+
+/* ── Custom Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 146, 70, 0.2);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 146, 70, 0.4);
+}
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 146, 70, 0.2) transparent;
 }
 
 /* ── Inline Mozzarella Icon ──────────────────────────────────────── */

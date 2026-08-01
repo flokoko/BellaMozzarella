@@ -104,9 +104,11 @@
 
 .bristol-hero-date-input {
   padding: 0.35rem 0.6rem;
-  border: 2px solid var(--input-border);
+  border: 1px solid var(--glass-border);
   border-radius: 10px;
-  background: var(--input-bg);
+  background: var(--card-bg);
+  backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(var(--glass-saturate));
   color: var(--text-primary);
   font-size: 0.85rem;
   font-family: inherit;
