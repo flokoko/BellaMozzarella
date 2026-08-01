@@ -58,10 +58,21 @@ BEGIN
   ELSE
     -- Existierender Teilnehmer: Passwort prüfen
     IF v_participant.password_hash IS NULL OR v_participant.password_hash = '' THEN
-      -- Erstes Login: Passwort setzen
+      -- Erstes Login: Passwort setzen (bcrypt)
       v_password_hash := crypt(p_password, gen_salt('bf', 10));
       UPDATE participants SET password_hash = v_password_hash
       WHERE id = v_participant.id;
+    ELSIF v_participant.password_hash !~ '^\$2[ab]\$' THEN
+      -- Alter SHA-256 Hash (vor bcrypt-Migration)
+      -- Prüfe mit SHA-256
+      IF v_participant.password_hash = encode(digest(p_password::bytea, 'sha256'::text), 'hex') THEN
+        -- Korrekt! Upgrade auf bcrypt
+        v_password_hash := crypt(p_password, gen_salt('bf', 10));
+        UPDATE participants SET password_hash = v_password_hash
+        WHERE id = v_participant.id;
+      ELSE
+        RETURN jsonb_build_object('error', 'Falsches Passwort');
+      END IF;
     ELSIF v_participant.password_hash != crypt(p_password, v_participant.password_hash) THEN
       RETURN jsonb_build_object('error', 'Falsches Passwort');
     END IF;
@@ -99,7 +110,13 @@ BEGIN
     RETURN jsonb_build_object('error', 'Teilnehmer nicht gefunden');
   END IF;
 
-  IF v_participant.password_hash != crypt(p_old_password, v_participant.password_hash) THEN
+  -- Prüfe altes Passwort (unterstützt alte SHA-256 und neue bcrypt Hashes)
+  IF v_participant.password_hash !~ '^\$2[ab]\$' THEN
+    -- Alter SHA-256 Hash
+    IF v_participant.password_hash != encode(digest(p_old_password::bytea, 'sha256'::text), 'hex') THEN
+      RETURN jsonb_build_object('error', 'Altes Passwort falsch');
+    END IF;
+  ELSIF v_participant.password_hash != crypt(p_old_password, v_participant.password_hash) THEN
     RETURN jsonb_build_object('error', 'Altes Passwort falsch');
   END IF;
 
