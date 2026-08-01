@@ -233,18 +233,6 @@ export default function App() {
   // ── Render ─────────────────────────────────────────────────────────
   const expenseCategories = useMemo(() => categories.filter(c => c.list_type === 'expense'), [categories])
 
-  // ── Rotierende italienische Begrüßung ──────────────────────────────
-  const ITALIAN_GREETINGS = [
-    'Buongiorno! ☀️', 'Ciao! 👋', 'Andiamo! 🚗', 'Mamma Mia! 🍕',
-    'Che bello! ✨', 'Dolce Vita! 🍷', 'Bellissimo! 🇮🇹', 'Forza! 💪',
-    'Fantastico! 🎉', 'Pronto? 📞', 'Amore! ❤️', 'Grazie! 🙏',
-    'Benvenuto! 🏠', 'Che caldo! 🥵', 'Viva l\'Italia! 🎊',
-  ]
-  const greeting = useMemo(
-    () => ITALIAN_GREETINGS[Math.floor(Math.random() * ITALIAN_GREETINGS.length)],
-    []
-  )
-
   return (
     <>
       {/* ── Floating Food Emojis ── */}
@@ -271,7 +259,6 @@ export default function App() {
                 <span className="header-flag-bar white"></span>
                 <span className="header-flag-bar red"></span>
                 🍕 {list.name}
-                <span className="header-greeting">{greeting}</span>
               </span>
               <span className="header-user">
                 Angemeldet als: <strong>{userName}</strong>
