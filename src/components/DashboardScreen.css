@@ -10,13 +10,13 @@
   gap: 0.4rem;
   padding: 0.45rem 0.7rem;
   margin-bottom: 0.75rem;
-  border: 1px solid var(--border-color);
-  border-left: 3px solid #ce2b37;
-  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  border-left: 3px solid var(--italian-red);
+  border-radius: 14px;
   background: var(--card-bg);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
   cursor: pointer;
   font-family: inherit;
   font-size: 0.8rem;
@@ -24,12 +24,13 @@
   color: var(--text-secondary);
   width: 100%;
   text-align: left;
-  transition: transform 0.35s, box-shadow 0.35s;
+  transition: transform 0.35s, box-shadow 0.35s, border-color 0.35s;
 }
 
 .dash-bristol-row:hover {
   transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  border-color: var(--accent);
 }
 
 .dash-bristol-row:active {
@@ -67,12 +68,12 @@
   align-items: flex-start;
   gap: 0.25rem;
   padding: 0.6rem 0.65rem;
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
   background: var(--card-bg);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
   cursor: pointer;
   text-align: left;
   font-family: inherit;
@@ -90,20 +91,20 @@
   left: 0;
   right: 0;
   height: 50%;
-  background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%);
+  background: linear-gradient(180deg, rgba(255,255,255,0.10) 0%, transparent 100%);
   pointer-events: none;
-  border-radius: 12px 12px 0 0;
+  border-radius: 14px 14px 0 0;
 }
 
 /* Italian flag color accents per card */
-.dash-card:nth-child(1) { border-left: 3px solid #009246; animation-delay: 0s; }
+.dash-card:nth-child(1) { border-left: 3px solid var(--italian-green); animation-delay: 0s; }
 .dash-card:nth-child(2) { border-left: 3px solid #0284c7; animation-delay: 0.08s; }
-.dash-card:nth-child(3) { border-left: 3px solid #ce2b37; animation-delay: 0.16s; }
-.dash-card:nth-child(4) { border-left: 3px solid #d97706; animation-delay: 0.24s; }
+.dash-card:nth-child(3) { border-left: 3px solid var(--italian-red); animation-delay: 0.16s; }
+.dash-card:nth-child(4) { border-left: 3px solid var(--italian-gold); animation-delay: 0.24s; }
 
 .dash-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-md), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   border-color: var(--accent);
 }
 
@@ -145,20 +146,20 @@
 
 /* Italian-inspired color scheme: green · blue · red · amber */
 .dash-card:nth-child(1) .dash-card-icon {
-  background: rgba(0, 146, 70, 0.12);
-  color: #009246;
+  background: rgba(0, 146, 70, 0.15);
+  color: var(--italian-green);
 }
 .dash-card:nth-child(2) .dash-card-icon {
-  background: rgba(2, 132, 199, 0.12);
+  background: rgba(2, 132, 199, 0.15);
   color: #0284c7;
 }
 .dash-card:nth-child(3) .dash-card-icon {
-  background: rgba(206, 43, 55, 0.12);
-  color: #ce2b37;
+  background: rgba(206, 43, 55, 0.15);
+  color: var(--italian-red);
 }
 .dash-card:nth-child(4) .dash-card-icon {
-  background: rgba(217, 119, 6, 0.12);
-  color: #d97706;
+  background: rgba(212, 160, 23, 0.15);
+  color: var(--italian-gold);
 }
 
 .dash-card-body {
@@ -193,20 +194,20 @@
 /* ── Quick Notes Section ── */
 .dash-notes-section {
   animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid var(--border-color);
-  border-left: 3px solid #009246;
-  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  border-left: 3px solid var(--italian-green);
+  border-radius: 14px;
   padding: 0.6rem 0.65rem;
   background: var(--card-bg);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
   margin-bottom: 0.75rem;
   transition: box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dash-notes-section:hover {
-  box-shadow: var(--shadow-md), 0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+  box-shadow: var(--shadow-md), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   border-color: var(--accent);
 }
 
@@ -279,7 +280,7 @@
   gap: 0.4rem;
   padding: 0.6rem;
   background: var(--card-bg);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--glass-border);
   border-radius: 12px;
   box-shadow: var(--shadow-sm);
   margin-bottom: 0.6rem;
@@ -401,12 +402,12 @@
 
 .dash-note-card {
   background: var(--card-bg);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--border-color);
+  backdrop-filter: blur(calc(var(--glass-blur) - 4px)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) - 4px)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-border);
   border-radius: 12px;
   padding: 0.55rem 0.65rem;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
   cursor: pointer;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
               box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -416,7 +417,7 @@
 }
 
 .dash-note-card:hover {
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-md), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   transform: translateY(-1px);
 }
 
@@ -482,7 +483,7 @@
 
 .dash-note-star:hover {
   opacity: 1;
-  color: #eab308;
+  color: var(--italian-gold);
   transform: scale(1.15);
 }
 
@@ -493,13 +494,13 @@
 /* Favorited notes: always show star, golden tint */
 .dash-note-favorite .dash-note-star {
   opacity: 1;
-  color: #eab308;
+  color: var(--italian-gold);
 }
 
 /* Favorited note card: subtle left border accent + background tint */
 .dash-note-favorite {
-  border-left: 3px solid #eab308;
-  background: color-mix(in srgb, #eab308 6%, var(--card-bg, #fff));
+  border-left: 3px solid var(--italian-gold);
+  background: color-mix(in srgb, var(--italian-gold) 6%, var(--card-bg, #fff));
 }
 
 .dash-note-card-editing {
@@ -520,39 +521,36 @@
 }
 
 .dash-note-title {
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 0.15rem;
 }
 
 .dash-note-text {
-  font-size: 0.82rem;
-  color: var(--text-primary);
-  white-space: pre-wrap;
-  word-break: break-word;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
   line-height: 1.4;
+  word-break: break-word;
 }
 
-/* ── Note Links ── */
 .dash-note-link {
   color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 2px;
   word-break: break-all;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.15rem;
-  font-weight: 600;
-}
-
-.dash-note-link:active {
-  opacity: 0.7;
 }
 
 .dash-note-link-icon {
-  opacity: 0.6;
-  flex-shrink: 0;
+  display: inline;
+  margin-left: 1px;
+  vertical-align: middle;
+}
+
+.dash-note-by {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
 }
 
 .dash-note-delete {
@@ -563,68 +561,60 @@
   border-radius: 6px;
   display: flex;
   align-items: center;
-  opacity: 0.4;
   flex-shrink: 0;
-  color: var(--text-secondary);
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  color: var(--text-muted);
+  opacity: 0.25;
+  transition: opacity 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+              color 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+              transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.dash-note-card:hover .dash-note-delete {
+  opacity: 0.6;
 }
 
 .dash-note-delete:hover {
   opacity: 1;
-  background: var(--accent-light);
-  transform: scale(1.15);
+  color: var(--italian-red);
+  transform: scale(1.2) rotate(-5deg);
 }
 
 .dash-note-delete:active {
-  transform: scale(0.9);
-}
-
-.dash-note-by {
-  font-size: 0.68rem;
-  color: var(--text-muted);
-  margin-top: 0.25rem;
+  transform: scale(0.9) rotate(0deg);
 }
 
 /* ── Install Banner ── */
 .dash-install-banner {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.6rem 0.65rem;
-  border: 1px solid var(--border-color);
-  border-left: 3px solid #009246;
-  border-radius: 12px;
-  background: var(--card-bg);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
-  color: var(--accent);
-  font-weight: 700;
-  font-size: 0.85rem;
-  cursor: pointer;
+  gap: 0.5rem;
   width: 100%;
-  margin-bottom: 1rem;
+  padding: 0.7rem 0.8rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  background: var(--card-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+  cursor: pointer;
   font-family: inherit;
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: left;
+  transition: transform 0.35s, box-shadow 0.35s, border-color 0.35s;
 }
 
 .dash-install-banner:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.dash-install-banner:active {
-  transform: scale(0.97);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  border-color: var(--accent);
 }
 
 .dash-install-icon {
   display: flex;
   align-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: rgba(0, 146, 70, 0.12);
-  justify-content: center;
-  color: #009246;
+  color: var(--accent);
   flex-shrink: 0;
 }
