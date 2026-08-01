@@ -105,7 +105,7 @@ export interface BristolEntry {
   id: string
   list_id: string
   participant_name: string
-  value: number  // 1-7
+  value: number  // 1-13
   entry_date: string  // YYYY-MM-DD
   created_at: string
 }

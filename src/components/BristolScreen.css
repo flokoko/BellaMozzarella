@@ -98,7 +98,7 @@
   100% { transform: scale(1); opacity: 1; }
 }
 
-/* ── Value Picker ── */
+/* ── Value Picker (Grid) ── */
 .bristol-picker {
   background: var(--card-bg);
   backdrop-filter: blur(10px);
@@ -119,17 +119,13 @@
   text-align: center;
 }
 
-.bristol-picker-row {
-  display: flex;
-  gap: 0.4rem;
-  justify-content: center;
-  flex-wrap: wrap;
+.bristol-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
 }
 
 .bristol-picker-btn {
-  flex: 1;
-  min-width: 48px;
-  max-width: 64px;
   border: 2px solid var(--border-color);
   background: var(--card-bg-solid);
   border-radius: 16px;
@@ -140,6 +136,7 @@
   align-items: center;
   gap: 0.1rem;
   transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  min-width: 0;
 }
 
 .bristol-picker-btn:hover {
@@ -183,11 +180,13 @@
 }
 
 .bristol-picker-adj {
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   font-weight: 500;
   color: var(--text-secondary);
   text-transform: capitalize;
   line-height: 1;
+  text-align: center;
+  word-break: break-word;
 }
 
 /* ── Cards ── */
@@ -423,6 +422,14 @@
   align-items: center;
   flex: 1;
   justify-content: flex-end;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 0.15rem 0;
+}
+
+.bristol-history-edit-picker::-webkit-scrollbar {
+  display: none;
 }
 
 .bristol-history-edit-btn {
@@ -431,7 +438,7 @@
   border-radius: 50%;
   border: 2px solid var(--border-color);
   background: var(--card-bg-solid);
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 700;
   color: var(--bristol-color, var(--accent));
   cursor: pointer;
@@ -440,6 +447,7 @@
   justify-content: center;
   transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   padding: 0;
+  flex-shrink: 0;
 }
 
 .bristol-history-edit-btn:hover {
@@ -474,6 +482,7 @@
   transition: all 0.35s;
   padding: 0;
   margin-left: 0.15rem;
+  flex-shrink: 0;
 }
 
 .bristol-history-edit-cancel:hover {
@@ -498,40 +507,22 @@
 .bristol-toggle-btn {
   border: none;
   background: none;
+  padding: 0.35rem 0.8rem;
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--button-text);
-  padding: 0.4rem 0.75rem;
-  border-radius: 10px;
+  color: var(--text-secondary);
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  transition: all 0.35s;
-}
-
-.bristol-toggle-btn:active {
-  transform: scale(0.95);
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
 }
 
 .bristol-toggle-btn.active {
   background: var(--accent);
   color: white;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 8px rgba(0, 146, 70, 0.2);
 }
 
-/* ── Responsive ── */
-@media (max-width: 380px) {
-  .bristol-picker-btn {
-    min-width: 40px;
-    max-width: 52px;
-    padding: 0.5rem 0.1rem;
-  }
-  .bristol-picker-emoji { font-size: 0.85rem; }
-  .bristol-picker-num { font-size: 0.95rem; }
-  .bristol-picker-adj { font-size: 0.55rem; }
-  .bristol-stats-row { gap: 0.3rem; }
-  .bristol-stat-num { font-size: 0.95rem; }
-  .bristol-hero-circle { width: 68px; height: 68px; }
-  .bristol-hero-number { font-size: 1.3rem; }
+.bristol-toggle-btn:not(.active):hover {
+  color: var(--text-primary);
 }

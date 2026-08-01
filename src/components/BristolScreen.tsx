@@ -16,6 +16,12 @@ const BRISTOL_ADJECTIVES: Record<number, string> = {
   5: 'weich',
   6: 'breiig',
   7: 'flüssig',
+  8: 'stückig',
+  9: 'pastös',
+  10: 'schleimig',
+  11: 'wässrig',
+  12: 'spritzig',
+  13: 'explosiv',
 }
 
 const BRISTOL_COLORS: Record<number, string> = {
@@ -26,6 +32,12 @@ const BRISTOL_COLORS: Record<number, string> = {
   5: '#9ACD32',
   6: '#FFD700',
   7: '#FF6347',
+  8: '#8B0000',
+  9: '#DC143C',
+  10: '#FF1493',
+  11: '#FF69B4',
+  12: '#FFB6C1',
+  13: '#FFE4E1',
 }
 
 const BRISTOL_EMOJIS: Record<number, string> = {
@@ -36,7 +48,15 @@ const BRISTOL_EMOJIS: Record<number, string> = {
   5: '🍦',
   6: '🥣',
   7: '💧',
+  8: '🧩',
+  9: '🥔',
+  10: '🫧',
+  11: '💦',
+  12: '🚿',
+  13: '💥',
 }
+
+const BRISTOL_VALUES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
 
 interface BristolScreenProps {
   listId: string
@@ -140,14 +160,15 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
   }, [entries])
 
   const distributionData = useMemo(() => {
-    const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 }
+    const counts: Record<number, number> = {}
+    BRISTOL_VALUES.forEach(v => { counts[v] = 0 })
     entries.forEach(e => { counts[e.value] = (counts[e.value] ?? 0) + 1 })
-    return Array.from({ length: 7 }, (_, i) => ({
-      value: i + 1,
-      label: `${i + 1}`,
-      count: counts[i + 1],
-      adjective: BRISTOL_ADJECTIVES[i + 1],
-      fill: BRISTOL_COLORS[i + 1],
+    return BRISTOL_VALUES.map(v => ({
+      value: v,
+      label: `${v}`,
+      count: counts[v],
+      adjective: BRISTOL_ADJECTIVES[v],
+      fill: BRISTOL_COLORS[v],
     }))
   }, [entries])
 
@@ -200,11 +221,11 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
         )}
       </div>
 
-      {/* ── Value Picker ── */}
+      {/* ── Value Picker (Grid) ── */}
       <div className="bristol-picker">
-        <div className="bristol-picker-label">Bristol-Skala 1–7</div>
-        <div className="bristol-picker-row">
-          {Array.from({ length: 7 }, (_, i) => i + 1).map(v => (
+        <div className="bristol-picker-label">Bristol-Skala 1–13</div>
+        <div className="bristol-picker-grid">
+          {BRISTOL_VALUES.map(v => (
             <button
               key={v}
               className={`bristol-picker-btn ${myTodayEntry?.value === v ? 'selected' : ''}`}
@@ -296,7 +317,7 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
                   formatter={(val: any) => [`${val} Einträge`, 'Anzahl']}
                   labelFormatter={(label: any) => `Wert ${label}`}
                 />
-                <Bar dataKey="count" radius={[8, 8, 0, 0]} maxBarSize={32} fill="var(--accent)" />
+                <Bar dataKey="count" radius={[8, 8, 0, 0]} maxBarSize={24} fill="var(--accent)" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -308,7 +329,7 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
               <LineChart data={trendData} margin={{ top: 4, right: 4, bottom: 0, left: -16 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} />
                 <XAxis dataKey="label" tick={{ fontSize: 10, fill: 'var(--text-secondary)' }} axisLine={false} tickLine={false} />
-                <YAxis domain={[1, 7]} ticks={[1, 2, 3, 4, 5, 6, 7]} tick={{ fontSize: 11, fill: 'var(--text-secondary)' }} axisLine={false} tickLine={false} />
+                <YAxis domain={[1, 13]} ticks={[1, 3, 5, 7, 9, 11, 13]} tick={{ fontSize: 11, fill: 'var(--text-secondary)' }} axisLine={false} tickLine={false} />
                 <Tooltip
                   contentStyle={{
                     background: 'var(--card-bg-solid)',
@@ -363,7 +384,7 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
                   </span>
                   {isEditing ? (
                     <div className="bristol-history-edit-picker">
-                      {Array.from({ length: 7 }, (_, i) => i + 1).map(v => (
+                      {BRISTOL_VALUES.map(v => (
                         <button
                           key={v}
                           className={`bristol-history-edit-btn ${e.value === v ? 'selected' : ''}`}
