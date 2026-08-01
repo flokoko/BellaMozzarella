@@ -78,6 +78,10 @@
   background: #ce2b37;
 }
 
+.expense-chart-bar-gold {
+  background: #d4a017;
+}
+
 .expense-chart-amount {
   flex-shrink: 0;
   width: 4.5rem;

@@ -53,8 +53,19 @@ export default function ExpenseCharts({
       .sort((a, b) => b.amount - a.amount)
   }, [expenses])
 
-  // suppress unused warning — expenseSplits and knownPersons are part of the
-  // public API but not needed for the current chart derivations
+  // ── Ausgaben pro Kategorie ──
+  const categoryData = useMemo<BarData[]>(() => {
+    const map: Record<string, number> = {}
+    for (const e of expenses) {
+      const cat = e.category || 'Ohne Kategorie'
+      map[cat] = (map[cat] ?? 0) + e.amount
+    }
+    return Object.entries(map)
+      .map(([name, amount]) => ({ label: name, amount }))
+      .sort((a, b) => b.amount - a.amount)
+  }, [expenses])
+
+  // suppress unused warning
   void expenseSplits
   void knownPersons
 
@@ -68,6 +79,7 @@ export default function ExpenseCharts({
 
   const maxDaily = Math.max(...dailyData.map((d) => d.amount), 1)
   const maxPerson = Math.max(...personData.map((d) => d.amount), 1)
+  const maxCategory = Math.max(...categoryData.map((d) => d.amount), 1)
 
   return (
     <div className="expense-charts">
@@ -104,6 +116,27 @@ export default function ExpenseCharts({
                   <div
                     className="expense-chart-bar expense-chart-bar-green"
                     style={{ width: `${(d.amount / maxPerson) * 100}%` }}
+                  />
+                </div>
+                <span className="expense-chart-amount">{fmtEUR(d.amount)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Ausgaben pro Kategorie ── */}
+      {categoryData.length > 0 && (
+        <div className="expense-chart-group">
+          <h4 className="expense-chart-title">Ausgaben pro Kategorie</h4>
+          <div className="expense-chart-bars">
+            {categoryData.map((d, i) => (
+              <div key={i} className="expense-chart-row">
+                <span className="expense-chart-label">{d.label}</span>
+                <div className="expense-chart-bar-track">
+                  <div
+                    className="expense-chart-bar expense-chart-bar-gold"
+                    style={{ width: `${(d.amount / maxCategory) * 100}%` }}
                   />
                 </div>
                 <span className="expense-chart-amount">{fmtEUR(d.amount)}</span>
