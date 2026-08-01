@@ -1,8 +1,8 @@
 /* ── CSS Variables: Light mode (default) ──────────────────────────── */
 :root {
-  --bg-gradient: linear-gradient(160deg, #e8f5e9 0%, #f5f0e0 25%, #fff5f5 50%, #f0faf0 75%, #e8f5e9 100%);
-  --header-bg: rgba(255, 255, 255, 0.30);
-  --card-bg: rgba(255, 255, 255, 0.45);
+  --bg-gradient: linear-gradient(160deg, #d4edda 0%, #f0e6c8 25%, #ffe8e8 50%, #d4edda 75%, #c8e6c9 100%);
+  --header-bg: rgba(255, 255, 255, 0.50);
+  --card-bg: rgba(255, 255, 255, 0.60);
   --card-bg-solid: #ffffff;
   --text-primary: #1a2e1a;
   --text-secondary: #6b806b;
@@ -16,9 +16,9 @@
   --button-bg: rgba(0, 0, 0, 0.03);
   --button-text: #6b806b;
   --shadow: rgba(0, 146, 70, 0.06);
-  --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 12px 48px rgba(0, 0, 0, 0.12);
+  --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.07);
+  --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 12px 48px rgba(0, 0, 0, 0.18);
   --checkbox-border: #d0e0d0;
   --input-bg: rgba(255, 255, 255, 0.85);
   --select-bg: rgba(255, 255, 255, 0.85);
@@ -28,7 +28,7 @@
   --green-gradient: linear-gradient(135deg, #009246, #00b35e);
   --error-color: #ce2b37;
   --dashed-border: rgba(0, 146, 70, 0.2);
-  --glass-border: rgba(255, 255, 255, 0.20);
+  --glass-border: rgba(0, 0, 0, 0.06);
   --glass-blur: 24px;
   --glass-saturate: 200%;
   --italian-green: #009246;
@@ -107,10 +107,10 @@ body::before {
   position: fixed;
   inset: 0;
   background-image: 
-    radial-gradient(circle at 15% 25%, rgba(0, 146, 70, 0.06) 0%, transparent 45%),
-    radial-gradient(circle at 85% 20%, rgba(206, 43, 55, 0.05) 0%, transparent 45%),
-    radial-gradient(circle at 50% 75%, rgba(212, 160, 23, 0.04) 0%, transparent 45%),
-    radial-gradient(circle at 30% 60%, rgba(0, 146, 70, 0.03) 0%, transparent 40%);
+    radial-gradient(circle at 15% 25%, rgba(0, 146, 70, 0.10) 0%, transparent 45%),
+    radial-gradient(circle at 85% 20%, rgba(206, 43, 55, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 50% 75%, rgba(212, 160, 23, 0.07) 0%, transparent 45%),
+    radial-gradient(circle at 30% 60%, rgba(0, 146, 70, 0.05) 0%, transparent 40%);
   pointer-events: none;
   z-index: 0;
 }
@@ -238,7 +238,7 @@ body::after {
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
 }
 
 /* ── Reduced Motion ───────────────────────────────────────────────── */

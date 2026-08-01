@@ -16,7 +16,7 @@
   background: var(--card-bg);
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
   cursor: pointer;
   font-family: inherit;
   font-size: 0.8rem;
@@ -29,7 +29,7 @@
 
 .dash-bristol-row:hover {
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  box-shadow: var(--shadow-md), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
   border-color: var(--accent);
 }
 
@@ -73,7 +73,7 @@
   background: var(--card-bg);
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
   cursor: pointer;
   text-align: left;
   font-family: inherit;
@@ -91,7 +91,7 @@
   left: 0;
   right: 0;
   height: 50%;
-  background: linear-gradient(180deg, rgba(255,255,255,0.10) 0%, transparent 100%);
+  background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 100%);
   pointer-events: none;
   border-radius: 14px 14px 0 0;
 }
@@ -104,7 +104,7 @@
 
 .dash-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  box-shadow: var(--shadow-md), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
   border-color: var(--accent);
 }
 
@@ -201,13 +201,13 @@
   background: var(--card-bg);
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
   margin-bottom: 0.75rem;
   transition: box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dash-notes-section:hover {
-  box-shadow: var(--shadow-md), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  box-shadow: var(--shadow-md), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
   border-color: var(--accent);
 }
 
@@ -413,7 +413,7 @@
   border: 1px solid var(--glass-border);
   border-radius: 12px;
   padding: 0.55rem 0.65rem;
-  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
   cursor: pointer;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
               box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -423,7 +423,7 @@
 }
 
 .dash-note-card:hover {
-  box-shadow: var(--shadow-md), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  box-shadow: var(--shadow-md), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
   transform: translateY(-1px);
 }
 
@@ -602,7 +602,7 @@
   background: var(--card-bg);
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
   cursor: pointer;
   font-family: inherit;
   font-size: 0.8rem;
@@ -614,7 +614,7 @@
 
 .dash-install-banner:hover {
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  box-shadow: var(--shadow-md), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
   border-color: var(--accent);
 }
 
