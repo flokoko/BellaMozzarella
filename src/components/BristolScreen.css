@@ -217,16 +217,16 @@
   color: white;
 }
 
-/* ── Bonus-Wert 13 (Plasma) ── */
+/* ── Bonus-Wert 13 (Kacke) ── */
 .bristol-picker-btn-bonus {
   border-style: dashed;
-  border-color: #ff0040;
-  background: linear-gradient(135deg, var(--card-bg-solid) 0%, rgba(255, 0, 64, 0.08) 100%);
+  border-color: #8B4513;
+  background: linear-gradient(135deg, var(--card-bg-solid) 0%, rgba(139, 69, 19, 0.08) 100%);
   position: relative;
 }
 
 .bristol-picker-btn-bonus::after {
-  content: '⚡';
+  content: '💩';
   position: absolute;
   top: -6px;
   right: -6px;
@@ -235,15 +235,15 @@
 }
 
 .bristol-picker-btn-bonus:hover {
-  border-color: #ff0040;
-  box-shadow: 0 0 20px rgba(255, 0, 64, 0.4);
+  border-color: #8B4513;
+  box-shadow: 0 0 20px rgba(139, 69, 19, 0.4);
   transform: translateY(-3px);
 }
 
 .bristol-picker-btn-bonus.selected {
   border-style: solid;
-  background: #ff0040;
-  box-shadow: 0 0 30px rgba(255, 0, 64, 0.6);
+  background: #8B4513;
+  box-shadow: 0 0 30px rgba(139, 69, 19, 0.6);
   transform: translateY(-3px) scale(1.05);
 }
 
@@ -252,15 +252,15 @@
   color: white;
 }
 
-/* ── Plasma-Glow im Hero ── */
-.bristol-hero-plasma {
-  box-shadow: 0 0 40px rgba(255, 0, 64, 0.6), 0 0 80px rgba(255, 0, 64, 0.3);
-  animation: bristol-plasma-pulse 1.5s ease-in-out infinite;
+/* ── Kacke-Glow im Hero ── */
+.bristol-hero-kacke {
+  box-shadow: 0 0 40px rgba(139, 69, 19, 0.6), 0 0 80px rgba(160, 82, 45, 0.3);
+  animation: bristol-kacke-pulse 1.5s ease-in-out infinite;
 }
 
-@keyframes bristol-plasma-pulse {
-  0%, 100% { box-shadow: 0 0 40px rgba(255, 0, 64, 0.6), 0 0 80px rgba(255, 0, 64, 0.3); }
-  50% { box-shadow: 0 0 60px rgba(255, 0, 64, 0.8), 0 0 120px rgba(255, 0, 64, 0.4); }
+@keyframes bristol-kacke-pulse {
+  0%, 100% { box-shadow: 0 0 40px rgba(139, 69, 19, 0.6), 0 0 80px rgba(160, 82, 45, 0.3); }
+  50% { box-shadow: 0 0 60px rgba(139, 69, 19, 0.8), 0 0 120px rgba(160, 82, 45, 0.4); }
 }
 
 .bristol-picker-emoji {
@@ -563,23 +563,23 @@
   transform: none !important;
 }
 
-/* ── History-Edit: Plasma-Bonus ── */
+/* ── History-Edit: Kacke-Bonus ── */
 .bristol-history-edit-btn-bonus {
-  border-color: #ff0040;
-  color: #ff0040;
+  border-color: #8B4513;
+  color: #8B4513;
   font-weight: 800;
 }
 
 .bristol-history-edit-btn-bonus.selected {
-  background: #ff0040;
+  background: #8B4513;
   color: white;
-  border-color: #ff0040;
-  box-shadow: 0 0 12px rgba(255, 0, 64, 0.5);
+  border-color: #8B4513;
+  box-shadow: 0 0 12px rgba(139, 69, 19, 0.5);
 }
 
 .bristol-history-edit-btn-bonus:hover {
-  border-color: #ff0040;
-  box-shadow: 0 0 10px rgba(255, 0, 64, 0.3);
+  border-color: #8B4513;
+  box-shadow: 0 0 10px rgba(139, 69, 19, 0.3);
 }
 
 .bristol-history-edit-cancel {
