@@ -42,11 +42,6 @@ interface GeoResult {
   country?: string
 }
 
-interface RadarFrame {
-  time: number
-  path: string
-}
-
 const WEATHER_CODE_MAP: Record<number, { emoji: string; desc: string }> = {
   0: { emoji: '☀️', desc: 'Sonnig' },
   1: { emoji: '🌤️', desc: 'Heiter' },
@@ -102,11 +97,6 @@ function fmtHour(dateStr: string) {
   return d.toLocaleTimeString('de-DE', { hour: '2-digit' })
 }
 
-function fmtRadarTime(ts: number) {
-  const d = new Date(ts * 1000)
-  return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-}
-
 /** Component that updates the map view when coordinates change */
 function MapUpdater({ lat, lon }: { lat: number; lon: number }) {
   const map = useMap()
@@ -125,12 +115,8 @@ export default function WeatherScreen() {
   const [geoLoading, setGeoLoading] = useState(false)
   const cacheRef = useRef<{ data: WeatherData; ts: number } | null>(null)
 
-  // ── Radar state ──
-  const [radarFrames, setRadarFrames] = useState<RadarFrame[]>([])
-  const [radarHost, setRadarHost] = useState('')
-  const [radarPlaying, setRadarPlaying] = useState(true)
-  const [radarIndex, setRadarIndex] = useState(0)
-  const radarIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  // ── OWM API key ──
+  const owmKey = import.meta.env.VITE_OWM_API_KEY as string | undefined
 
   // ── Read stored location from localStorage ──
   const storedLocation = useMemo(() => {
@@ -203,49 +189,6 @@ export default function WeatherScreen() {
       fetchWeather(storedLocation.lat, storedLocation.lon, storedLocation.name)
     }
   }, [storedLocation, fetchWeather])
-
-  // ── Fetch radar data ──
-  useEffect(() => {
-    let cancelled = false
-    fetch('https://api.rainviewer.com/public/weather-maps.json')
-      .then(r => r.json())
-      .then(data => {
-        if (cancelled) return
-        const past: RadarFrame[] = (data.radar?.past ?? []) as RadarFrame[]
-        const host = data.host as string
-        setRadarHost(host)
-        setRadarFrames(past)
-        setRadarIndex(past.length - 1)
-      })
-      .catch(() => { /* radar silently fails */ })
-    return () => { cancelled = true }
-  }, [])
-
-  // ── Radar animation interval ──
-  useEffect(() => {
-    if (radarPlaying && radarFrames.length > 0) {
-      radarIntervalRef.current = setInterval(() => {
-        setRadarIndex(prev => (prev + 1) % radarFrames.length)
-      }, 500)
-    }
-    return () => {
-      if (radarIntervalRef.current) {
-        clearInterval(radarIntervalRef.current)
-        radarIntervalRef.current = null
-      }
-    }
-  }, [radarPlaying, radarFrames.length])
-
-  const toggleRadar = () => {
-    navigator.vibrate?.(8)
-    setRadarPlaying(prev => !prev)
-  }
-
-  const handleRadarSlider = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const idx = Number(e.target.value)
-    setRadarIndex(idx)
-    setRadarPlaying(false)
-  }
 
   // ── Geocode city name ──
   const handleGeocode = async () => {
@@ -444,29 +387,15 @@ export default function WeatherScreen() {
             </div>
           </div>
 
-          {/* ── Rain Radar ── */}
-          {storedLocation && radarFrames.length > 0 && (
+          {/* ── Rain Radar (OpenWeatherMap) ── */}
+          {storedLocation && owmKey && (
             <div className="weather-section">
-              <div className="weather-radar-header">
-                <h3 className="weather-section-title" style={{ margin: 0 }}>📡 Regenradar</h3>
-                <div className="weather-radar-controls">
-                  <span className="weather-radar-time">
-                    {fmtRadarTime(radarFrames[radarIndex]?.time ?? 0)}
-                  </span>
-                  <button
-                    className="weather-radar-play-btn"
-                    onClick={toggleRadar}
-                    aria-label={radarPlaying ? 'Pause' : 'Play'}
-                  >
-                    {radarPlaying ? '⏸' : '▶️'}
-                  </button>
-                </div>
-              </div>
-              <div className="weather-radar-map">
+              <h3 className="weather-section-title" style={{ margin: 0 }}>📡 Regenradar</h3>
+              <div className="weather-radar-map" style={{ marginTop: '0.7rem' }}>
                 <MapContainer
                   center={[storedLocation.lat, storedLocation.lon]}
                   zoom={7}
-                  maxZoom={12}
+                  maxZoom={18}
                   style={{ height: '100%', width: '100%' }}
                   zoomControl={true}
                   scrollWheelZoom={true}
@@ -475,16 +404,13 @@ export default function WeatherScreen() {
                   <TileLayer
                     attribution='&copy; <a href="https://carto.com/">CARTO</a>'
                     url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                    maxNativeZoom={12}
+                    maxNativeZoom={18}
                   />
-                  {radarHost && radarFrames[radarIndex] && (
-                    <TileLayer
-                      key={radarFrames[radarIndex].path}
-                      url={`${radarHost}${radarFrames[radarIndex].path}/256/{z}/{x}/{y}/2/1.png`}
-                      opacity={0.55}
-                      maxNativeZoom={8}
-                    />
-                  )}
+                  <TileLayer
+                    url={`https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${owmKey}`}
+                    opacity={0.5}
+                    maxNativeZoom={18}
+                  />
                   <CircleMarker
                     center={[storedLocation.lat, storedLocation.lon]}
                     radius={10}
@@ -492,24 +418,6 @@ export default function WeatherScreen() {
                   />
                   <MapUpdater lat={storedLocation.lat} lon={storedLocation.lon} />
                 </MapContainer>
-              </div>
-              <div className="weather-radar-timeline">
-                <input
-                  type="range"
-                  className="weather-radar-slider"
-                  min={0}
-                  max={radarFrames.length - 1}
-                  value={radarIndex}
-                  onChange={handleRadarSlider}
-                />
-                <div className="weather-radar-timeline-labels">
-                  <span className="weather-radar-timeline-label">
-                    {fmtRadarTime(radarFrames[0]?.time ?? 0)}
-                  </span>
-                  <span className="weather-radar-timeline-label">
-                    {fmtRadarTime(radarFrames[radarFrames.length - 1]?.time ?? 0)}
-                  </span>
-                </div>
               </div>
             </div>
           )}
