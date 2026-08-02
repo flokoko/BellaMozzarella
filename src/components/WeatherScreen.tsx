@@ -99,7 +99,7 @@ function fmtTime(dateStr: string) {
 
 function fmtHour(dateStr: string) {
   const d = new Date(dateStr)
-  return d.toLocaleTimeString('de-DE', { hour: '2-digit' }) + ' h'
+  return d.toLocaleTimeString('de-DE', { hour: '2-digit' })
 }
 
 function fmtRadarTime(ts: number) {
