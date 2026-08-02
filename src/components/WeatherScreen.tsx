@@ -111,7 +111,7 @@ function fmtRadarTime(ts: number) {
 function MapUpdater({ lat, lon }: { lat: number; lon: number }) {
   const map = useMap()
   useEffect(() => {
-    map.setView([lat, lon], 9)
+    map.setView([lat, lon], 7)
   }, [map, lat, lon])
   return null
 }
@@ -465,7 +465,7 @@ export default function WeatherScreen() {
               <div className="weather-radar-map">
                 <MapContainer
                   center={[storedLocation.lat, storedLocation.lon]}
-                  zoom={9}
+                  zoom={7}
                   maxZoom={12}
                   style={{ height: '100%', width: '100%' }}
                   zoomControl={true}
