@@ -475,13 +475,14 @@ export default function WeatherScreen() {
                   <TileLayer
                     attribution='&copy; <a href="https://carto.com/">CARTO</a>'
                     url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                    maxZoom={12}
+                    maxNativeZoom={12}
                   />
                   {radarHost && radarFrames[radarIndex] && (
                     <TileLayer
                       key={radarFrames[radarIndex].path}
                       url={`${radarHost}${radarFrames[radarIndex].path}/256/{z}/{x}/{y}/2/1.png`}
                       opacity={0.55}
+                      maxNativeZoom={8}
                     />
                   )}
                   <CircleMarker
