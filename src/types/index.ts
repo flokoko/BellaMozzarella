@@ -35,7 +35,7 @@ export interface ShoppingList {
   created_at: string
 }
 
-export type TabView = 'home' | 'list' | 'bring' | 'mealplan' | 'expenses' | 'bristol' | 'settings'
+export type TabView = 'home' | 'list' | 'bring' | 'mealplan' | 'expenses' | 'bristol' | 'weather' | 'settings'
 export type BringFilter = 'all' | 'mine' | 'unfilled'
 
 export type DayOfWeek = 'Montag' | 'Dienstag' | 'Mittwoch' | 'Donnerstag' | 'Freitag' | 'Samstag' | 'Sonntag'

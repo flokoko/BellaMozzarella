@@ -191,7 +191,7 @@ export default function DashboardScreen({
   return (
     <div className="dashboard-screen">
       {/* ── Weather Widget ── */}
-      <WeatherWidget />
+      <WeatherWidget onNavigate={() => { navigator.vibrate?.(8); onNavigate('weather') }} />
 
       {/* ── Bristol Widget ── */}
       {bristolEnabled && (

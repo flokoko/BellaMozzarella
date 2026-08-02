@@ -17,6 +17,7 @@ const MealPlanScreen = lazy(() => import('./components/MealPlanScreen'))
 const ExpenseScreen = lazy(() => import('./components/ExpenseScreen'))
 const SettingsScreen = lazy(() => import('./components/SettingsScreen'))
 const BristolScreen = lazy(() => import('./components/BristolScreen'))
+const WeatherScreen = lazy(() => import('./components/WeatherScreen'))
 
 function TabLoader() {
   return (
@@ -256,6 +257,7 @@ export default function App() {
     mealplan: { icon: Pizza, label: 'Essensplan' },
     expenses: { icon: Wallet, label: 'Ausgaben' },
     bristol: { icon: Activity, label: 'Bristol' },
+    weather: { icon: Sun, label: 'Wetter' },
     settings: { icon: Settings, label: 'Einstellungen' },
   }
 
@@ -423,6 +425,11 @@ export default function App() {
               listId={list.id}
               userName={userName}
             />
+          </Suspense>
+        )}
+        {tab === 'weather' && (
+          <Suspense fallback={<TabLoader />}>
+            <WeatherScreen />
           </Suspense>
         )}
         {tab === 'settings' && (

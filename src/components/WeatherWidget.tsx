@@ -62,7 +62,11 @@ function fmtDay(dateStr: string) {
   return d.toLocaleDateString('de-DE', { weekday: 'short' })
 }
 
-export default function WeatherWidget() {
+interface WeatherWidgetProps {
+  onNavigate?: () => void
+}
+
+export default function WeatherWidget({ onNavigate }: WeatherWidgetProps = {}) {
   const [weather, setWeather] = useState<WeatherData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -275,6 +279,15 @@ export default function WeatherWidget() {
                 )
               })}
             </div>
+          )}
+
+          {expanded && onNavigate && (
+            <button
+              className="weather-open-btn"
+              onClick={(e) => { e.stopPropagation(); navigator.vibrate?.(8); onNavigate() }}
+            >
+              🌤️ Zur Wetter-Übersicht ›
+            </button>
           )}
         </>
       )}

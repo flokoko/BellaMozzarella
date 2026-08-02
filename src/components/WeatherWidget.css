@@ -220,6 +220,33 @@
   color: var(--danger);
 }
 
+/* ── Open button ── */
+.weather-open-btn {
+  width: 100%;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--button-bg);
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.35s;
+  text-align: center;
+  margin-top: 0.4rem;
+}
+
+.weather-open-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
+}
+
+.weather-open-btn:active {
+  transform: scale(0.97);
+}
+
 /* ── Error / Loading ── */
 .weather-error {
   font-size: 0.78rem;
