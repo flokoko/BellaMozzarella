@@ -3,11 +3,11 @@ import { Trash2, Pizza, GripVertical, ChevronDown } from 'lucide-react'
 import type { ListItem, ItemCategory, ListType } from '../types'
 import type { PointerEvent as ReactPointerEvent } from 'react'
 import { supabase } from '../lib/supabase'
-import { logError } from '../lib/logger'
 import { useToast } from '../context/ToastContext'
 import { aggregateItems, type AggregatedItem } from '../lib/aggregate'
 import ItemRow from './ItemRow'
 import AddItemForm from './AddItemForm'
+import EditItemForm from './EditItemForm'
 import CategoryManager from './CategoryManager'
 import { SkeletonCatHeader, SkeletonItemRow } from './Skeleton'
 
@@ -26,7 +26,6 @@ interface ListScreenProps {
   onItemChange?: () => void
   onReorder?: (listType: ListType, newOrder: string[]) => void
   onCategoriesChange?: () => void
-  onDuplicate?: (item: ListItem) => void
 }
 
 /** Wraps one category's items with independent drag-reorder + aggregation. */
@@ -36,7 +35,7 @@ function DraggableCategorySection({
   onItemToggle,
   onBatchToggle,
   onItemDelete,
-  onDuplicate,
+  onEdit,
   onReorder,
 }: {
   catItems: ListItem[]
@@ -44,7 +43,7 @@ function DraggableCategorySection({
   onItemToggle?: (item: ListItem) => void
   onBatchToggle?: (items: ListItem[], checked: boolean) => void
   onItemDelete?: (item: ListItem) => void
-  onDuplicate?: (item: ListItem) => void
+  onEdit?: (item: ListItem) => void
   onReorder?: (newOrder: string[]) => void
 }) {
   const { confirm } = useToast()
@@ -130,7 +129,7 @@ function DraggableCategorySection({
               item={item}
               onToggle={onItemToggle}
               onDelete={onItemDelete}
-              onDuplicate={onDuplicate}
+              onEdit={onEdit}
               dragHandleProps={{
                 onPointerDown: (e: ReactPointerEvent) => handlePointerDown(e, agg.groupKey),
                 onPointerMove: handlePointerMove,
@@ -228,6 +227,7 @@ export default function ListScreen({ items, categories, listId, userName, isLoad
   const { confirm } = useToast()
   const [hideChecked, setHideChecked] = useState(() => localStorage.getItem('bella_hide_checked') === 'true')
   const [searchQuery, setSearchQuery] = useState('')
+  const [editingItem, setEditingItem] = useState<ListItem | null>(null)
 
   const toggleHideChecked = () => {
     navigator.vibrate?.(8)
@@ -237,25 +237,6 @@ export default function ListScreen({ items, categories, listId, userName, isLoad
   }
 
   const checkedItems = items.filter((i) => i.is_checked)
-
-  const handleDuplicate = async (item: ListItem) => {
-    const { error } = await supabase.from('items').insert({
-      list_id: listId,
-      name: item.name,
-      quantity: item.quantity,
-      category: item.category,
-      assigned_to: item.assigned_to,
-      is_checked: false,
-      is_brought: false,
-      created_by: userName,
-      list_type: 'shopping',
-    })
-    if (error) {
-      logError('Duplicate error:', error)
-      return
-    }
-    onItemChange?.()
-  }
 
   const handleDeleteChecked = () => {
     if (checkedItems.length === 0) return
@@ -339,7 +320,7 @@ export default function ListScreen({ items, categories, listId, userName, isLoad
             onItemToggle={onItemToggle}
             onBatchToggle={onBatchToggle}
             onItemDelete={onItemDelete}
-            onDuplicate={handleDuplicate}
+            onEdit={(item) => setEditingItem(item)}
             onReorder={(newOrder) => onReorder?.('shopping', newOrder)}
           />
         )
@@ -370,11 +351,24 @@ export default function ListScreen({ items, categories, listId, userName, isLoad
             onItemToggle={onItemToggle}
             onBatchToggle={onBatchToggle}
             onItemDelete={onItemDelete}
-            onDuplicate={handleDuplicate}
+            onEdit={(item) => setEditingItem(item)}
             onReorder={(newOrder) => onReorder?.('shopping', newOrder)}
           />
         )
       })()}
+
+      {editingItem && (
+        <EditItemForm
+          item={editingItem}
+          categories={categories}
+          listId={listId}
+          onSaved={() => {
+            setEditingItem(null)
+            onItemChange?.()
+          }}
+          onCancel={() => setEditingItem(null)}
+        />
+      )}
     </div>
   )
 }

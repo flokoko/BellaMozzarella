@@ -1,6 +1,6 @@
 import type { ListItem } from '../types'
 import type { PointerEvent as ReactPointerEvent } from 'react'
-import { Trash2, GripVertical, Copy } from 'lucide-react'
+import { Trash2, GripVertical, Pencil } from 'lucide-react'
 import { useToast } from '../context/ToastContext'
 import './ItemRow.css'
 
@@ -8,7 +8,7 @@ interface ItemRowProps {
   item: ListItem
   onToggle?: (item: ListItem) => void
   onDelete?: (item: ListItem) => void
-  onDuplicate?: (item: ListItem) => void
+  onEdit?: (item: ListItem) => void
   dragHandleProps?: {
     onPointerDown: (e: ReactPointerEvent) => void
     onPointerMove: (e: ReactPointerEvent) => void
@@ -19,7 +19,7 @@ interface ItemRowProps {
   registerRef?: (el: HTMLDivElement | null) => void
 }
 
-export default function ItemRow({ item, onToggle, onDelete, onDuplicate, dragHandleProps, isDragging, isDragOver, registerRef }: ItemRowProps) {
+export default function ItemRow({ item, onToggle, onDelete, onEdit, dragHandleProps, isDragging, isDragOver, registerRef }: ItemRowProps) {
   const { confirm } = useToast()
 
   const toggleChecked = () => {
@@ -78,8 +78,8 @@ export default function ItemRow({ item, onToggle, onDelete, onDuplicate, dragHan
           {item.created_by && <span className="item-created-by">von {item.created_by}</span>}
         </div>
       </div>
-      <button className="item-duplicate" onClick={(e) => { e.stopPropagation(); onDuplicate?.(item) }} aria-label="Duplizieren">
-        <Copy size={16} strokeWidth={2} />
+      <button className="item-edit" onClick={(e) => { e.stopPropagation(); onEdit?.(item) }} aria-label="Bearbeiten">
+        <Pencil size={16} strokeWidth={2} />
       </button>
       <button className="item-delete" onClick={deleteItem} aria-label="Löschen">
         <Trash2 size={16} strokeWidth={2} />

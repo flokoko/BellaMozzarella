@@ -185,7 +185,7 @@
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.item-duplicate {
+.item-edit {
   border: none;
   background: none;
   cursor: pointer;
@@ -198,13 +198,13 @@
   flex-shrink: 0;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.item-duplicate:hover {
+.item-edit:hover {
   opacity: 1;
-  color: var(--accent);
-  background: var(--accent-light);
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.12);
   transform: scale(1.15);
 }
-.item-duplicate:active {
+.item-edit:active {
   transform: scale(0.9);
 }
 
