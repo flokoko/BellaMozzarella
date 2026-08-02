@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
-import { MapContainer, TileLayer, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, CircleMarker, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import './WeatherScreen.css'
 
@@ -111,7 +111,7 @@ function fmtRadarTime(ts: number) {
 function MapUpdater({ lat, lon }: { lat: number; lon: number }) {
   const map = useMap()
   useEffect(() => {
-    map.setView([lat, lon], 7)
+    map.setView([lat, lon], 9)
   }, [map, lat, lon])
   return null
 }
@@ -465,7 +465,8 @@ export default function WeatherScreen() {
               <div className="weather-radar-map">
                 <MapContainer
                   center={[storedLocation.lat, storedLocation.lon]}
-                  zoom={7}
+                  zoom={9}
+                  maxZoom={12}
                   style={{ height: '100%', width: '100%' }}
                   zoomControl={true}
                   scrollWheelZoom={true}
@@ -474,6 +475,7 @@ export default function WeatherScreen() {
                   <TileLayer
                     attribution='&copy; <a href="https://carto.com/">CARTO</a>'
                     url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                    maxZoom={12}
                   />
                   {radarHost && radarFrames[radarIndex] && (
                     <TileLayer
@@ -482,6 +484,11 @@ export default function WeatherScreen() {
                       opacity={0.55}
                     />
                   )}
+                  <CircleMarker
+                    center={[storedLocation.lat, storedLocation.lon]}
+                    radius={10}
+                    pathOptions={{ color: '#ce2b37', fillColor: '#ce2b37', fillOpacity: 0.8, weight: 2 }}
+                  />
                   <MapUpdater lat={storedLocation.lat} lon={storedLocation.lon} />
                 </MapContainer>
               </div>
