@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
-import { MapContainer, TileLayer, ImageOverlay, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import './WeatherScreen.css'
 
@@ -115,8 +115,6 @@ function MapUpdater({ lat, lon }: { lat: number; lon: number }) {
   }, [map, lat, lon])
   return null
 }
-
-const WORLD_BOUNDS: [[number, number], [number, number]] = [[-90, -180], [90, 180]]
 
 export default function WeatherScreen() {
   const [weather, setWeather] = useState<WeatherData | null>(null)
@@ -336,14 +334,6 @@ export default function WeatherScreen() {
     return 'Extrem'
   }, [weather])
 
-  // ── Current radar frame URL ──
-  const currentRadarUrl = useMemo(() => {
-    if (!radarHost || radarFrames.length === 0) return null
-    const frame = radarFrames[radarIndex]
-    if (!frame) return null
-    return `${radarHost}${frame.path}/256/{z}/{x}/{y}/2/1.png`
-  }, [radarHost, radarFrames, radarIndex])
-
   // ── No location set: prompt ──
   if (!storedLocation && !showLocationInput) {
     return (
@@ -455,7 +445,7 @@ export default function WeatherScreen() {
           </div>
 
           {/* ── Rain Radar ── */}
-          {storedLocation && radarFrames.length > 0 && currentRadarUrl && (
+          {storedLocation && radarFrames.length > 0 && (
             <div className="weather-section">
               <div className="weather-radar-header">
                 <h3 className="weather-section-title" style={{ margin: 0 }}>📡 Regenradar</h3>
@@ -485,11 +475,13 @@ export default function WeatherScreen() {
                     attribution='&copy; <a href="https://carto.com/">CARTO</a>'
                     url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                   />
-                  <ImageOverlay
-                    url={currentRadarUrl}
-                    bounds={WORLD_BOUNDS}
-                    opacity={0.55}
-                  />
+                  {radarHost && radarFrames[radarIndex] && (
+                    <TileLayer
+                      key={radarFrames[radarIndex].path}
+                      url={`${radarHost}${radarFrames[radarIndex].path}/256/{z}/{x}/{y}/2/1.png`}
+                      opacity={0.55}
+                    />
+                  )}
                   <MapUpdater lat={storedLocation.lat} lon={storedLocation.lon} />
                 </MapContainer>
               </div>
