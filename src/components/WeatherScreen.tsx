@@ -1,4 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
+import { MapContainer, TileLayer, ImageOverlay, useMap } from 'react-leaflet'
+import 'leaflet/dist/leaflet.css'
 import './WeatherScreen.css'
 
 interface WeatherData {
@@ -38,6 +40,11 @@ interface GeoResult {
   lon: number
   name: string
   country?: string
+}
+
+interface RadarFrame {
+  time: number
+  path: string
 }
 
 const WEATHER_CODE_MAP: Record<number, { emoji: string; desc: string }> = {
@@ -95,6 +102,22 @@ function fmtHour(dateStr: string) {
   return d.toLocaleTimeString('de-DE', { hour: '2-digit' }) + ' h'
 }
 
+function fmtRadarTime(ts: number) {
+  const d = new Date(ts * 1000)
+  return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+}
+
+/** Component that updates the map view when coordinates change */
+function MapUpdater({ lat, lon }: { lat: number; lon: number }) {
+  const map = useMap()
+  useEffect(() => {
+    map.setView([lat, lon], 7)
+  }, [map, lat, lon])
+  return null
+}
+
+const WORLD_BOUNDS: [[number, number], [number, number]] = [[-90, -180], [90, 180]]
+
 export default function WeatherScreen() {
   const [weather, setWeather] = useState<WeatherData | null>(null)
   const [loading, setLoading] = useState(false)
@@ -103,6 +126,13 @@ export default function WeatherScreen() {
   const [locationQuery, setLocationQuery] = useState('')
   const [geoLoading, setGeoLoading] = useState(false)
   const cacheRef = useRef<{ data: WeatherData; ts: number } | null>(null)
+
+  // ── Radar state ──
+  const [radarFrames, setRadarFrames] = useState<RadarFrame[]>([])
+  const [radarHost, setRadarHost] = useState('')
+  const [radarPlaying, setRadarPlaying] = useState(true)
+  const [radarIndex, setRadarIndex] = useState(0)
+  const radarIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // ── Read stored location from localStorage ──
   const storedLocation = useMemo(() => {
@@ -115,7 +145,6 @@ export default function WeatherScreen() {
 
   // ── Fetch weather data (rich API for screen) ──
   const fetchWeather = useCallback(async (lat: number, lon: number, name: string) => {
-    // Check 10-minute cache
     if (cacheRef.current && Date.now() - cacheRef.current.ts < 10 * 60 * 1000) {
       setWeather(cacheRef.current.data)
       return
@@ -177,6 +206,49 @@ export default function WeatherScreen() {
     }
   }, [storedLocation, fetchWeather])
 
+  // ── Fetch radar data ──
+  useEffect(() => {
+    let cancelled = false
+    fetch('https://api.rainviewer.com/public/weather-maps.json')
+      .then(r => r.json())
+      .then(data => {
+        if (cancelled) return
+        const past: RadarFrame[] = (data.radar?.past ?? []) as RadarFrame[]
+        const host = data.host as string
+        setRadarHost(host)
+        setRadarFrames(past)
+        setRadarIndex(past.length - 1)
+      })
+      .catch(() => { /* radar silently fails */ })
+    return () => { cancelled = true }
+  }, [])
+
+  // ── Radar animation interval ──
+  useEffect(() => {
+    if (radarPlaying && radarFrames.length > 0) {
+      radarIntervalRef.current = setInterval(() => {
+        setRadarIndex(prev => (prev + 1) % radarFrames.length)
+      }, 500)
+    }
+    return () => {
+      if (radarIntervalRef.current) {
+        clearInterval(radarIntervalRef.current)
+        radarIntervalRef.current = null
+      }
+    }
+  }, [radarPlaying, radarFrames.length])
+
+  const toggleRadar = () => {
+    navigator.vibrate?.(8)
+    setRadarPlaying(prev => !prev)
+  }
+
+  const handleRadarSlider = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const idx = Number(e.target.value)
+    setRadarIndex(idx)
+    setRadarPlaying(false)
+  }
+
   // ── Geocode city name ──
   const handleGeocode = async () => {
     const query = locationQuery.trim()
@@ -205,7 +277,7 @@ export default function WeatherScreen() {
       localStorage.setItem('weather_lat', String(result.lat))
       localStorage.setItem('weather_lon', String(result.lon))
       localStorage.setItem('weather_name', displayName)
-      cacheRef.current = null // force refetch
+      cacheRef.current = null
       setShowLocationInput(false)
       setLocationQuery('')
       fetchWeather(result.lat, result.lon, displayName)
@@ -226,7 +298,7 @@ export default function WeatherScreen() {
   const hourlyForecast = useMemo(() => {
     if (!weather) return []
     const now = new Date()
-    const currentHour = now.toISOString().slice(0, 13) // "2024-01-15T14"
+    const currentHour = now.toISOString().slice(0, 13)
     const startIndex = weather.hourly.time.findIndex((t: string) => t.slice(0, 13) >= currentHour)
     const start = startIndex >= 0 ? startIndex : 0
     return weather.hourly.time.slice(start, start + 24).map((t: string, i: number) => ({
@@ -263,6 +335,14 @@ export default function WeatherScreen() {
     if (uv <= 10) return 'Sehr hoch'
     return 'Extrem'
   }, [weather])
+
+  // ── Current radar frame URL ──
+  const currentRadarUrl = useMemo(() => {
+    if (!radarHost || radarFrames.length === 0) return null
+    const frame = radarFrames[radarIndex]
+    if (!frame) return null
+    return `${radarHost}${frame.path}/256/{z}/{x}/{y}/2/1.png`
+  }, [radarHost, radarFrames, radarIndex])
 
   // ── No location set: prompt ──
   if (!storedLocation && !showLocationInput) {
@@ -373,6 +453,66 @@ export default function WeatherScreen() {
               })}
             </div>
           </div>
+
+          {/* ── Rain Radar ── */}
+          {storedLocation && radarFrames.length > 0 && currentRadarUrl && (
+            <div className="weather-section">
+              <div className="weather-radar-header">
+                <h3 className="weather-section-title" style={{ margin: 0 }}>📡 Regenradar</h3>
+                <div className="weather-radar-controls">
+                  <span className="weather-radar-time">
+                    {fmtRadarTime(radarFrames[radarIndex]?.time ?? 0)}
+                  </span>
+                  <button
+                    className="weather-radar-play-btn"
+                    onClick={toggleRadar}
+                    aria-label={radarPlaying ? 'Pause' : 'Play'}
+                  >
+                    {radarPlaying ? '⏸' : '▶️'}
+                  </button>
+                </div>
+              </div>
+              <div className="weather-radar-map">
+                <MapContainer
+                  center={[storedLocation.lat, storedLocation.lon]}
+                  zoom={7}
+                  style={{ height: '100%', width: '100%' }}
+                  zoomControl={true}
+                  scrollWheelZoom={true}
+                  dragging={true}
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                  />
+                  <ImageOverlay
+                    url={currentRadarUrl}
+                    bounds={WORLD_BOUNDS}
+                    opacity={0.55}
+                  />
+                  <MapUpdater lat={storedLocation.lat} lon={storedLocation.lon} />
+                </MapContainer>
+              </div>
+              <div className="weather-radar-timeline">
+                <input
+                  type="range"
+                  className="weather-radar-slider"
+                  min={0}
+                  max={radarFrames.length - 1}
+                  value={radarIndex}
+                  onChange={handleRadarSlider}
+                />
+                <div className="weather-radar-timeline-labels">
+                  <span className="weather-radar-timeline-label">
+                    {fmtRadarTime(radarFrames[0]?.time ?? 0)}
+                  </span>
+                  <span className="weather-radar-timeline-label">
+                    {fmtRadarTime(radarFrames[radarFrames.length - 1]?.time ?? 0)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* ── Daily forecast ── */}
           <div className="weather-section">
