@@ -6,7 +6,7 @@
   flex-direction: column;
 }
 
-/* ── Persistenter MozzaScene-Hintergrund ── */
+/* ── MozzaScene-Hintergrund (nur auf der Join-Seite) ── */
 .mozza-bg {
   position: fixed;
   inset: 0;
@@ -14,13 +14,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none;
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-.mozza-bg-hidden {
-  opacity: 0;
-  transform: scale(0.8);
   pointer-events: none;
 }
 

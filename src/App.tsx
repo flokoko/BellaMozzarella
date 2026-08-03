@@ -195,10 +195,7 @@ export default function App() {
     prevAllCheckedRef.current = allChecked
   }, [checkedCount, shoppingItems.length])
 
-  // ── Early return (after all hooks) ─────────────────────────────────
-  // NOTE: no early return here — MozzaScene must render before the conditional
-  // to keep the WebGL context alive across login. The conditional rendering
-  // happens in the main return block below.
+  // ── Note: no early return here — hooks must stay above the main return.
 
   // ── Event handlers ─────────────────────────────────────────────────
   const handleToggleTheme = () => {
@@ -266,12 +263,13 @@ export default function App() {
 
   return (
     <>
-      {/* MozzaScene: immer gemountet, nie unmountet — per CSS versteckt nach Login */}
-      <div className={`mozza-bg ${!userName || !list ? '' : 'mozza-bg-hidden'}`}>
-        <MozzaScene fullscreen />
-      </div>
       {!userName || !list ? (
-        <JoinScreen onJoin={handleJoin} />
+        <>
+          <div className="mozza-bg">
+            <MozzaScene fullscreen />
+          </div>
+          <JoinScreen onJoin={handleJoin} />
+        </>
       ) : (
     <div className="app">
       <header className="app-header">

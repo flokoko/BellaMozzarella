@@ -254,7 +254,7 @@ export function useListData() {
             return orig ? { ...i, is_checked: orig.is_checked } : i
           }))
         }
-        if (list) fetchAll(list.id, true)
+        if (list) fetchItems(list.id, 'shopping')
       })
     } else {
       // Enqueue one op per item for offline (Supabase RLS needs per-row)
@@ -262,7 +262,7 @@ export function useListData() {
         enqueue({ type: 'update', table: 'items', payload: { is_checked: checked }, filterColumn: 'id', filterValue: item.id })
       }
     }
-  }, [isOnline, enqueue, list, fetchAll])
+  }, [isOnline, enqueue, list, fetchItems])
 
   const toggleShoppingItem = useCallback((item: ListItem) => {
     setShoppingItems(prev => prev.map(i => i.id === item.id ? { ...i, is_checked: !i.is_checked } : i))
@@ -273,12 +273,12 @@ export function useListData() {
           setShoppingItems(prev => prev.map(i => i.id === item.id ? { ...i, is_checked: item.is_checked } : i))
         }
         // Refetch AFTER server write completes — prevents race with optimistic state
-        if (list) fetchAll(list.id, true)
+        if (list) fetchItems(list.id, 'shopping')
       })
     } else {
       enqueue({ type: 'update', table: 'items', payload: { is_checked: !item.is_checked }, filterColumn: 'id', filterValue: item.id })
     }
-  }, [isOnline, enqueue, list, fetchAll])
+  }, [isOnline, enqueue, list, fetchItems])
 
   // ── Undo helper ─────────────────────────────────────────────────────
   const withUndo = useCallback((items: ListItem[], doAction: () => void) => {
@@ -304,13 +304,13 @@ export function useListData() {
             logError('deleteShoppingItem error:', error)
             setShoppingItems(prev => [item, ...prev])
           }
-          if (list) fetchAll(list.id, true)
+          if (list) fetchItems(list.id, 'shopping')
         })
       } else {
         enqueue({ type: 'delete', table: 'items', payload: {}, filterColumn: 'id', filterValue: item.id })
       }
     })
-  }, [withUndo, isOnline, enqueue, list, fetchAll])
+  }, [withUndo, isOnline, enqueue, list, fetchItems])
 
   const undoDelete = useCallback(() => {
     if (!undoState) return
@@ -319,7 +319,7 @@ export function useListData() {
     for (const item of undoState.items) {
       if (isOnline) {
         supabase.from('items').insert(item as any).then(() => {
-          if (list) fetchAll(list.id, true)
+          if (list) fetchItems(list.id, 'shopping')
         })
       } else {
         enqueue({ type: 'insert', table: 'items', payload: item as unknown as Record<string, unknown> })
@@ -327,7 +327,7 @@ export function useListData() {
     }
     setShoppingItems(prev => [...undoState.items, ...prev])
     setUndoState(null)
-  }, [undoState, isOnline, enqueue, list, fetchAll])
+  }, [undoState, isOnline, enqueue, list, fetchItems])
 
   const toggleBringItem = useCallback((item: ListItem) => {
     setBringItems(prev => prev.map(i => i.id === item.id ? { ...i, is_brought: !i.is_brought } : i))
@@ -337,12 +337,12 @@ export function useListData() {
           logError('toggleBringItem error:', error)
           setBringItems(prev => prev.map(i => i.id === item.id ? { ...i, is_brought: item.is_brought } : i))
         }
-        if (list) fetchAll(list.id, true)
+        if (list) fetchItems(list.id, 'bring')
       })
     } else {
       enqueue({ type: 'update', table: 'items', payload: { is_brought: !item.is_brought }, filterColumn: 'id', filterValue: item.id })
     }
-  }, [isOnline, enqueue, list, fetchAll])
+  }, [isOnline, enqueue, list, fetchItems])
 
   const deleteBringItem = useCallback((item: ListItem) => {
     setBringItems(prev => prev.filter(i => i.id !== item.id))
@@ -352,12 +352,12 @@ export function useListData() {
           logError('deleteBringItem error:', error)
           setBringItems(prev => [item, ...prev])
         }
-        if (list) fetchAll(list.id, true)
+        if (list) fetchItems(list.id, 'bring')
       })
     } else {
       enqueue({ type: 'delete', table: 'items', payload: {}, filterColumn: 'id', filterValue: item.id })
     }
-  }, [isOnline, enqueue, list, fetchAll])
+  }, [isOnline, enqueue, list, fetchItems])
 
   const reorderItems = useCallback(async (listType: ListType, newOrder: string[]) => {
     if (!list) return

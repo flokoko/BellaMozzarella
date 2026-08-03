@@ -65,11 +65,11 @@ export function useOfflineQueue() {
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
 
-    // Periodic connectivity check every 30s — catches false offline
+    // Periodic connectivity check every 60s — catches false offline
     const pingInterval = setInterval(async () => {
       const connected = await checkConnectivity()
       setIsOnline(connected)
-    }, 30_000)
+    }, 60_000)
 
     // Also run an initial ping to correct a potentially wrong navigator.onLine
     checkConnectivity().then((connected) => {
