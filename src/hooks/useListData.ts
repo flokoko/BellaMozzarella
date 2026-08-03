@@ -546,7 +546,7 @@ export function useListData() {
     setAdminUnlocked(false)
     setUndoState(null)
     prevShoppingItemsRef.current = []
-  }, [])
+  }, [list])
 
   const handleRename = useCallback(async (newName: string): Promise<string | null> => {
     const trimmed = newName.trim()
