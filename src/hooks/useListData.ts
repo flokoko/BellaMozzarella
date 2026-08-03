@@ -15,6 +15,7 @@ import { supabase } from '../lib/supabase'
 import { useOfflineQueue } from './useOfflineQueue'
 import { useRealtimeSync } from './useRealtimeSync'
 import { logError } from '../lib/logger'
+import { readCache, writeCache, clearCacheForList } from '../lib/readCache'
 
 export function useListData() {
   // ── Offline queue ──────────────────────────────────────────────────
@@ -57,8 +58,20 @@ export function useListData() {
       .eq('list_type', listType)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true })
-    if (err) { logError('fetchItems error:', err); return }
+    if (err) {
+      logError('fetchItems error:', err)
+      // Offline fallback: show cached data so lists stay visible
+      const table = listType === 'shopping' ? 'shopping_items' : 'bring_items'
+      const cached = readCache<ListItem[]>(listId, table)
+      if (cached) {
+        if (listType === 'shopping') setShoppingItems(cached)
+        else setBringItems(cached)
+      }
+      return
+    }
     const items = (data || []) as ListItem[]
+    // Write to read cache for offline access
+    writeCache(listId, listType === 'shopping' ? 'shopping_items' : 'bring_items', items)
     if (listType === 'shopping') {
       // ── Push notification: check for new items added by others ──
       const prevIds = new Set(prevShoppingItemsRef.current.map(i => i.id))
@@ -88,8 +101,15 @@ export function useListData() {
       .select('*')
       .eq('list_id', listId)
       .order('sort_order', { ascending: true })
-    if (err) { logError('fetchCategories error:', err); return }
-    setCategories((data || []) as ItemCategory[])
+    if (err) {
+      logError('fetchCategories error:', err)
+      const cached = readCache<ItemCategory[]>(listId, 'categories')
+      if (cached) setCategories(cached)
+      return
+    }
+    const catData = (data || []) as ItemCategory[]
+    writeCache(listId, 'categories', catData)
+    setCategories(catData)
   }, [])
 
   const fetchMeals = useCallback(async (listId: string) => {
@@ -98,8 +118,15 @@ export function useListData() {
       .select('*')
       .eq('list_id', listId)
       .order('created_at', { ascending: true })
-    if (err) { logError('fetchMeals error:', err); return }
-    setMeals((data || []) as Meal[])
+    if (err) {
+      logError('fetchMeals error:', err)
+      const cached = readCache<Meal[]>(listId, 'meals')
+      if (cached) setMeals(cached)
+      return
+    }
+    const mealData = (data || []) as Meal[]
+    writeCache(listId, 'meals', mealData)
+    setMeals(mealData)
   }, [])
 
   const fetchMealIdeas = useCallback(async (listId: string) => {
@@ -108,8 +135,15 @@ export function useListData() {
       .select('*')
       .eq('list_id', listId)
       .order('created_at', { ascending: true })
-    if (err) { logError('fetchMealIdeas error:', err); return }
-    setMealIdeas((data || []) as MealIdea[])
+    if (err) {
+      logError('fetchMealIdeas error:', err)
+      const cached = readCache<MealIdea[]>(listId, 'meal_ideas')
+      if (cached) setMealIdeas(cached)
+      return
+    }
+    const ideaData = (data || []) as MealIdea[]
+    writeCache(listId, 'meal_ideas', ideaData)
+    setMealIdeas(ideaData)
   }, [])
 
   const fetchNotes = useCallback(async (listId: string) => {
@@ -120,8 +154,15 @@ export function useListData() {
       .order('is_favorite', { ascending: false })
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true })
-    if (err) { logError('fetchNotes error:', err); return }
-    setNotes((data || []) as QuickNote[])
+    if (err) {
+      logError('fetchNotes error:', err)
+      const cached = readCache<QuickNote[]>(listId, 'notes')
+      if (cached) setNotes(cached)
+      return
+    }
+    const noteData = (data || []) as QuickNote[]
+    writeCache(listId, 'notes', noteData)
+    setNotes(noteData)
   }, [])
 
   const fetchExpenses = useCallback(async (listId: string) => {
@@ -131,8 +172,15 @@ export function useListData() {
       .eq('list_id', listId)
       .order('expense_date', { ascending: false })
       .order('created_at', { ascending: false })
-    if (err) { logError('fetchExpenses error:', err); return }
-    setExpenses((data || []) as Expense[])
+    if (err) {
+      logError('fetchExpenses error:', err)
+      const cached = readCache<Expense[]>(listId, 'expenses')
+      if (cached) setExpenses(cached)
+      return
+    }
+    const expData = (data || []) as Expense[]
+    writeCache(listId, 'expenses', expData)
+    setExpenses(expData)
   }, [])
 
   const fetchParticipants = useCallback(async (listId: string) => {
@@ -141,8 +189,15 @@ export function useListData() {
       .select('*')
       .eq('list_id', listId)
       .order('name', { ascending: true })
-    if (err) { logError('fetchParticipants error:', err); return }
-    setParticipants((data || []) as Participant[])
+    if (err) {
+      logError('fetchParticipants error:', err)
+      const cached = readCache<Participant[]>(listId, 'participants')
+      if (cached) setParticipants(cached)
+      return
+    }
+    const partData = (data || []) as Participant[]
+    writeCache(listId, 'participants', partData)
+    setParticipants(partData)
   }, [])
 
   const fetchAll = useCallback(async (listId: string, force = false) => {
@@ -203,8 +258,17 @@ export function useListData() {
       .select('*')
       .in('expense_id', expenseIds)
       .then(({ data, error }) => {
-        if (error) { logError('fetchSplits error:', error); return }
-        setExpenseSplits((data || []) as ExpenseSplit[])
+        if (error) {
+          logError('fetchSplits error:', error)
+          if (list) {
+            const cached = readCache<ExpenseSplit[]>(list.id, 'expense_splits')
+            if (cached) setExpenseSplits(cached)
+          }
+          return
+        }
+        const splits = (data || []) as ExpenseSplit[]
+        if (list) writeCache(list.id, 'expense_splits', splits)
+        setExpenseSplits(splits)
       })
   }, [expenses])
 
@@ -449,6 +513,7 @@ export function useListData() {
 
   // ── Join / Leave / Rename ──────────────────────────────────────────
   const handleJoin = useCallback(async (name: string, l: ShoppingList, pid: string) => {
+    clearCacheForList(l.id)
     setUserName(name)
     setParticipantId(pid)
     setList(l)
@@ -463,6 +528,7 @@ export function useListData() {
   }, [fetchAll])
 
   const handleLeave = useCallback(() => {
+    if (list) clearCacheForList(list.id)
     localStorage.removeItem('user_name')
     localStorage.removeItem('participant_id')
     setUserName(null)
