@@ -40,6 +40,9 @@ export function useListData() {
   // ── Fetch guard for realtime sync debounce ─────────────────────────
   const isFetchingRef = useRef(false)
 
+  // ── Race guard for atomic expense+splits fetch ─────────────────────
+  const fetchSeq = useRef(0)
+
   // ── Track previous shopping items for push notifications ───────────
   const prevShoppingItemsRef = useRef<ListItem[]>([])
 
@@ -166,6 +169,8 @@ export function useListData() {
   }, [])
 
   const fetchExpenses = useCallback(async (listId: string) => {
+    const mySeq = ++fetchSeq.current
+
     const { data, error: err } = await supabase
       .from('expenses')
       .select('*')
@@ -174,13 +179,42 @@ export function useListData() {
       .order('created_at', { ascending: false })
     if (err) {
       logError('fetchExpenses error:', err)
-      const cached = readCache<Expense[]>(listId, 'expenses')
-      if (cached) setExpenses(cached)
+      // Offline fallback: show cached data for both tables
+      if (mySeq === fetchSeq.current) {
+        const cachedExp = readCache<Expense[]>(listId, 'expenses')
+        if (cachedExp) setExpenses(cachedExp)
+        const cachedSplits = readCache<ExpenseSplit[]>(listId, 'expense_splits')
+        if (cachedSplits) setExpenseSplits(cachedSplits)
+      }
       return
     }
     const expData = (data || []) as Expense[]
-    writeCache(listId, 'expenses', expData)
-    setExpenses(expData)
+
+    // Fetch all splits for these expenses in the same async body
+    let splits: ExpenseSplit[] = []
+    if (expData.length > 0) {
+      const expenseIds = expData.map(e => e.id)
+      const { data: splitData, error: splitErr } = await supabase
+        .from('expense_splits')
+        .select('*')
+        .in('expense_id', expenseIds)
+      if (splitErr) {
+        logError('fetchExpenses splits error:', splitErr)
+        // Fall back to cached splits, but still apply fresh expenses
+        const cachedSplits = readCache<ExpenseSplit[]>(listId, 'expense_splits')
+        splits = cachedSplits ?? []
+      } else {
+        splits = (splitData || []) as ExpenseSplit[]
+      }
+    }
+
+    // Race guard: only apply if this is still the latest call
+    if (mySeq === fetchSeq.current) {
+      writeCache(listId, 'expenses', expData)
+      writeCache(listId, 'expense_splits', splits)
+      setExpenses(expData)
+      setExpenseSplits(splits)
+    }
   }, [])
 
   const fetchParticipants = useCallback(async (listId: string) => {
@@ -236,7 +270,7 @@ export function useListData() {
         fetchMealIdeas(list.id)
       } else if (table === 'notes') {
         fetchNotes(list.id)
-      } else if (table === 'expenses') {
+      } else if (table === 'expenses' || table === 'expense_splits') {
         fetchExpenses(list.id)
       } else if (table === 'participants') {
         fetchParticipants(list.id)
@@ -248,29 +282,6 @@ export function useListData() {
     listId: list?.id ?? null,
     onTableChange: handleRealtimeChange,
   })
-
-  // ── Fetch expense splits whenever expenses change ──────────────────
-  useEffect(() => {
-    if (expenses.length === 0) { setExpenseSplits([]); return }
-    const expenseIds = expenses.map(e => e.id)
-    supabase
-      .from('expense_splits')
-      .select('*')
-      .in('expense_id', expenseIds)
-      .then(({ data, error }) => {
-        if (error) {
-          logError('fetchSplits error:', error)
-          if (list) {
-            const cached = readCache<ExpenseSplit[]>(list.id, 'expense_splits')
-            if (cached) setExpenseSplits(cached)
-          }
-          return
-        }
-        const splits = (data || []) as ExpenseSplit[]
-        if (list) writeCache(list.id, 'expense_splits', splits)
-        setExpenseSplits(splits)
-      })
-  }, [expenses])
 
   // ── Auto-restore session ───────────────────────────────────────────
   useEffect(() => {

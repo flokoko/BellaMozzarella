@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { supabase, getJoinCode } from '../lib/supabase'
 
-type TableName = 'items' | 'categories' | 'meals' | 'meal_ideas' | 'notes' | 'expenses' | 'participants'
+type TableName = 'items' | 'categories' | 'meals' | 'meal_ideas' | 'notes' | 'expenses' | 'expense_splits' | 'participants'
 
 interface UseRealtimeSyncOptions {
   listId: string | null
@@ -24,7 +24,7 @@ export function useRealtimeSync({ listId, onTableChange }: UseRealtimeSyncOption
     if (!listId) return
 
     const joinCode = getJoinCode()
-    const tables: TableName[] = ['items', 'categories', 'meals', 'meal_ideas', 'notes', 'expenses', 'participants']
+    const tables: TableName[] = ['items', 'categories', 'meals', 'meal_ideas', 'notes', 'expenses', 'expense_splits', 'participants']
 
     const channel = supabase.channel(`list:${listId}`, {
       config: { headers: { 'x-join-code': joinCode } },
