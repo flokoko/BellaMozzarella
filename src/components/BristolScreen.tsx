@@ -49,13 +49,14 @@ const BRISTOL_VALUES = [1, 2, 3, 4, 5, 6, 7, 13]
 interface BristolScreenProps {
   listId: string
   userName: string
+  isAdmin: boolean
 }
 
 function todayStr(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
-export default function BristolScreen({ listId, userName }: BristolScreenProps) {
+export default function BristolScreen({ listId, userName, isAdmin }: BristolScreenProps) {
   const { toast, confirm } = useToast()
 
   const [entries, setEntries] = useState<BristolEntry[]>([])
@@ -409,6 +410,7 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
           <div className="bristol-history-list">
             {entries.map(e => {
               const isOwn = e.participant_name === userName
+              const canManage = isOwn || isAdmin
               const isEditing = editingEntryId === e.id
               return (
                 <div key={e.id} className={`bristol-history-row ${isOwn ? 'bristol-history-own' : ''}`}>
@@ -454,7 +456,7 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
                         {e.value}
                       </span>
                       <span className="bristol-history-adj">{BRISTOL_ADJECTIVES[e.value]}</span>
-                      {isOwn && (
+                      {canManage && (
                         <button
                           className="bristol-history-edit-trigger"
                           onClick={() => setEditingEntryId(e.id)}

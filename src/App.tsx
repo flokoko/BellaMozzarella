@@ -422,6 +422,7 @@ export default function App() {
             <BristolScreen
               listId={list.id}
               userName={userName}
+              isAdmin={isAdmin}
             />
           </Suspense>
         )}
