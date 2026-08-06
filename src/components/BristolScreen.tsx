@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { Pencil, Trash2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { logError } from '../lib/logger'
 import { useToast } from '../context/ToastContext'
@@ -444,7 +445,7 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
                         disabled={submitting}
                         aria-label="Eintrag löschen"
                       >
-                        🗑
+                        <Trash2 size={14} strokeWidth={2} />
                       </button>
                     </div>
                   ) : (
@@ -459,7 +460,7 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
                           onClick={() => setEditingEntryId(e.id)}
                           aria-label="Wert bearbeiten"
                         >
-                          ✏️
+                          <Pencil size={14} strokeWidth={2} />
                         </button>
                       )}
                     </>
