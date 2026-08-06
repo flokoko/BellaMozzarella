@@ -55,7 +55,7 @@ function todayStr(): string {
 }
 
 export default function BristolScreen({ listId, userName }: BristolScreenProps) {
-  const { toast } = useToast()
+  const { toast, confirm } = useToast()
 
   const [entries, setEntries] = useState<BristolEntry[]>([])
   const [loadingEntries, setLoadingEntries] = useState(true)
@@ -137,6 +137,21 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
     setEditingEntryId(null)
     fetchEntries()
   }, [toast, fetchEntries])
+
+  const handleDeleteEntry = useCallback((entryId: string, entry: BristolEntry) => {
+    const datum = new Date(entry.entry_date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
+    confirm(`"${entry.participant_name}" vom ${datum} wirklich löschen?`, async () => {
+      const { error } = await supabase.from('bristol_entries').delete().eq('id', entryId)
+      if (error) {
+        toast(`Fehler: ${error.message}`, 'error')
+        return
+      }
+      toast('Eintrag gelöscht!', 'success')
+      navigator.vibrate?.(10)
+      setEditingEntryId(null)
+      fetchEntries()
+    })
+  }, [confirm, toast, fetchEntries])
 
   const mySelectedEntry = useMemo(
     () => entries.find(e => e.participant_name === userName && e.entry_date === selectedDate),
@@ -422,6 +437,14 @@ export default function BristolScreen({ listId, userName }: BristolScreenProps) 
                         disabled={submitting}
                       >
                         ✕
+                      </button>
+                      <button
+                        className="bristol-history-delete-btn"
+                        onClick={() => handleDeleteEntry(e.id, e)}
+                        disabled={submitting}
+                        aria-label="Eintrag löschen"
+                      >
+                        🗑
                       </button>
                     </div>
                   ) : (

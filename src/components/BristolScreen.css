@@ -612,6 +612,34 @@
   cursor: not-allowed;
 }
 
+.bristol-history-delete-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+  background: var(--card-bg-solid);
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.35s;
+  padding: 0;
+  margin-left: 0.15rem;
+}
+
+.bristol-history-delete-btn:hover {
+  border-color: var(--danger, #cc0000);
+  color: var(--danger, #cc0000);
+  background: rgba(204, 0, 0, 0.08);
+}
+
+.bristol-history-delete-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* ── Bristol toggle in settings ── */
 .bristol-toggle-group {
   display: flex;
