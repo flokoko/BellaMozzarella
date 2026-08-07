@@ -444,6 +444,7 @@
 
 .bristol-history-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.6rem;
@@ -520,18 +521,13 @@
 
 .bristol-history-edit-picker {
   display: flex;
-  gap: 0.2rem;
+  flex-wrap: wrap;
+  gap: 0.3rem;
   align-items: center;
-  flex: 1;
-  justify-content: flex-end;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+  flex: 1 1 100%;
+  justify-content: flex-start;
   padding: 0.15rem 0;
-}
-
-.bristol-history-edit-picker::-webkit-scrollbar {
-  display: none;
+  margin-top: 0.15rem;
 }
 
 .bristol-history-edit-btn {
