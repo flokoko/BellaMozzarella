@@ -3,6 +3,7 @@ import { ShoppingCart, Backpack, Pizza, Wallet, Smartphone, StickyNote, Trash2, 
 import type { QuickNote, TabView } from '../types'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../context/ToastContext'
+import { useOfflineQueue } from '../hooks/useOfflineQueue'
 import { useDragReorder } from '../hooks/useDragReorder'
 import { SkeletonCard, SkeletonNote } from './Skeleton'
 import WeatherWidget from './WeatherWidget'
@@ -90,6 +91,7 @@ export default function DashboardScreen({
   bristolEnabled,
 }: DashboardScreenProps) {
   const { toast, confirm } = useToast()
+  const { isOnline, enqueue } = useOfflineQueue()
   const [showForm, setShowForm] = useState(false)
   const [formTitle, setFormTitle] = useState('')
   const [formContent, setFormContent] = useState('')
@@ -122,15 +124,28 @@ export default function DashboardScreen({
   const handleSave = async () => {
     const content = formContent.trim()
     if (!content) return
-    const { error } = await supabase.from('notes').insert({
-      list_id: listId,
-      title: formTitle.trim() || null,
-      content,
-      created_by: userName,
-    })
-    if (error) {
-      toast(`Fehler beim Speichern: ${error.message}`, 'error')
-      return
+    if (isOnline) {
+      const { error } = await supabase.from('notes').insert({
+        list_id: listId,
+        title: formTitle.trim() || null,
+        content,
+        created_by: userName,
+      })
+      if (error) {
+        toast(`Fehler beim Speichern: ${error.message}`, 'error')
+        return
+      }
+    } else {
+      enqueue({
+        type: 'insert',
+        table: 'notes',
+        payload: {
+          list_id: listId,
+          title: formTitle.trim() || null,
+          content,
+          created_by: userName,
+        },
+      })
     }
     setFormTitle('')
     setFormContent('')
@@ -140,10 +155,20 @@ export default function DashboardScreen({
 
   const handleDelete = (note: QuickNote) => {
     confirm('Dieses Element wirklich löschen?', async () => {
-      const { error } = await supabase.from('notes').delete().eq('id', note.id)
-      if (error) {
-        toast(`Fehler beim Löschen: ${error.message}`, 'error')
-        return
+      if (isOnline) {
+        const { error } = await supabase.from('notes').delete().eq('id', note.id)
+        if (error) {
+          toast(`Fehler beim Löschen: ${error.message}`, 'error')
+          return
+        }
+      } else {
+        enqueue({
+          type: 'delete',
+          table: 'notes',
+          payload: {},
+          filterColumn: 'id',
+          filterValue: note.id,
+        })
       }
       navigator.vibrate?.(15)
       onNotesChange()
@@ -165,16 +190,29 @@ export default function DashboardScreen({
   const handleUpdate = async (note: QuickNote) => {
     const content = editContent.trim()
     if (!content) return
-    const { error } = await supabase
-      .from('notes')
-      .update({
-        title: editTitle.trim() || null,
-        content,
+    if (isOnline) {
+      const { error } = await supabase
+        .from('notes')
+        .update({
+          title: editTitle.trim() || null,
+          content,
+        })
+        .eq('id', note.id)
+      if (error) {
+        toast(`Fehler beim Speichern: ${error.message}`, 'error')
+        return
+      }
+    } else {
+      enqueue({
+        type: 'update',
+        table: 'notes',
+        payload: {
+          title: editTitle.trim() || null,
+          content,
+        },
+        filterColumn: 'id',
+        filterValue: note.id,
       })
-      .eq('id', note.id)
-    if (error) {
-      toast(`Fehler beim Speichern: ${error.message}`, 'error')
-      return
     }
     cancelEdit()
     onNotesChange()

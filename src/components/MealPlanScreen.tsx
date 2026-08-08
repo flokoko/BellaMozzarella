@@ -3,6 +3,7 @@ import { Coffee, Sandwich, UtensilsCrossed, Calendar, Pizza, X, Check, Pencil, T
 import type { Meal, MealIdea, DayOfWeek, MealType } from '../types'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../context/ToastContext'
+import { useOfflineQueue } from '../hooks/useOfflineQueue'
 import './MealPlanScreen.css'
 
 interface MealPlanScreenProps {
@@ -45,6 +46,7 @@ export default function MealPlanScreen({
   onIdeasChange,
 }: MealPlanScreenProps) {
   const { toast, confirm } = useToast()
+  const { isOnline, enqueue } = useOfflineQueue()
   const [section, setSection] = useState<'week' | 'ideas'>('week')
   const [editingCell, setEditingCell] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
@@ -99,26 +101,51 @@ export default function MealPlanScreen({
     const n = editName.trim()
     if (!n) return
     if (editingMealId) {
-      const { error } = await supabase
-        .from('meals')
-        .update({ name: n, note: editNote.trim() || null })
-        .eq('id', editingMealId)
-      if (error) {
-        toast(`Fehler beim Speichern: ${error.message}`, 'error')
-        return
+      if (isOnline) {
+        const { error } = await supabase
+          .from('meals')
+          .update({ name: n, note: editNote.trim() || null })
+          .eq('id', editingMealId)
+        if (error) {
+          toast(`Fehler beim Speichern: ${error.message}`, 'error')
+          return
+        }
+      } else {
+        enqueue({
+          type: 'update',
+          table: 'meals',
+          payload: { name: n, note: editNote.trim() || null },
+          filterColumn: 'id',
+          filterValue: editingMealId,
+        })
       }
     } else {
-      const { error } = await supabase.from('meals').insert({
-        list_id: listId,
-        day,
-        meal_type: type,
-        name: n,
-        note: editNote.trim() || null,
-        created_by: userName,
-      })
-      if (error) {
-        toast(`Fehler beim Speichern: ${error.message}`, 'error')
-        return
+      if (isOnline) {
+        const { error } = await supabase.from('meals').insert({
+          list_id: listId,
+          day,
+          meal_type: type,
+          name: n,
+          note: editNote.trim() || null,
+          created_by: userName,
+        })
+        if (error) {
+          toast(`Fehler beim Speichern: ${error.message}`, 'error')
+          return
+        }
+      } else {
+        enqueue({
+          type: 'insert',
+          table: 'meals',
+          payload: {
+            list_id: listId,
+            day,
+            meal_type: type,
+            name: n,
+            note: editNote.trim() || null,
+            created_by: userName,
+          },
+        })
       }
     }
     navigator.vibrate?.(10)
@@ -128,10 +155,20 @@ export default function MealPlanScreen({
 
   const deleteMeal = (meal: Meal) => {
     confirm('Dieses Element wirklich löschen?', async () => {
-      const { error } = await supabase.from('meals').delete().eq('id', meal.id)
-      if (error) {
-        toast(`Fehler beim Löschen: ${error.message}`, 'error')
-        return
+      if (isOnline) {
+        const { error } = await supabase.from('meals').delete().eq('id', meal.id)
+        if (error) {
+          toast(`Fehler beim Löschen: ${error.message}`, 'error')
+          return
+        }
+      } else {
+        enqueue({
+          type: 'delete',
+          table: 'meals',
+          payload: {},
+          filterColumn: 'id',
+          filterValue: meal.id,
+        })
       }
       navigator.vibrate?.(10)
       onMealsChange()
@@ -141,15 +178,28 @@ export default function MealPlanScreen({
   const addIdea = async () => {
     const n = newIdeaName.trim()
     if (!n) return
-    const { error } = await supabase.from('meal_ideas').insert({
-      list_id: listId,
-      name: n,
-      tags: newIdeaTags.trim() || null,
-      created_by: userName,
-    })
-    if (error) {
-      toast(`Fehler beim Speichern: ${error.message}`, 'error')
-      return
+    if (isOnline) {
+      const { error } = await supabase.from('meal_ideas').insert({
+        list_id: listId,
+        name: n,
+        tags: newIdeaTags.trim() || null,
+        created_by: userName,
+      })
+      if (error) {
+        toast(`Fehler beim Speichern: ${error.message}`, 'error')
+        return
+      }
+    } else {
+      enqueue({
+        type: 'insert',
+        table: 'meal_ideas',
+        payload: {
+          list_id: listId,
+          name: n,
+          tags: newIdeaTags.trim() || null,
+          created_by: userName,
+        },
+      })
     }
     setNewIdeaName('')
     setNewIdeaTags('')
@@ -159,10 +209,20 @@ export default function MealPlanScreen({
 
   const deleteIdea = (idea: MealIdea) => {
     confirm('Dieses Element wirklich löschen?', async () => {
-      const { error } = await supabase.from('meal_ideas').delete().eq('id', idea.id)
-      if (error) {
-        toast(`Fehler beim Löschen: ${error.message}`, 'error')
-        return
+      if (isOnline) {
+        const { error } = await supabase.from('meal_ideas').delete().eq('id', idea.id)
+        if (error) {
+          toast(`Fehler beim Löschen: ${error.message}`, 'error')
+          return
+        }
+      } else {
+        enqueue({
+          type: 'delete',
+          table: 'meal_ideas',
+          payload: {},
+          filterColumn: 'id',
+          filterValue: idea.id,
+        })
       }
       navigator.vibrate?.(10)
       onIdeasChange()
@@ -172,17 +232,32 @@ export default function MealPlanScreen({
   const planIdea = async (idea: MealIdea) => {
     const existing = getMeal(planDay, planMealType)
     const doInsert = async () => {
-      const { error } = await supabase.from('meals').insert({
-        list_id: listId,
-        day: planDay,
-        meal_type: planMealType,
-        name: idea.name,
-        note: idea.tags ?? null,
-        created_by: userName,
-      })
-      if (error) {
-        toast(`Fehler beim Eintragen: ${error.message}`, 'error')
-        return
+      if (isOnline) {
+        const { error } = await supabase.from('meals').insert({
+          list_id: listId,
+          day: planDay,
+          meal_type: planMealType,
+          name: idea.name,
+          note: idea.tags ?? null,
+          created_by: userName,
+        })
+        if (error) {
+          toast(`Fehler beim Eintragen: ${error.message}`, 'error')
+          return
+        }
+      } else {
+        enqueue({
+          type: 'insert',
+          table: 'meals',
+          payload: {
+            list_id: listId,
+            day: planDay,
+            meal_type: planMealType,
+            name: idea.name,
+            note: idea.tags ?? null,
+            created_by: userName,
+          },
+        })
       }
       setPlanPickerFor(null)
       navigator.vibrate?.(10)
@@ -191,10 +266,20 @@ export default function MealPlanScreen({
 
     if (existing) {
       confirm(`Für ${planDay} ${planMealType} gibt es schon "${existing.name}". Ersetzen?`, async () => {
-        const { error: delErr } = await supabase.from('meals').delete().eq('id', existing.id)
-        if (delErr) {
-          toast(`Fehler: ${delErr.message}`, 'error')
-          return
+        if (isOnline) {
+          const { error: delErr } = await supabase.from('meals').delete().eq('id', existing.id)
+          if (delErr) {
+            toast(`Fehler: ${delErr.message}`, 'error')
+            return
+          }
+        } else {
+          enqueue({
+            type: 'delete',
+            table: 'meals',
+            payload: {},
+            filterColumn: 'id',
+            filterValue: existing.id,
+          })
         }
         await doInsert()
       })

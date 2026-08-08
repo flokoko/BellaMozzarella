@@ -114,14 +114,11 @@ export default function App() {
     }
   }, [undoState, undoDelete, toast])
 
-  // ── Bristol Modus (per-user via localStorage) ──────────────────────
+  // ── Bristol Modus (read-only via Event-Listener; SettingsScreen is the
+  //    single writer for 'bristol_modus_enabled') ──────────────────────
   const [bristolEnabled, setBristolEnabled] = useState(
     () => localStorage.getItem('bristol_modus_enabled') === 'true'
   )
-
-  useEffect(() => {
-    localStorage.setItem('bristol_modus_enabled', bristolEnabled ? 'true' : 'false')
-  }, [bristolEnabled])
 
   // Listen for bristol modus changes from SettingsScreen
   useEffect(() => {

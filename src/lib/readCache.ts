@@ -43,16 +43,26 @@ export function writeCache<T>(listId: string, table: string, data: T): void {
 }
 
 /** Remove ALL cached entries for a given list (`bm_cache_{listId}_*`).
- *  Call this on join/leave so a new list never shows the previous list's data. */
+ *  Call this on join/leave so a new list never shows the previous list's data.
+ *  Uses a known-tables list instead of iterating all localStorage keys. */
+const KNOWN_CACHE_TABLES = [
+  'shopping_items',
+  'bring_items',
+  'categories',
+  'meals',
+  'meal_ideas',
+  'notes',
+  'expenses',
+  'expense_splits',
+  'participants',
+  'bristol_entries',
+]
+
 export function clearCacheForList(listId: string): void {
   try {
-    const prefix = `bm_cache_${listId}_`
-    const keysToRemove: string[] = []
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i)
-      if (key && key.startsWith(prefix)) keysToRemove.push(key)
+    for (const table of KNOWN_CACHE_TABLES) {
+      localStorage.removeItem(cacheKey(listId, table))
     }
-    for (const key of keysToRemove) localStorage.removeItem(key)
   } catch {
     // localStorage unavailable — nothing to clear
   }

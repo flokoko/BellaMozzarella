@@ -107,6 +107,18 @@
   color: var(--danger);
 }
 
+.bristol-widget-retry-btn {
+  display: block;
+  margin: 0.25rem auto 0;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--card-bg-solid, transparent);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
 /* ── Sections ── */
 .bristol-widget-section {
   margin-bottom: 0.5rem;

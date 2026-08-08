@@ -3,6 +3,7 @@ import { Trash2, Plus } from 'lucide-react'
 import type { ExpenseSplit, ItemCategory } from '../types'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../context/ToastContext'
+import { useCategories } from '../hooks/useCategories'
 import { calculateShareAmounts, fmtEUR } from '../lib/settlement'
 
 interface ExpenseFormProps {
@@ -70,6 +71,7 @@ export default function ExpenseForm({
   resetForm,
 }: ExpenseFormProps) {
   const { toast, confirm } = useToast()
+  const { updateCategory, deleteCategory, addCategory } = useCategories(onCategoriesChange)
   const [catEditorOpen, setCatEditorOpen] = useState(false)
   const [catLocalNames, setCatLocalNames] = useState<Record<string, string>>({})
   const [newCatName, setNewCatName] = useState('')
@@ -295,22 +297,20 @@ export default function ExpenseForm({
                   onChange={(e) => {
                     setCatLocalNames(prev => ({ ...prev, [cat.id]: e.target.value }))
                   }}
-                  onBlur={async () => {
+                  onBlur={() => {
                     const newName = catLocalNames[cat.id]?.trim()
                     if (newName && newName !== cat.name) {
-                      await supabase.from('categories').update({ name: newName }).eq('id', cat.id)
-                      onCategoriesChange()
+                      updateCategory(cat.id, { name: newName })
                     }
                     setCatLocalNames(prev => { const n = { ...prev }; delete n[cat.id]; return n })
                   }}
                 />
                 <button
                   className="expense-cat-editor-del"
-                  onClick={async () => {
+                  onClick={() => {
                     confirm(`Kategorie "${cat.name}" wirklich löschen?`, async () => {
-                      await supabase.from('categories').delete().eq('id', cat.id)
+                      await deleteCategory(cat.id)
                       await supabase.from('expenses').update({ category: null }).eq('list_id', listId).eq('category', cat.name)
-                      onCategoriesChange()
                       onExpensesChange()
                     })
                   }}
@@ -330,21 +330,17 @@ export default function ExpenseForm({
             />
             <button
               className="expense-cat-editor-add-btn"
-              onClick={async () => {
+              onClick={() => {
                 const name = newCatName.trim()
                 if (!name) return
                 const maxOrder = expenseCategories.reduce((m, c) => Math.max(m, c.sort_order), 0)
-                await supabase.from('categories').insert({
-                  list_id: listId,
-                  list_type: 'expense',
+                addCategory(listId, 'expense', maxOrder + 1, {
                   name,
                   icon: '📦',
                   color: '#9b6dd9',
                   bg: '#e8dcf7',
-                  sort_order: maxOrder + 1,
                 })
                 setNewCatName('')
-                onCategoriesChange()
               }}
             >
               <Plus size={16} strokeWidth={2} />

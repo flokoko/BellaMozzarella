@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
+import { useOfflineQueue } from '../hooks/useOfflineQueue'
+import { BRISTOL_COLORS, BRISTOL_EMOJIS } from '../lib/bristolConstants'
 import './BristolWidget.css'
 
 interface BristolStats {
@@ -18,10 +20,50 @@ interface BristolWidgetProps {
   onNavigate: () => void
 }
 
+/** Compute BristolStats from a raw entries array. Pure helper. */
+function computeStats(
+  entries: { value: number; participant_name: string; entry_date: string }[],
+  today: string,
+  userName: string,
+): BristolStats {
+  const totalEntries = entries.length
+  const todayEntries = entries.filter(e => e.entry_date === today).length
+
+  const avgValue = totalEntries > 0
+    ? entries.reduce((s, e) => s + e.value, 0) / totalEntries
+    : null
+
+  const valueCounts: Record<number, number> = {}
+  entries.forEach(e => { valueCounts[e.value] = (valueCounts[e.value] ?? 0) + 1 })
+  const mostCommonValue = Object.keys(valueCounts).length > 0
+    ? Number(Object.entries(valueCounts).sort((a, b) => b[1] - a[1])[0][0])
+    : null
+
+  const userEntries = entries.filter(e => e.participant_name === userName)
+  const userTotal = userEntries.length
+  const userAvgValue = userTotal > 0
+    ? userEntries.reduce((s, e) => s + e.value, 0) / userTotal
+    : null
+  const userLatestValue = userTotal > 0
+    ? userEntries.sort((a, b) => b.entry_date.localeCompare(a.entry_date))[0].value
+    : null
+
+  return {
+    totalEntries,
+    todayEntries,
+    avgValue: avgValue !== null ? Number(avgValue.toFixed(1)) : null,
+    mostCommonValue,
+    userEntries: userTotal,
+    userAvgValue: userAvgValue !== null ? Number(userAvgValue.toFixed(1)) : null,
+    userLatestValue,
+  }
+}
+
 export default function BristolWidget({ listId, userName, onNavigate }: BristolWidgetProps) {
   const [stats, setStats] = useState<BristolStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const { isOnline, enqueue } = useOfflineQueue()
 
   // ── Collapsible state from localStorage ──
   const [expanded, setExpanded] = useState(() => {
@@ -42,65 +84,34 @@ export default function BristolWidget({ listId, userName, onNavigate }: BristolW
     setLoading(true)
     setError('')
     try {
-      const { data: allEntries, error: err1 } = await supabase
-        .from('bristol_entries')
-        .select('value, participant_name, entry_date')
-        .eq('list_id', listId)
+      if (isOnline) {
+        const { data: allEntries, error: err1 } = await supabase
+          .from('bristol_entries')
+          .select('value, participant_name, entry_date')
+          .eq('list_id', listId)
 
-      if (err1) throw err1
+        if (err1) throw err1
 
-      const entries = allEntries as { value: number; participant_name: string; entry_date: string }[]
-      const totalEntries = entries.length
-      const todayEntries = entries.filter(e => e.entry_date === today).length
-
-      const avgValue = totalEntries > 0
-        ? entries.reduce((s, e) => s + e.value, 0) / totalEntries
-        : null
-
-      const valueCounts: Record<number, number> = {}
-      entries.forEach(e => { valueCounts[e.value] = (valueCounts[e.value] ?? 0) + 1 })
-      const mostCommonValue = Object.keys(valueCounts).length > 0
-        ? Number(Object.entries(valueCounts).sort((a, b) => b[1] - a[1])[0][0])
-        : null
-
-      const userEntries = entries.filter(e => e.participant_name === userName)
-      const userTotal = userEntries.length
-      const userAvgValue = userTotal > 0
-        ? userEntries.reduce((s, e) => s + e.value, 0) / userTotal
-        : null
-      const userLatestValue = userTotal > 0
-        ? userEntries.sort((a, b) => b.entry_date.localeCompare(a.entry_date))[0].value
-        : null
-
-      setStats({
-        totalEntries,
-        todayEntries,
-        avgValue: avgValue !== null ? Number(avgValue.toFixed(1)) : null,
-        mostCommonValue,
-        userEntries: userTotal,
-        userAvgValue: userAvgValue !== null ? Number(userAvgValue.toFixed(1)) : null,
-        userLatestValue,
-      })
+        const entries = allEntries as { value: number; participant_name: string; entry_date: string }[]
+        setStats(computeStats(entries, today, userName))
+      } else {
+        // Offline: no fetch — keep last stats or show empty
+        setStats(prev => prev ?? computeStats([], today, userName))
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Fehler beim Laden')
     } finally {
       setLoading(false)
     }
-  }, [listId, userName, today])
+  }, [listId, userName, today, isOnline])
+
+  // ── Offline: enqueue a read-reload trigger; the actual writes go through
+  //    BristolScreen which also uses the queue. Here we just suppress fetch. ──
+  void enqueue // enqueue available for future write operations from widget
 
   useEffect(() => {
     fetchStats()
   }, [fetchStats])
-
-  const BRISTOL_COLORS: Record<number, string> = {
-    1: '#8B4513', 2: '#A0522D', 3: '#D2691E', 4: '#009246',
-    5: '#9ACD32', 6: '#FFD700', 7: '#FF6347', 13: '#8B4513',
-  }
-
-  const BRISTOL_EMOJIS: Record<number, string> = {
-    1: '🪨', 2: '🌭', 3: '🥨', 4: '🍌',
-    5: '🍦', 6: '🥣', 7: '💧', 13: '💩',
-  }
 
   return (
     <div className="bristol-widget" onClick={toggleExpanded}>
@@ -129,7 +140,17 @@ export default function BristolWidget({ listId, userName, onNavigate }: BristolW
       {expanded && (
         <div className="bristol-widget-expanded">
           {loading && <p className="bristol-widget-loading-text">Lädt Bristol-Daten…</p>}
-          {error && <p className="bristol-widget-error-text">{error}</p>}
+          {error && (
+            <>
+              <p className="bristol-widget-error-text">{error}</p>
+              <button
+                className="bristol-widget-retry-btn"
+                onClick={(e) => { e.stopPropagation(); fetchStats() }}
+              >
+                ↻ Erneut versuchen
+              </button>
+            </>
+          )}
 
           {stats && !loading && (
             <>

@@ -1,4 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
+import { getWeatherInfo, fmtDay } from '../lib/weatherCodes'
+import { getStoredLocation, setStoredLocation, geocodeCity, formatLocationName } from '../lib/weather'
 import './WeatherWidget.css'
 
 interface WeatherData {
@@ -13,53 +15,6 @@ interface WeatherData {
     tempMin: number
   }[]
   locationName: string
-}
-
-interface GeoResult {
-  lat: number
-  lon: number
-  name: string
-  country?: string
-}
-
-const WEATHER_CODE_MAP: Record<number, { emoji: string; desc: string }> = {
-  0: { emoji: '☀️', desc: 'Sonnig' },
-  1: { emoji: '🌤️', desc: 'Heiter' },
-  2: { emoji: '⛅', desc: 'Bewölkt' },
-  3: { emoji: '☁️', desc: 'Bedeckt' },
-  45: { emoji: '🌫️', desc: 'Nebel' },
-  48: { emoji: '🌫️', desc: 'Reifnebel' },
-  51: { emoji: '🌧️', desc: 'Nieselregen' },
-  53: { emoji: '🌧️', desc: 'Nieselregen' },
-  55: { emoji: '🌧️', desc: 'Nieselregen' },
-  56: { emoji: '🌧️', desc: 'Gefrierender Niesel' },
-  57: { emoji: '🌧️', desc: 'Gefrierender Niesel' },
-  61: { emoji: '🌧️', desc: 'Regen' },
-  63: { emoji: '🌧️', desc: 'Regen' },
-  65: { emoji: '🌧️', desc: 'Starker Regen' },
-  66: { emoji: '🌧️', desc: 'Gefrierender Regen' },
-  67: { emoji: '🌧️', desc: 'Gefrierender Regen' },
-  71: { emoji: '❄️', desc: 'Schnee' },
-  73: { emoji: '❄️', desc: 'Schnee' },
-  75: { emoji: '❄️', desc: 'Starker Schneefall' },
-  77: { emoji: '❄️', desc: 'Schneegriesel' },
-  80: { emoji: '🌧️', desc: 'Regenschauer' },
-  81: { emoji: '🌧️', desc: 'Regenschauer' },
-  82: { emoji: '🌧️', desc: 'Heftige Schauer' },
-  85: { emoji: '❄️', desc: 'Schneeschauer' },
-  86: { emoji: '❄️', desc: 'Schneeschauer' },
-  95: { emoji: '⛈️', desc: 'Gewitter' },
-  96: { emoji: '⛈️', desc: 'Gewitter mit Hagel' },
-  99: { emoji: '⛈️', desc: 'Schweres Gewitter' },
-}
-
-function getWeatherInfo(code: number) {
-  return WEATHER_CODE_MAP[code] ?? { emoji: '🌡️', desc: 'Unbekannt' }
-}
-
-function fmtDay(dateStr: string) {
-  const d = new Date(dateStr)
-  return d.toLocaleDateString('de-DE', { weekday: 'short' })
 }
 
 interface WeatherWidgetProps {
@@ -89,13 +44,7 @@ export default function WeatherWidget({ onNavigate }: WeatherWidgetProps = {}) {
   }
 
   // ── Read stored location from localStorage ──
-  const storedLocation = useMemo(() => {
-    const lat = localStorage.getItem('weather_lat')
-    const lon = localStorage.getItem('weather_lon')
-    const name = localStorage.getItem('weather_name')
-    if (lat && lon && name) return { lat: parseFloat(lat), lon: parseFloat(lon), name }
-    return null
-  }, [])
+  const storedLocation = useMemo(() => getStoredLocation(), [])
 
   // ── Fetch weather data ──
   const fetchWeather = useCallback(async (lat: number, lon: number, name: string) => {
@@ -150,27 +99,9 @@ export default function WeatherWidget({ onNavigate }: WeatherWidgetProps = {}) {
     setGeoLoading(true)
     setError('')
     try {
-      const res = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1`,
-      )
-      if (!res.ok) throw new Error('Ort nicht gefunden')
-      const data = await res.json()
-      if (!data.results || data.results.length === 0) {
-        setError(`"${query}" nicht gefunden`)
-        return
-      }
-      const result: GeoResult = {
-        lat: data.results[0].latitude,
-        lon: data.results[0].longitude,
-        name: data.results[0].name,
-        country: data.results[0].country,
-      }
-      const displayName = result.country
-        ? `${result.name}, ${result.country}`
-        : result.name
-      localStorage.setItem('weather_lat', String(result.lat))
-      localStorage.setItem('weather_lon', String(result.lon))
-      localStorage.setItem('weather_name', displayName)
+      const result = await geocodeCity(query)
+      const displayName = formatLocationName(result)
+      setStoredLocation(result.lat, result.lon, displayName)
       cacheRef.current = null // force refetch
       setShowLocationInput(false)
       setLocationQuery('')

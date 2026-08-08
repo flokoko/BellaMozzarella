@@ -3,48 +3,20 @@ import { Pencil, Trash2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { logError } from '../lib/logger'
 import { useToast } from '../context/ToastContext'
+import { useOfflineQueue } from '../hooks/useOfflineQueue'
 import type { BristolEntry } from '../types'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   LineChart, Line, CartesianGrid, Legend,
 } from 'recharts'
 import confetti from 'canvas-confetti'
+import {
+  BRISTOL_ADJECTIVES,
+  BRISTOL_COLORS,
+  BRISTOL_EMOJIS,
+  BRISTOL_VALUES,
+} from '../lib/bristolConstants'
 import './BristolScreen.css'
-
-const BRISTOL_ADJECTIVES: Record<number, string> = {
-  1: 'klumpig',
-  2: 'wurstartig',
-  3: 'rissig',
-  4: 'glatt',
-  5: 'weich',
-  6: 'breiig',
-  7: 'flüssig',
-  13: 'Plasma',
-}
-
-const BRISTOL_COLORS: Record<number, string> = {
-  1: '#8B4513',
-  2: '#A0522D',
-  3: '#D2691E',
-  4: '#009246',
-  5: '#9ACD32',
-  6: '#FFD700',
-  7: '#FF6347',
-  13: '#8B4513',
-}
-
-const BRISTOL_EMOJIS: Record<number, string> = {
-  1: '🪨',
-  2: '🌭',
-  3: '🥨',
-  4: '🍌',
-  5: '🍦',
-  6: '🥣',
-  7: '💧',
-  13: '💩',
-}
-
-const BRISTOL_VALUES = [1, 2, 3, 4, 5, 6, 7, 13]
 
 interface BristolScreenProps {
   listId: string
@@ -58,6 +30,7 @@ function todayStr(): string {
 
 export default function BristolScreen({ listId, userName, isAdmin }: BristolScreenProps) {
   const { toast, confirm } = useToast()
+  const { isOnline, enqueue } = useOfflineQueue()
 
   const [entries, setEntries] = useState<BristolEntry[]>([])
   const [loadingEntries, setLoadingEntries] = useState(true)
@@ -88,21 +61,35 @@ export default function BristolScreen({ listId, userName, isAdmin }: BristolScre
 
   const handleSubmitEntry = useCallback(async (value: number) => {
     setSubmitting(true)
-    const { error } = await supabase
-      .from('bristol_entries')
-      .upsert(
-        {
+    if (isOnline) {
+      const { error } = await supabase
+        .from('bristol_entries')
+        .upsert(
+          {
+            list_id: listId,
+            participant_name: userName,
+            value,
+            entry_date: selectedDate,
+          },
+          { onConflict: 'list_id,participant_name,entry_date' }
+        )
+      setSubmitting(false)
+      if (error) {
+        toast(`Fehler: ${error.message}`, 'error')
+        return
+      }
+    } else {
+      enqueue({
+        type: 'insert',
+        table: 'bristol_entries',
+        payload: {
           list_id: listId,
           participant_name: userName,
           value,
           entry_date: selectedDate,
         },
-        { onConflict: 'list_id,participant_name,entry_date' }
-      )
-    setSubmitting(false)
-    if (error) {
-      toast(`Fehler: ${error.message}`, 'error')
-      return
+      })
+      setSubmitting(false)
     }
     const isToday = selectedDate === today
     const dateLabel = isToday ? '' : ` (${new Date(selectedDate).toLocaleDateString('de-DE')})`
@@ -121,39 +108,60 @@ export default function BristolScreen({ listId, userName, isAdmin }: BristolScre
       })
     }
     fetchEntries()
-  }, [listId, userName, selectedDate, today, toast, fetchEntries])
+  }, [listId, userName, selectedDate, today, toast, fetchEntries, isOnline, enqueue])
 
   const handleUpdateEntry = useCallback(async (entryId: string, value: number) => {
     setSubmitting(true)
-    const { error } = await supabase
-      .from('bristol_entries')
-      .update({ value })
-      .eq('id', entryId)
-    setSubmitting(false)
-    if (error) {
-      toast(`Fehler: ${error.message}`, 'error')
-      return
+    if (isOnline) {
+      const { error } = await supabase
+        .from('bristol_entries')
+        .update({ value })
+        .eq('id', entryId)
+      setSubmitting(false)
+      if (error) {
+        toast(`Fehler: ${error.message}`, 'error')
+        return
+      }
+    } else {
+      enqueue({
+        type: 'update',
+        table: 'bristol_entries',
+        payload: { value },
+        filterColumn: 'id',
+        filterValue: entryId,
+      })
+      setSubmitting(false)
     }
     toast(`Bristol-Wert auf ${value} (${BRISTOL_ADJECTIVES[value]}) geändert!`, 'success')
     navigator.vibrate?.(20)
     setEditingEntryId(null)
     fetchEntries()
-  }, [toast, fetchEntries])
+  }, [toast, fetchEntries, isOnline, enqueue])
 
   const handleDeleteEntry = useCallback((entryId: string, entry: BristolEntry) => {
     const datum = new Date(entry.entry_date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
     confirm(`"${entry.participant_name}" vom ${datum} wirklich löschen?`, async () => {
-      const { error } = await supabase.from('bristol_entries').delete().eq('id', entryId)
-      if (error) {
-        toast(`Fehler: ${error.message}`, 'error')
-        return
+      if (isOnline) {
+        const { error } = await supabase.from('bristol_entries').delete().eq('id', entryId)
+        if (error) {
+          toast(`Fehler: ${error.message}`, 'error')
+          return
+        }
+      } else {
+        enqueue({
+          type: 'delete',
+          table: 'bristol_entries',
+          payload: {},
+          filterColumn: 'id',
+          filterValue: entryId,
+        })
       }
       toast('Eintrag gelöscht!', 'success')
       navigator.vibrate?.(10)
       setEditingEntryId(null)
       fetchEntries()
     })
-  }, [confirm, toast, fetchEntries])
+  }, [confirm, toast, fetchEntries, isOnline, enqueue])
 
   const mySelectedEntry = useMemo(
     () => entries.find(e => e.participant_name === userName && e.entry_date === selectedDate),

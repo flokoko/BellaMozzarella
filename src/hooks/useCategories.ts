@@ -29,13 +29,19 @@ export function useCategories(onChange: () => void) {
     onChange()
   }, [onChange, toast])
 
-  const addCategory = useCallback(async (listId: string, listType: ListType, sortOrder: number) => {
+  const addCategory = useCallback(async (
+    listId: string,
+    listType: ListType,
+    sortOrder: number,
+    overrides?: { name?: string; icon?: string; color?: string; bg?: string },
+  ) => {
     const { error } = await supabase.from('categories').insert({
       list_id: listId,
       list_type: listType,
-      name: 'Neue Kategorie',
-      color: '#ffffff',
-      bg: '#009246',
+      name: overrides?.name ?? 'Neue Kategorie',
+      icon: overrides?.icon ?? '🏷️',
+      color: overrides?.color ?? '#ffffff',
+      bg: overrides?.bg ?? '#009246',
       sort_order: sortOrder,
     })
     if (error) {
