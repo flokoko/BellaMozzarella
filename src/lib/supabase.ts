@@ -9,14 +9,12 @@ if (!supabaseUrl || !supabaseAnonKey) {
   )
 }
 
-// Fester Join-Code für die Liste (wird für RLS benötigt, für Benutzer unsichtbar)
-const LIST_JOIN_CODE = import.meta.env.VITE_JOIN_CODE
-if (!LIST_JOIN_CODE) {
-  console.warn(
-    'Missing VITE_JOIN_CODE. Copy .env.example to .env and fill in your values. ' +
-    'Using empty string as fallback — login may fail.'
-  )
-}
+// Fester Join-Code für die Liste (wird für RLS und login_participant benötigt).
+// 'BELLA26' ist der öffentliche Join-Code (steht im Login-Formular) und hartcodiert
+// in der DB (lists.join_code). Der Fallback ist KEIN Sicherheitsrisiko — ohne ihn
+// wäre LIST_JOIN_CODE undefined → login_participant erhält nur p_name/p_password
+// → PGRST202 "Could not find the function login_participant(p_name, p_password)".
+const LIST_JOIN_CODE = import.meta.env.VITE_JOIN_CODE || 'BELLA26'
 
 // Module-level variable for the current join code (used for RLS)
 let currentJoinCode = LIST_JOIN_CODE
