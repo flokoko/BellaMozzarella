@@ -96,6 +96,28 @@ export function useOfflineQueue() {
     let success = 0
     let failed = 0
 
+    const executeOp = async (op: QueuedOp): Promise<void> => {
+      if (op.type === 'rpc') {
+        const { error } = await supabase.rpc(op.rpcName!, op.payload)
+        if (error) throw error
+      } else if (op.type === 'insert') {
+        const { error } = await supabase.from(op.table).insert(op.payload)
+        if (error) throw error
+      } else if (op.type === 'update') {
+        const { error } = await supabase
+          .from(op.table)
+          .update(op.payload)
+          .eq(op.filterColumn!, op.filterValue!)
+        if (error) throw error
+      } else if (op.type === 'delete') {
+        const { error } = await supabase
+          .from(op.table)
+          .delete()
+          .eq(op.filterColumn!, op.filterValue!)
+        if (error) throw error
+      }
+    }
+
     try {
       let queue = loadQueue()
 
@@ -104,52 +126,16 @@ export function useOfflineQueue() {
         let opError = false
 
         try {
-          if (op.type === 'rpc') {
-            const { error } = await supabase.rpc(op.rpcName!, op.payload)
-            if (error) throw error
-          } else if (op.type === 'insert') {
-            const { error } = await supabase.from(op.table).insert(op.payload)
-            if (error) throw error
-          } else if (op.type === 'update') {
-            const { error } = await supabase
-              .from(op.table)
-              .update(op.payload)
-              .eq(op.filterColumn!, op.filterValue!)
-            if (error) throw error
-          } else if (op.type === 'delete') {
-            const { error } = await supabase
-              .from(op.table)
-              .delete()
-              .eq(op.filterColumn!, op.filterValue!)
-            if (error) throw error
-          }
+          await executeOp(op)
         } catch {
           // Retry mit exponentiellem Backoff (max 3 Versuche)
           let retries = 0
-          let lastError: unknown
+          let lastError: unknown = null
           while (retries < 2) {
             retries++
             await new Promise(r => setTimeout(r, 1000 * Math.pow(2, retries - 1)))
             try {
-              if (op.type === 'rpc') {
-                const { error } = await supabase.rpc(op.rpcName!, op.payload)
-                if (error) throw error
-              } else if (op.type === 'insert') {
-                const { error } = await supabase.from(op.table).insert(op.payload)
-                if (error) throw error
-              } else if (op.type === 'update') {
-                const { error } = await supabase
-                  .from(op.table)
-                  .update(op.payload)
-                  .eq(op.filterColumn!, op.filterValue!)
-                if (error) throw error
-              } else if (op.type === 'delete') {
-                const { error } = await supabase
-                  .from(op.table)
-                  .delete()
-                  .eq(op.filterColumn!, op.filterValue!)
-                if (error) throw error
-              }
+              await executeOp(op)
               lastError = null
               break // Erfolg
             } catch (e) {

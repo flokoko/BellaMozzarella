@@ -16,6 +16,14 @@ import { useOfflineQueue } from './useOfflineQueue'
 import { useRealtimeSync } from './useRealtimeSync'
 import { logError } from '../lib/logger'
 import { readCache, writeCache, clearCacheForList } from '../lib/readCache'
+import {
+  deriveCategoriesByType,
+  deriveKnownPersons,
+  deriveUserBalance,
+  deriveExpenseTotal,
+  deriveIsAdmin,
+  deriveCheckedCount,
+} from '../lib/derivedState'
 
 export function useListData() {
   // ── Offline queue ──────────────────────────────────────────────────
@@ -45,6 +53,10 @@ export function useListData() {
 
   // ── Track previous shopping items for push notifications ───────────
   const prevShoppingItemsRef = useRef<ListItem[]>([])
+
+  // ── userNameRef: avoids cascading re-creation of fetchItems ────────
+  const userNameRef = useRef<string | null>(userName)
+  userNameRef.current = userName
 
   // ── Undo state for delete operations ───────────────────────────────
   const [undoState, setUndoState] = useState<{
@@ -78,7 +90,7 @@ export function useListData() {
     if (listType === 'shopping') {
       // ── Push notification: check for new items added by others ──
       const prevIds = new Set(prevShoppingItemsRef.current.map(i => i.id))
-      const newItems = items.filter(i => !prevIds.has(i.id) && i.created_by !== userName)
+      const newItems = items.filter(i => !prevIds.has(i.id) && i.created_by !== userNameRef.current)
       if (
         newItems.length > 0 &&
         document.hidden &&
@@ -96,7 +108,7 @@ export function useListData() {
     } else {
       setBringItems(items)
     }
-  }, [userName])
+  }, [])
 
   const fetchCategories = useCallback(async (listId: string) => {
     const { data, error: err } = await supabase
@@ -469,9 +481,9 @@ export function useListData() {
     } else {
       enqueue({ type: 'rpc', table: '', payload: { item_ids: newOrder }, rpcName: 'batch_reorder_items' })
     }
-    // Refetch after reorder completes
-    if (list) fetchAll(list.id)
-  }, [list, fetchAll, isOnline, enqueue])
+    // Refetch only the affected list type (not all 8 tables)
+    if (list) fetchItems(list.id, listType)
+  }, [list, fetchItems, isOnline, enqueue])
 
   const reorderNotes = useCallback(async (newOrder: string[]) => {
     if (!list) return
@@ -488,8 +500,8 @@ export function useListData() {
     } else {
       enqueue({ type: 'rpc', table: '', payload: { note_ids: newOrder }, rpcName: 'batch_reorder_notes' })
     }
-    if (list) fetchAll(list.id)
-  }, [list, fetchAll, isOnline, enqueue])
+    if (list) fetchNotes(list.id)
+  }, [list, fetchNotes, isOnline, enqueue])
 
   const toggleNoteFavorite = useCallback(async (noteId: string) => {
     if (!list) return
@@ -501,37 +513,19 @@ export function useListData() {
     fetchAll(list.id, true)
   }, [list, fetchAll])
 
-  // ── Derived values ─────────────────────────────────────────────────
-  const shoppingCategories = useMemo(() => categories.filter((c) => c.list_type === 'shopping'), [categories])
-  const bringCategories = useMemo(() => categories.filter((c) => c.list_type === 'bring'), [categories])
+  // ── Derived values (pure functions from lib/derivedState) ──────────
+  const shoppingCategories = useMemo(() => deriveCategoriesByType(categories, 'shopping'), [categories])
+  const bringCategories = useMemo(() => deriveCategoriesByType(categories, 'bring'), [categories])
 
-  const knownPersons = useMemo(() => {
-    const names = new Set<string>()
-    if (userName) names.add(userName)
-    participants.forEach(p => names.add(p.name))
-    return Array.from(names).sort((a, b) => a.localeCompare(b))
-  }, [userName, participants])
+  const knownPersons = useMemo(() => deriveKnownPersons(userName, participants), [userName, participants])
 
-  const userBalance = useMemo(() => {
-    const paid = expenses.filter(e => e.paid_by === userName).reduce((s, e) => s + e.amount, 0)
-    const share = expenseSplits.filter(s => s.person_name === userName).reduce((s, s2) => s + s2.share_amount, 0)
-    return paid - share
-  }, [expenses, expenseSplits, userName])
+  const userBalance = useMemo(() => deriveUserBalance(expenses, expenseSplits, userName), [expenses, expenseSplits, userName])
 
-  const expenseTotal = useMemo(() =>
-    expenses.reduce((sum, e) => sum + e.amount, 0),
-    [expenses],
-  )
+  const expenseTotal = useMemo(() => deriveExpenseTotal(expenses), [expenses])
 
-  const isAdmin = useMemo(() =>
-    participants.some(p => p.name === userName && p.is_admin),
-    [participants, userName],
-  )
+  const isAdmin = useMemo(() => deriveIsAdmin(participants, userName), [participants, userName])
 
-  const checkedCount = useMemo(() =>
-    shoppingItems.filter((i) => i.is_checked).length,
-    [shoppingItems],
-  )
+  const checkedCount = useMemo(() => deriveCheckedCount(shoppingItems), [shoppingItems])
 
   // ── Join / Leave / Rename ──────────────────────────────────────────
   const handleJoin = useCallback(async (name: string, l: ShoppingList, pid: string) => {

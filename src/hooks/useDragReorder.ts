@@ -10,6 +10,9 @@ export function useDragReorder<T extends { id: string }>(
   onReorder: (newOrder: string[]) => void
 ) {
   const [dragState, setDragState] = useState<DragState>({ draggingId: null, dragOverId: null })
+  const dragStateRef = useRef<DragState>(dragState)
+  dragStateRef.current = dragState
+
   const dragStartY = useRef(0)
   const dragItemIndex = useRef(-1)
   const itemEls = useRef<Map<string, HTMLElement>>(new Map())
@@ -39,9 +42,10 @@ export function useDragReorder<T extends { id: string }>(
     ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
   }, [items])
 
+  // dragState via ref → stable dependency list, no re-creation on every move
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    if (!dragState.draggingId) return
-    // Find which item we're hovering over
+    const ds = dragStateRef.current
+    if (!ds.draggingId) return
     const currentY = e.clientY
     let closestId: string | null = null
     let closestDist = Infinity
@@ -52,14 +56,15 @@ export function useDragReorder<T extends { id: string }>(
         closestId = id
       }
     }
-    if (closestId && closestId !== dragState.draggingId) {
+    if (closestId && closestId !== ds.draggingId) {
       setDragState(prev => ({ ...prev, dragOverId: closestId }))
     }
-  }, [dragState])
+  }, [])
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
-    if (!dragState.draggingId) return
-    const { draggingId, dragOverId } = dragState
+    const ds = dragStateRef.current
+    if (!ds.draggingId) return
+    const { draggingId, dragOverId } = ds
     if (dragOverId && draggingId !== dragOverId) {
       // Compute new order
       const ids = items.map(i => i.id)
@@ -73,7 +78,7 @@ export function useDragReorder<T extends { id: string }>(
     }
     setDragState({ draggingId: null, dragOverId: null })
     ;(e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId)
-  }, [dragState, items, onReorder])
+  }, [items, onReorder])
 
   return {
     dragState,

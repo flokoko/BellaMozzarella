@@ -1,0 +1,444 @@
+import { useState, useMemo, useCallback } from 'react'
+import { Trash2, Plus } from 'lucide-react'
+import type { ExpenseSplit, ItemCategory } from '../types'
+import { supabase } from '../lib/supabase'
+import { useToast } from '../context/ToastContext'
+import { calculateShareAmounts, fmtEUR } from '../lib/settlement'
+
+interface ExpenseFormProps {
+  listId: string
+  userName: string
+  allPersons: string[]
+  expenseCategories: ItemCategory[]
+  editingId: string | null
+  description: string
+  amount: string
+  paidBy: string
+  splitPeople: string[]
+  splitMode: 'equal' | 'exact'
+  exactShares: Record<string, string>
+  expenseDate: string
+  expenseNote: string
+  expenseCategory: string
+  formExpanded: boolean
+  // Setters
+  setDescription: (v: string) => void
+  setAmount: (v: string) => void
+  setPaidBy: (v: string) => void
+  setSplitPeople: (v: string[] | ((prev: string[]) => string[])) => void
+  setSplitMode: (v: 'equal' | 'exact') => void
+  setExactShares: (v: Record<string, string> | ((prev: Record<string, string>) => Record<string, string>)) => void
+  setExpenseDate: (v: string) => void
+  setExpenseNote: (v: string) => void
+  setExpenseCategory: (v: string) => void
+  // Data helpers
+  getSplitsForExpense: (expenseId: string) => ExpenseSplit[]
+  // Callbacks
+  onExpensesChange: () => void
+  onCategoriesChange: () => void
+  resetForm: () => void
+}
+
+export default function ExpenseForm({
+  listId,
+  userName,
+  allPersons,
+  expenseCategories,
+  editingId,
+  description,
+  amount,
+  paidBy,
+  splitPeople,
+  splitMode,
+  exactShares,
+  expenseDate,
+  expenseNote,
+  expenseCategory,
+  formExpanded,
+  setDescription,
+  setAmount,
+  setPaidBy,
+  setSplitPeople,
+  setSplitMode,
+  setExactShares,
+  setExpenseDate,
+  setExpenseNote,
+  setExpenseCategory,
+  getSplitsForExpense,
+  onExpensesChange,
+  onCategoriesChange,
+  resetForm,
+}: ExpenseFormProps) {
+  const { toast, confirm } = useToast()
+  const [catEditorOpen, setCatEditorOpen] = useState(false)
+  const [catLocalNames, setCatLocalNames] = useState<Record<string, string>>({})
+  const [newCatName, setNewCatName] = useState('')
+
+  const amountNum = parseFloat(amount) || 0
+
+  // ── Exact shares sum ──
+  const exactSum = useMemo(() => {
+    return splitPeople.reduce((sum, p) => {
+      const val = parseFloat(exactShares[p] ?? '0')
+      return sum + (isNaN(val) ? 0 : val)
+    }, 0)
+  }, [splitPeople, exactShares])
+
+  const exactSumOk =
+    splitMode === 'equal' ||
+    Math.abs(exactSum - amountNum) < 0.01
+
+  const canSave =
+    description.trim() !== '' &&
+    amountNum > 0 &&
+    splitPeople.length > 0 &&
+    exactSumOk
+
+  const togglePerson = (name: string) => {
+    setSplitPeople((prev) =>
+      prev.includes(name) ? prev.filter((p) => p !== name) : [...prev, name],
+    )
+  }
+
+  // ── Preview for equal split ──
+  const equalPreview = useMemo(() => {
+    if (splitMode !== 'equal' || splitPeople.length === 0 || amountNum <= 0) return null
+    const totalCents = Math.round(amountNum * 100)
+    const perCents = Math.floor(totalCents / splitPeople.length)
+    const remainder = totalCents - perCents * splitPeople.length
+    if (remainder === 0) {
+      return `${splitPeople.length} Personen à ${fmtEUR(perCents / 100)}`
+    }
+    const lower = perCents / 100
+    const higher = (perCents + 1) / 100
+    return `${splitPeople.length} Personen à ${fmtEUR(lower)}–${fmtEUR(higher)}`
+  }, [splitMode, splitPeople, amountNum])
+
+  const calculateShares = useCallback((): { person_name: string; share_amount: number }[] => {
+    return calculateShareAmounts(splitMode, splitPeople, amountNum, exactShares)
+  }, [splitMode, splitPeople, amountNum, exactShares])
+
+  // ── Save (insert or update) ──
+  const handleSave = async () => {
+    const desc = description.trim()
+    if (!desc || amountNum <= 0 || splitPeople.length === 0) return
+    if (!exactSumOk) return
+
+    const shares = calculateShares()
+
+    if (editingId) {
+      const { error: updErr } = await supabase
+        .from('expenses')
+        .update({
+          description: desc,
+          amount: amountNum,
+          paid_by: paidBy,
+          split_mode: splitMode,
+          expense_date: expenseDate,
+          note: expenseNote.trim() || null,
+          category: expenseCategory || null,
+        })
+        .eq('id', editingId)
+      if (updErr) {
+        toast(`Fehler beim Speichern: ${updErr.message}`, 'error')
+        return
+      }
+      const oldSplits = getSplitsForExpense(editingId)
+      const oldMap = new Map(oldSplits.map(s => [s.person_name, s.share_amount]))
+      const newMap = new Map(shares.map(s => [s.person_name, s.share_amount]))
+
+      const toDelete = oldSplits.filter(s => !newMap.has(s.person_name))
+      const toInsert = shares.filter(s => !oldMap.has(s.person_name))
+      const toUpdate = shares.filter(s => oldMap.has(s.person_name) && oldMap.get(s.person_name) !== s.share_amount)
+
+      const ops: PromiseLike<{ error: unknown }>[] = []
+      if (toDelete.length > 0) {
+        ops.push(
+          supabase.from('expense_splits').delete().eq('expense_id', editingId).in('person_name', toDelete.map(s => s.person_name))
+        )
+      }
+      if (toInsert.length > 0) {
+        ops.push(
+          supabase.from('expense_splits').insert(
+            toInsert.map(s => ({ expense_id: editingId, person_name: s.person_name, share_amount: s.share_amount }))
+          )
+        )
+      }
+      for (const s of toUpdate) {
+        ops.push(
+          supabase.from('expense_splits').update({ share_amount: s.share_amount }).eq('expense_id', editingId).eq('person_name', s.person_name)
+        )
+      }
+
+      if (ops.length > 0) {
+        const results = await Promise.allSettled(ops)
+        const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && r.value.error))
+        if (failed.length > 0) {
+          toast('Fehler beim Aktualisieren der Aufteilung. Bitte erneut versuchen.', 'error')
+          return
+        }
+      }
+    } else {
+      const { data, error: insErr } = await supabase
+        .from('expenses')
+        .insert({
+          list_id: listId,
+          description: desc,
+          amount: amountNum,
+          paid_by: paidBy,
+          split_mode: splitMode,
+          expense_date: expenseDate,
+          note: expenseNote.trim() || null,
+          category: expenseCategory || null,
+          created_by: userName,
+        })
+        .select('id')
+        .single()
+      if (insErr) {
+        toast(`Fehler beim Speichern: ${insErr.message}`, 'error')
+        return
+      }
+      const expenseId = data.id
+      if (shares.length > 0) {
+        const { error: splitErr } = await supabase.from('expense_splits').insert(
+          shares.map((s) => ({
+            expense_id: expenseId,
+            person_name: s.person_name,
+            share_amount: s.share_amount,
+          })),
+        )
+        if (splitErr) {
+          toast(`Fehler beim Speichern der Aufteilung: ${splitErr.message}`, 'error')
+          await supabase.from('expenses').delete().eq('id', expenseId)
+          return
+        }
+      }
+    }
+
+    navigator.vibrate?.(10)
+    resetForm()
+    onExpensesChange()
+  }
+
+  if (!formExpanded) return null
+
+  return (
+    <div className="expense-form">
+      <input
+        className="expense-input"
+        type="text"
+        placeholder="Beschreibung (z.B. Supermarkt)"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        autoFocus
+      />
+      <div className="expense-form-row">
+        <input
+          className="expense-input"
+          type="number"
+          step="0.01"
+          placeholder="Betrag (€)"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+        />
+        <select
+          className="expense-select"
+          value={paidBy}
+          onChange={(e) => setPaidBy(e.target.value)}
+        >
+          {allPersons.map((p) => (
+            <option key={p} value={p}>{p}</option>
+          ))}
+        </select>
+      </div>
+
+      <input
+        className="expense-input"
+        type="date"
+        value={expenseDate}
+        onChange={(e) => setExpenseDate(e.target.value)}
+      />
+
+      {/* Kategorie */}
+      <div className="expense-category-row">
+        {expenseCategories.map(cat => (
+          <button
+            key={cat.id}
+            className={`expense-cat-chip ${expenseCategory === cat.name ? 'active' : ''}`}
+            onClick={() => setExpenseCategory(expenseCategory === cat.name ? '' : cat.name)}
+            type="button"
+            style={expenseCategory === cat.name ? { borderColor: cat.color, background: cat.bg, color: cat.color } : {}}
+          >
+            {cat.icon} {cat.name}
+          </button>
+        ))}
+        <button
+          className="expense-cat-chip expense-cat-edit-btn"
+          onClick={() => setCatEditorOpen(v => !v)}
+          type="button"
+        >
+          ✏️
+        </button>
+      </div>
+
+      {/* Inline Category Editor */}
+      {catEditorOpen && (
+        <div className="expense-cat-editor">
+          <div className="expense-cat-editor-list">
+            {expenseCategories.map(cat => (
+              <div key={cat.id} className="expense-cat-editor-row">
+                <span className="expense-cat-editor-icon">{cat.icon}</span>
+                <input
+                  className="expense-cat-editor-input"
+                  type="text"
+                  value={catLocalNames[cat.id] ?? cat.name}
+                  onChange={(e) => {
+                    setCatLocalNames(prev => ({ ...prev, [cat.id]: e.target.value }))
+                  }}
+                  onBlur={async () => {
+                    const newName = catLocalNames[cat.id]?.trim()
+                    if (newName && newName !== cat.name) {
+                      await supabase.from('categories').update({ name: newName }).eq('id', cat.id)
+                      onCategoriesChange()
+                    }
+                    setCatLocalNames(prev => { const n = { ...prev }; delete n[cat.id]; return n })
+                  }}
+                />
+                <button
+                  className="expense-cat-editor-del"
+                  onClick={async () => {
+                    confirm(`Kategorie "${cat.name}" wirklich löschen?`, async () => {
+                      await supabase.from('categories').delete().eq('id', cat.id)
+                      await supabase.from('expenses').update({ category: null }).eq('list_id', listId).eq('category', cat.name)
+                      onCategoriesChange()
+                      onExpensesChange()
+                    })
+                  }}
+                >
+                  <Trash2 size={14} strokeWidth={2} />
+                </button>
+              </div>
+            ))}
+          </div>
+          <div className="expense-cat-editor-add-row">
+            <input
+              className="expense-cat-editor-input"
+              type="text"
+              placeholder="Neue Kategorie…"
+              value={newCatName}
+              onChange={(e) => setNewCatName(e.target.value)}
+            />
+            <button
+              className="expense-cat-editor-add-btn"
+              onClick={async () => {
+                const name = newCatName.trim()
+                if (!name) return
+                const maxOrder = expenseCategories.reduce((m, c) => Math.max(m, c.sort_order), 0)
+                await supabase.from('categories').insert({
+                  list_id: listId,
+                  list_type: 'expense',
+                  name,
+                  icon: '📦',
+                  color: '#9b6dd9',
+                  bg: '#e8dcf7',
+                  sort_order: maxOrder + 1,
+                })
+                setNewCatName('')
+                onCategoriesChange()
+              }}
+            >
+              <Plus size={16} strokeWidth={2} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      <input
+        className="expense-input"
+        type="text"
+        placeholder="Notiz (optional) — z.B. 'Für den Strandtag'"
+        value={expenseNote}
+        onChange={(e) => setExpenseNote(e.target.value)}
+      />
+
+      {/* Split among chips */}
+      <div>
+        <div className="expense-chips-label">Geteilt durch</div>
+        <div className="expense-chips">
+          {allPersons.map((p) => (
+            <button
+              key={p}
+              className={`expense-chip ${splitPeople.includes(p) ? 'active' : ''}`}
+              onClick={() => togglePerson(p)}
+              type="button"
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Split mode toggle */}
+      <div className="expense-mode-toggle">
+        <button
+          className={`expense-mode-btn ${splitMode === 'equal' ? 'active' : ''}`}
+          onClick={() => setSplitMode('equal')}
+          type="button"
+        >
+          Gleichmäßig
+        </button>
+        <button
+          className={`expense-mode-btn ${splitMode === 'exact' ? 'active' : ''}`}
+          onClick={() => setSplitMode('exact')}
+          type="button"
+        >
+          Exakt
+        </button>
+      </div>
+
+      {/* Exact split inputs */}
+      {splitMode === 'exact' && splitPeople.length > 0 && (
+        <div className="expense-exact-splits">
+          {splitPeople.map((p) => (
+            <div key={p} className="expense-exact-row">
+              <span className="expense-exact-name">{p}</span>
+              <input
+                className="expense-exact-input"
+                type="number"
+                step="0.01"
+                placeholder="0,00"
+                value={exactShares[p] ?? ''}
+                onChange={(e) =>
+                  setExactShares((prev) => ({ ...prev, [p]: e.target.value }))
+                }
+              />
+            </div>
+          ))}
+          <div className={`expense-exact-sum ${exactSumOk ? 'ok' : 'warn'}`}>
+            <span>Summe: {fmtEUR(exactSum)}</span>
+            <span>Betrag: {fmtEUR(amountNum)}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Equal preview */}
+      {equalPreview && (
+        <div className="expense-form-preview">{equalPreview}</div>
+      )}
+
+      {/* Actions */}
+      <div className="expense-form-actions">
+        <button className="expense-btn-cancel" onClick={resetForm}>
+          Abbrechen
+        </button>
+        <button
+          className="expense-btn-save"
+          onClick={handleSave}
+          disabled={!canSave}
+        >
+          {editingId ? 'Aktualisieren' : 'Speichern'}
+        </button>
+      </div>
+    </div>
+  )
+}

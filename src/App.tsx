@@ -81,6 +81,7 @@ export default function App() {
     isAdmin, shoppingCategories, bringCategories, knownPersons, userBalance,
     expenseTotal, checkedCount, isLoading, isOnline, queueLength, flushQueue,
     setList, setAdminUnlocked,
+    fetchAll,
     fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes, fetchExpenses, fetchParticipants,
     toggleShoppingItem, deleteShoppingItem, undoDelete, batchToggleShoppingItems, toggleBringItem, deleteBringItem, reorderItems, reorderNotes, toggleNoteFavorite,
     handleJoin, handleLeave, handleRename,
@@ -154,20 +155,14 @@ export default function App() {
           toast('Einige Änderungen konnten nicht synchronisiert werden.', 'error')
         } else if (success > 0) {
           toast('Synchronisiert!', 'success')
-          // Full refetch after successful sync
+          // Full refetch after successful sync — single fetchAll with force=true
           if (list) {
-            fetchItems(list.id, 'shopping')
-            fetchItems(list.id, 'bring')
-            fetchCategories(list.id)
-            fetchMeals(list.id)
-            fetchNotes(list.id)
-            fetchExpenses(list.id)
-            fetchParticipants(list.id)
+            fetchAll(list.id, true)
           }
         }
       })
     }
-  }, [isOnline, queueLength, flushQueue, toast, list, fetchItems, fetchCategories, fetchMeals, fetchNotes, fetchExpenses, fetchParticipants])
+  }, [isOnline, queueLength, fetchAll, flushQueue, toast, list])
 
   // ── beforeinstallprompt: capture for custom install UI ─────────────
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null)
