@@ -10,7 +10,13 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 // Fester Join-Code für die Liste (wird für RLS benötigt, für Benutzer unsichtbar)
-const LIST_JOIN_CODE = import.meta.env.VITE_JOIN_CODE || 'BELLA26'
+const LIST_JOIN_CODE = import.meta.env.VITE_JOIN_CODE
+if (!LIST_JOIN_CODE) {
+  console.warn(
+    'Missing VITE_JOIN_CODE. Copy .env.example to .env and fill in your values. ' +
+    'Using empty string as fallback — login may fail.'
+  )
+}
 
 // Module-level variable for the current join code (used for RLS)
 let currentJoinCode = LIST_JOIN_CODE

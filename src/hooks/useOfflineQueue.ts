@@ -40,7 +40,7 @@ async function checkConnectivity(): Promise<boolean> {
   try {
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 5000)
-    const { error } = await supabase.from('participants').select('id').limit(1).maybeSingle()
+    const { error } = await supabase.from('participants').select('id').limit(1).abortSignal(controller.signal).maybeSingle()
     clearTimeout(timeout)
     return !error
   } catch {

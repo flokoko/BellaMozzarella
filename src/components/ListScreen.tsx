@@ -224,7 +224,7 @@ function DraggableCategorySection({
 }
 
 export default function ListScreen({ items, categories, listId, userName, isLoading, onItemToggle, onBatchToggle, onItemDelete, onItemChange, onReorder, onCategoriesChange }: ListScreenProps) {
-  const { confirm } = useToast()
+  const { toast, confirm } = useToast()
   const [hideChecked, setHideChecked] = useState(() => localStorage.getItem('bella_hide_checked') === 'true')
   const [searchQuery, setSearchQuery] = useState('')
   const [editingItem, setEditingItem] = useState<ListItem | null>(null)
@@ -241,7 +241,11 @@ export default function ListScreen({ items, categories, listId, userName, isLoad
   const handleDeleteChecked = () => {
     if (checkedItems.length === 0) return
     confirm('Alle erledigten Items löschen?', async () => {
-      await supabase.rpc('batch_delete_items', { item_ids: checkedItems.map(i => i.id) })
+      const { error } = await supabase.rpc('batch_delete_items', { item_ids: checkedItems.map(i => i.id) })
+      if (error) {
+        toast(`Fehler beim Löschen: ${error.message}`, 'error')
+        return
+      }
       onItemChange?.()
     })
   }

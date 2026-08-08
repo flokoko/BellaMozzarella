@@ -294,17 +294,28 @@ export function useListData() {
           setUserName(result.participant_name)
           setParticipantId(result.participant_id)
           setIsLoading(true)
-          supabase
-            .from('lists')
-            .select('*')
-            .eq('id', result.list_id)
-            .single()
-            .then(({ data }) => {
-              if (data) {
-                setList(data as ShoppingList)
-                fetchAll(result.list_id)
+          Promise.resolve(
+            supabase
+              .from('lists')
+              .select('*')
+              .eq('id', result.list_id)
+              .single()
+          ).then(({ data, error }) => {
+            if (error || !data) {
+              // List was deleted or query failed — clean up session and stop loading
+              setIsLoading(false)
+              if (!error) {
+                // Only clean up localStorage if the list genuinely doesn't exist
+                localStorage.removeItem('user_name')
+                localStorage.removeItem('participant_id')
               }
-            })
+              return
+            }
+            setList(data as ShoppingList)
+            fetchAll(result.list_id)
+          }).catch(() => {
+            setIsLoading(false)
+          })
         })
       })
     }

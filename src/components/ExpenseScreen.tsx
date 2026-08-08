@@ -385,7 +385,11 @@ export default function ExpenseScreen({
   const handleDelete = (expense: Expense) => {
     confirm(`"${expense.description}" wirklich löschen?`, async () => {
       // Delete splits first, then the expense — avoids orphaned split rows
-      await supabase.from('expense_splits').delete().eq('expense_id', expense.id)
+      const { error: splitError } = await supabase.from('expense_splits').delete().eq('expense_id', expense.id)
+      if (splitError) {
+        toast(`Fehler beim Löschen der Aufteilung: ${splitError.message}`, 'error')
+        return
+      }
       const { error } = await supabase.from('expenses').delete().eq('id', expense.id)
       if (error) {
         toast(`Fehler beim Löschen: ${error.message}`, 'error')

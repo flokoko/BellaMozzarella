@@ -58,9 +58,16 @@ export default function SettingsScreen({
   const [showSetPassword, setShowSetPassword] = useState(false)
   const [newAdminPassword, setNewAdminPassword] = useState('')
   const [adminError, setAdminError] = useState('')
-  const [showChangePassword, setShowChangePassword] = useState(false)
-  const [oldPassword, setOldPassword] = useState('')
-  const [newPassword, setNewPassword] = useState('')
+  // Account-Bereich: eigenes Passwort ändern (separate State vom Admin-Bereich)
+  const [showChangeOwnPw, setShowChangeOwnPw] = useState(false)
+  const [ownOldPw, setOwnOldPw] = useState('')
+  const [ownNewPw, setOwnNewPw] = useState('')
+  const [ownPwError, setOwnPwError] = useState('')
+  // Admin-Bereich: Passwort ändern (separate State vom Account-Bereich)
+  const [showChangeAdminPw, setShowChangeAdminPw] = useState(false)
+  const [adminOldPw, setAdminOldPw] = useState('')
+  const [adminNewPw, setAdminNewPw] = useState('')
+  const [adminPwError, setAdminPwError] = useState('')
   const [localCatNames, setLocalCatNames] = useState<Record<string, string>>({})
   const [bristolEnabled, setBristolEnabled] = useState(() => localStorage.getItem('bristol_modus_enabled') === 'true')
 
@@ -161,26 +168,49 @@ export default function SettingsScreen({
     setAdminPasswordInput('')
   }
 
-  const handleChangePassword = async () => {
-    setAdminError('')
-    const oldPw = oldPassword.trim()
-    const newPw = newPassword.trim()
+  const handleOwnPasswordChange = async () => {
+    setOwnPwError('')
+    const oldPw = ownOldPw.trim()
+    const newPw = ownNewPw.trim()
     if (!oldPw || !newPw) {
-      setAdminError('Bitte altes und neues Passwort eingeben.')
+      setOwnPwError('Bitte altes und neues Passwort eingeben.')
       return
     }
     if (newPw.length < 3) {
-      setAdminError('Neues Passwort muss mindestens 3 Zeichen lang sein.')
+      setOwnPwError('Neues Passwort muss mindestens 3 Zeichen lang sein.')
       return
     }
     const result = await onChangeOwnPassword(oldPw, newPw)
     if (result.error) {
-      setAdminError(result.error)
+      setOwnPwError(result.error)
     } else {
       toast('Passwort geändert!', 'success')
-      setOldPassword('')
-      setNewPassword('')
-      setShowChangePassword(false)
+      setOwnOldPw('')
+      setOwnNewPw('')
+      setShowChangeOwnPw(false)
+    }
+  }
+
+  const handleAdminPasswordChange = async () => {
+    setAdminPwError('')
+    const oldPw = adminOldPw.trim()
+    const newPw = adminNewPw.trim()
+    if (!oldPw || !newPw) {
+      setAdminPwError('Bitte altes und neues Passwort eingeben.')
+      return
+    }
+    if (newPw.length < 3) {
+      setAdminPwError('Neues Passwort muss mindestens 3 Zeichen lang sein.')
+      return
+    }
+    const result = await onChangeOwnPassword(oldPw, newPw)
+    if (result.error) {
+      setAdminPwError(result.error)
+    } else {
+      toast('Passwort geändert!', 'success')
+      setAdminOldPw('')
+      setAdminNewPw('')
+      setShowChangeAdminPw(false)
     }
   }
 
@@ -374,30 +404,30 @@ export default function SettingsScreen({
         )}
 
         {/* ── Eigenes Passwort ändern ──────────────────────────────── */}
-        {showChangePassword ? (
+        {showChangeOwnPw ? (
           <div className="settings-inline-form" style={{ flexDirection: 'column', gap: '0.5rem', marginTop: '0.6rem' }}>
             <input
               className="settings-inline-input"
               type="password"
               placeholder="Altes Passwort"
-              value={oldPassword}
-              onChange={(e) => setOldPassword(e.target.value)}
+              value={ownOldPw}
+              onChange={(e) => setOwnOldPw(e.target.value)}
               autoFocus
             />
             <input
               className="settings-inline-input"
               type="password"
               placeholder="Neues Passwort"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleChangePassword()}
+              value={ownNewPw}
+              onChange={(e) => setOwnNewPw(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleOwnPasswordChange()}
             />
-            {adminError && <p className="settings-admin-error">{adminError}</p>}
+            {ownPwError && <p className="settings-admin-error">{ownPwError}</p>}
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button className="settings-btn settings-btn-secondary" onClick={() => { setShowChangePassword(false); setOldPassword(''); setNewPassword(''); setAdminError('') }}>
+              <button className="settings-btn settings-btn-secondary" onClick={() => { setShowChangeOwnPw(false); setOwnOldPw(''); setOwnNewPw(''); setOwnPwError('') }}>
                 Abbrechen
               </button>
-              <button className="settings-btn settings-btn-primary" onClick={handleChangePassword}>
+              <button className="settings-btn settings-btn-primary" onClick={handleOwnPasswordChange}>
                 Speichern
               </button>
             </div>
@@ -406,7 +436,7 @@ export default function SettingsScreen({
           <button
             className="settings-btn settings-btn-secondary"
             style={{ marginTop: '0.6rem', width: '100%' }}
-            onClick={() => setShowChangePassword(true)}
+            onClick={() => setShowChangeOwnPw(true)}
           >
             <KeyRound size={16} strokeWidth={2} /> Passwort ändern
           </button>
@@ -539,30 +569,30 @@ export default function SettingsScreen({
             )}
 
             {/* Admin: Passwort ändern */}
-            {showChangePassword ? (
+            {showChangeAdminPw ? (
               <div className="settings-inline-form" style={{ flexDirection: 'column', gap: '0.5rem', marginTop: '0.6rem' }}>
                 <input
                   className="settings-inline-input"
                   type="password"
                   placeholder="Altes Passwort"
-                  value={oldPassword}
-                  onChange={(e) => setOldPassword(e.target.value)}
+                  value={adminOldPw}
+                  onChange={(e) => setAdminOldPw(e.target.value)}
                   autoFocus
                 />
                 <input
                   className="settings-inline-input"
                   type="password"
                   placeholder="Neues Passwort"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleChangePassword()}
+                  value={adminNewPw}
+                  onChange={(e) => setAdminNewPw(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAdminPasswordChange()}
                 />
-                {adminError && <p className="settings-admin-error">{adminError}</p>}
+                {adminPwError && <p className="settings-admin-error">{adminPwError}</p>}
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <button className="settings-btn settings-btn-secondary" onClick={() => { setShowChangePassword(false); setOldPassword(''); setNewPassword(''); setAdminError('') }}>
+                  <button className="settings-btn settings-btn-secondary" onClick={() => { setShowChangeAdminPw(false); setAdminOldPw(''); setAdminNewPw(''); setAdminPwError('') }}>
                     Abbrechen
                   </button>
-                  <button className="settings-btn settings-btn-primary" onClick={handleChangePassword}>
+                  <button className="settings-btn settings-btn-primary" onClick={handleAdminPasswordChange}>
                     Speichern
                   </button>
                 </div>
@@ -571,7 +601,7 @@ export default function SettingsScreen({
               <button
                 className="settings-btn settings-btn-secondary"
                 style={{ marginTop: '0.6rem', width: '100%' }}
-                onClick={() => setShowChangePassword(true)}
+                onClick={() => setShowChangeAdminPw(true)}
               >
                 <KeyRound size={16} strokeWidth={2} /> Passwort ändern
               </button>
