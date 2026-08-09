@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, lazy, Suspense } from 'react'
 import type { ShoppingList } from '../types'
 import { supabase, loginParticipant } from '../lib/supabase'
-import MozzaScene from './MozzaScene'
+const MozzaScene = lazy(() => import('./MozzaScene'))
 
 import './JoinScreen.css'
 
@@ -123,7 +123,9 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
 
   return (
     <div className="join-screen">
-      <MozzaScene fullscreen />
+      <Suspense fallback={null}>
+        <MozzaScene fullscreen />
+      </Suspense>
       <div className="join-card">
         <div className="join-logo">
           <div className="join-orbit">
