@@ -1,9 +1,16 @@
 import { useState, useEffect } from 'react'
-import { Trash2, Palette, Sun, Moon, Pencil, Crown, Lock, KeyRound, Bell, BellOff } from 'lucide-react'
+import { Trash2, Palette, Sun, Moon, Pencil, Crown, Lock, KeyRound, Bell, BellOff, Loader2 } from 'lucide-react'
 import type { ItemCategory, ListType, Participant } from '../types'
 import type { ThemeMode } from '../lib/theme'
 import { getTheme, setTheme } from '../lib/theme'
 import { supabase } from '../lib/supabase'
+import {
+  isPushSupported,
+  isPushConfigured,
+  subscribeToPush,
+  unsubscribeFromPush,
+  hasActiveSubscription,
+} from '../lib/push'
 import { useToast } from '../context/ToastContext'
 import { useCategories } from '../hooks/useCategories'
 import { useDebouncedCallback } from '../hooks/useDebouncedCallback'
@@ -52,6 +59,9 @@ export default function SettingsScreen({
   const [newName, setNewName] = useState(userName)
   const [pushEnabled, setPushEnabled] = useState(false)
   const [pushPermission, setPushPermission] = useState<NotificationPermission>('default')
+  const [pushLoading, setPushLoading] = useState(false)
+  const [pushSupported] = useState(() => isPushSupported())
+  const [pushConfigured] = useState(() => isPushConfigured())
   const [showAddParticipant, setShowAddParticipant] = useState(false)
   const [newParticipantName, setNewParticipantName] = useState('')
   const [adminPasswordInput, setAdminPasswordInput] = useState('')
@@ -76,10 +86,19 @@ export default function SettingsScreen({
 
   useEffect(() => {
     setThemeState(getTheme())
-    setPushEnabled(localStorage.getItem('push_notifications_enabled') === 'true')
     if ('Notification' in window) {
       setPushPermission(Notification.permission)
     }
+    // Check if there's an active push subscription on mount
+    hasActiveSubscription().then((active) => {
+      setPushEnabled(active)
+      // Keep localStorage flag in sync
+      if (active) {
+        localStorage.setItem('push_notifications_enabled', 'true')
+      } else {
+        localStorage.removeItem('push_notifications_enabled')
+      }
+    })
   }, [])
 
   useEffect(() => {
@@ -93,21 +112,29 @@ export default function SettingsScreen({
     setTheme(mode)
   }
 
-  const handleTogglePush = async () => {
+  const handleSubscribePush = async () => {
     navigator.vibrate?.(8)
-    if (pushEnabled) {
-      localStorage.removeItem('push_notifications_enabled')
-      setPushEnabled(false)
-      return
-    }
-    if ('Notification' in window) {
-      const permission = await Notification.requestPermission()
-      setPushPermission(permission)
-      if (permission === 'granted') {
-        localStorage.setItem('push_notifications_enabled', 'true')
-        setPushEnabled(true)
+    setPushLoading(true)
+    const result = await subscribeToPush(listId, userName)
+    setPushLoading(false)
+    if (result.ok) {
+      setPushEnabled(true)
+      if ('Notification' in window) {
+        setPushPermission(Notification.permission)
       }
+      toast('Push-Benachrichtigungen aktiviert!', 'success')
+    } else {
+      toast(result.error || 'Aktivierung fehlgeschlagen.', 'error')
     }
+  }
+
+  const handleUnsubscribePush = async () => {
+    navigator.vibrate?.(8)
+    setPushLoading(true)
+    await unsubscribeFromPush(listId, userName)
+    setPushLoading(false)
+    setPushEnabled(false)
+    toast('Push-Benachrichtigungen deaktiviert.', 'success')
   }
 
   const handleSaveName = async () => {
@@ -306,32 +333,68 @@ export default function SettingsScreen({
       {/* ── Push-Benachrichtigungen ──────────────────────────────────── */}
       <div className="settings-section">
         <h3 className="settings-section-title">Push-Benachrichtigungen</h3>
-        <div className="settings-item" onClick={handleTogglePush} style={{ cursor: 'pointer' }}>
-          <span className="settings-item-icon">
-            {pushEnabled ? <Bell size={18} strokeWidth={2} /> : <BellOff size={18} strokeWidth={2} />}
-          </span>
-          <span className="settings-item-label">Benachrichtigungen bei neuen Items</span>
-          <div className="settings-item-control">
-            <span className={`settings-push-status ${pushEnabled ? 'on' : 'off'}`}>
-              {pushEnabled
-                ? 'Aktiviert'
-                : pushPermission === 'denied'
-                  ? 'Nicht erlaubt'
-                  : 'Deaktiviert'}
-            </span>
-            <button
-              className={`settings-push-toggle ${pushEnabled ? 'on' : ''}`}
-              type="button"
-              aria-label="Push-Benachrichtigungen umschalten"
-            >
-              <span className="settings-push-toggle-knob" />
-            </button>
-          </div>
-        </div>
-        {pushPermission === 'denied' && (
-          <p className="settings-cat-hint" style={{ marginTop: '0.4rem', marginBottom: 0 }}>
-            Benachrichtigungen wurden im Browser blockiert. Bitte in den Browser-Einstellungen erlauben.
+        {!pushConfigured ? (
+          <p className="settings-cat-hint" style={{ marginBottom: 0 }}>
+            Push ist auf diesem Gerät nicht verfügbar / nicht konfiguriert.
           </p>
+        ) : !pushSupported ? (
+          <p className="settings-cat-hint" style={{ marginBottom: 0 }}>
+            Push wird von diesem Browser nicht unterstützt
+            {pushPermission === 'denied' ? ' (Benachrichtigungen blockiert).' : '.'}
+          </p>
+        ) : pushEnabled ? (
+          <>
+            <div className="settings-item">
+              <span className="settings-item-icon">
+                <Bell size={18} strokeWidth={2} />
+              </span>
+              <span className="settings-item-label">Push aktiv</span>
+              <div className="settings-item-control">
+                <span className="settings-push-status on">Aktiviert</span>
+              </div>
+            </div>
+            <button
+              className="settings-btn settings-btn-secondary"
+              style={{ marginTop: '0.6rem', width: '100%' }}
+              onClick={handleUnsubscribePush}
+              disabled={pushLoading}
+            >
+              {pushLoading
+                ? <Loader2 size={16} strokeWidth={2} className="spin" />
+                : <BellOff size={16} strokeWidth={2} />}
+              Deaktivieren
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="settings-item">
+              <span className="settings-item-icon">
+                <BellOff size={18} strokeWidth={2} />
+              </span>
+              <span className="settings-item-label">Benachrichtigungen bei neuen Items</span>
+              <div className="settings-item-control">
+                <span className="settings-push-status off">Deaktiviert</span>
+              </div>
+            </div>
+            {pushPermission === 'denied' && (
+              <p className="settings-cat-hint" style={{ marginTop: '0.4rem', marginBottom: 0 }}>
+                Benachrichtigungen wurden im Browser blockiert. Bitte in den Browser-Einstellungen erlauben.
+              </p>
+            )}
+            {pushPermission !== 'denied' && (
+              <button
+                className="settings-btn settings-btn-primary"
+                style={{ marginTop: '0.6rem', width: '100%' }}
+                onClick={handleSubscribePush}
+                disabled={pushLoading}
+              >
+                {pushLoading
+                  ? <Loader2 size={16} strokeWidth={2} className="spin" />
+                  : <Bell size={16} strokeWidth={2} />}
+                Push-Benachrichtigungen aktivieren
+              </button>
+            )}
+          </>
         )}
       </div>
 

@@ -1,6 +1,6 @@
 // IMPORTANT: Bump this version when deploying changes.
 // Keep in sync with APP_VERSION in src/version.ts
-const CACHE_NAME = 'bella-mozzarella-v1.1.0';
+const CACHE_NAME = 'bella-mozzarella-v1.2.0';
 
 // Install: skipWaiting to activate immediately
 self.addEventListener('install', (e) => {
@@ -14,6 +14,59 @@ self.addEventListener('activate', (e) => {
       Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
     ).then(() => self.clients.claim())
   );
+});
+
+// ── Push event handlers ────────────────────────────────────────────
+
+// Receive a push notification from the Edge Function and display it.
+self.addEventListener('push', (e) => {
+  let payload = { title: 'Bella Mozzarella', body: '', icon: '', tag: '', data: {} };
+
+  try {
+    if (e.data) {
+      payload = e.data.json();
+    }
+  } catch {
+    // Fallback if the payload isn't JSON
+    payload.body = e.data ? e.data.text() : '';
+  }
+
+  const title = payload.title || 'Bella Mozzarella';
+  const options = {
+    body: payload.body || '',
+    icon: payload.icon || '/BellaMozzarella/icon-192.png',
+    badge: '/BellaMozzarella/icon-192.png',
+    tag: payload.tag || 'bella-mozzarella',
+    data: payload.data || {},
+    vibrate: [80, 40, 80],
+  };
+
+  e.waitUntil(self.registration.showNotification(title, options));
+});
+
+// Handle notification click: focus existing window or open new one.
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+
+  e.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // Try to focus an existing Bella Mozzarella tab
+      for (const client of clientList) {
+        if (client.url.includes('/BellaMozzarella') && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // No existing tab found — open a new one
+      if (self.clients.openWindow) {
+        return self.clients.openWindow('/BellaMozzarella/');
+      }
+    })
+  );
+});
+
+// Handle notification close (analytics or cleanup could go here).
+self.addEventListener('notificationclose', () => {
+  // Intentionally empty — no action needed on close.
 });
 
 // Fetch

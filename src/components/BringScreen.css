@@ -253,3 +253,336 @@
   border-top: 3px solid var(--accent);
   padding-top: calc(0.55rem - 3px);
 }
+
+/* ══════════════════════════════════════════════════════════════════ */
+/* Sub-tab toggle: Mitbringen vs Meine Packliste                       */
+/* ══════════════════════════════════════════════════════════════════ */
+.bring-subtabs {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.bring-subtab {
+  flex: 1;
+  padding: 0.55rem 0.8rem;
+  border: 2px solid var(--input-border);
+  border-radius: 999px;
+  background: var(--card-bg);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--button-text);
+  cursor: pointer;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bring-subtab:hover {
+  border-color: var(--accent-light);
+  transform: translateY(-1px);
+}
+
+/* "Mitbringen" active = Italian green (#009246) */
+.bring-subtab.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 2px 12px rgba(0, 146, 70, 0.25);
+  transform: translateY(-1px);
+}
+
+/* "Meine Packliste" active = Italian red (#ce2b37) — overrides .active */
+.bring-subtab.active:nth-child(2) {
+  border-color: #ce2b37;
+  background: #ce2b37;
+  box-shadow: 0 2px 12px rgba(206, 43, 55, 0.25);
+}
+
+.bring-subtab:active {
+  transform: scale(0.96);
+}
+
+/* ══════════════════════════════════════════════════════════════════ */
+/* Packliste — add form                                               */
+/* ══════════════════════════════════════════════════════════════════ */
+.packlist-section {
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.packlist-add-form {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+}
+
+.packlist-input-name {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.packlist-input-name:focus {
+  border-color: #ce2b37;
+  box-shadow: 0 0 0 3px rgba(206, 43, 55, 0.15);
+}
+
+.packlist-input-qty {
+  width: 5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.packlist-input-qty:focus {
+  border-color: #ce2b37;
+  box-shadow: 0 0 0 3px rgba(206, 43, 55, 0.15);
+}
+
+.packlist-add-btn {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 12px;
+  background: #ce2b37;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.3s, background-color 0.3s;
+}
+
+.packlist-add-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 2px 12px rgba(206, 43, 55, 0.3);
+}
+
+.packlist-add-btn:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+.packlist-add-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ══════════════════════════════════════════════════════════════════ */
+/* Packliste — copy-from-bring button                                 */
+/* ══════════════════════════════════════════════════════════════════ */
+.packlist-copy-btn {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1.5px dashed #ce2b37;
+  border-radius: 12px;
+  background: transparent;
+  color: #ce2b37;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.packlist-copy-btn:hover {
+  background: rgba(206, 43, 55, 0.08);
+  transform: translateY(-1px);
+}
+
+.packlist-copy-btn:active {
+  transform: scale(0.97);
+}
+
+/* ══════════════════════════════════════════════════════════════════ */
+/* Packliste — progress bar                                           */
+/* ══════════════════════════════════════════════════════════════════ */
+.packlist-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+
+.packlist-progress-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--glass-border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.packlist-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #009246, #00b358);
+  border-radius: 999px;
+  transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.packlist-progress-text {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════════════════════════════ */
+/* Packliste — empty state                                            */
+/* ══════════════════════════════════════════════════════════════════ */
+.packlist-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 2.5rem 1rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border: 1px dashed var(--dashed-border);
+  border-radius: 20px;
+  margin: 0.5rem 0;
+  animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ══════════════════════════════════════════════════════════════════ */
+/* Packliste — item list                                              */
+/* ══════════════════════════════════════════════════════════════════ */
+.packlist-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.packlist-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.75rem;
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s;
+  animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.packlist-item:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+}
+
+.packlist-item:active {
+  transform: scale(0.98);
+}
+
+.packlist-item.checked .packlist-item-name,
+.packlist-item.checked .packlist-item-qty {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+/* Packlist checkbox — red (#ce2b37) accent */
+.packlist-checkbox-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.packlist-checkbox-wrap input {
+  opacity: 0;
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+}
+
+.packlist-checkmark {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--checkbox-border);
+  border-radius: 7px;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.packlist-checkbox-wrap input:checked + .packlist-checkmark {
+  background: #ce2b37;
+  border-color: transparent;
+  animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.packlist-checkbox-wrap input:checked + .packlist-checkmark::after {
+  content: '✓';
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 18px;
+}
+
+.packlist-item-name {
+  flex: 1;
+  font-size: 0.92rem;
+  word-break: break-word;
+  color: var(--text-primary);
+}
+
+.packlist-item-qty {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.packlist-item-delete {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  color: var(--text-secondary);
+  opacity: 0.25;
+  flex-shrink: 0;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.packlist-item-delete:hover {
+  opacity: 1;
+  background: rgba(206, 43, 55, 0.12);
+  color: #ce2b37;
+  transform: scale(1.2) rotate(-5deg);
+}
+
+.packlist-item-delete:active {
+  transform: scale(0.9);
+}
