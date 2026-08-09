@@ -1,13 +1,12 @@
-import { useState, useEffect, useRef, useMemo, Suspense, lazy } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback, Suspense, lazy } from 'react'
 import { ArrowLeft, Settings, Sun, Moon, WifiOff, ShoppingCart, Backpack, Pizza, Wallet, Activity, type LucideIcon } from 'lucide-react'
-import confetti from 'canvas-confetti'
 import type { TabView } from './types'
 import { getResolvedTheme, toggleTheme, applyTheme, initThemeListener } from './lib/theme'
 import { supabase, changeParticipantPassword } from './lib/supabase'
 import { useToast } from './context/ToastContext'
 import JoinScreen from './components/JoinScreen'
 import DashboardScreen from './components/DashboardScreen'
-import MozzaScene from './components/MozzaScene'
+const MozzaScene = lazy(() => import('./components/MozzaScene'))
 import { useListData } from './hooks/useListData'
 
 // Code splitting: lazy-load screens that aren't needed on first paint
@@ -36,7 +35,8 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 // ── Confetti helper: Italian flag colored burst ──────────────────────
-function fireConfetti() {
+async function fireConfetti() {
+  const { default: confetti } = await import('canvas-confetti')
   const colors = ['#009246', '#ffffff', '#ce2b37']
   // Burst 1: center, upward
   confetti({
@@ -71,6 +71,16 @@ function fireConfetti() {
   }, 400)
   // Vibrate
   navigator.vibrate?.([100, 50, 100, 50, 200])
+}
+
+const featureTitles: Record<Exclude<TabView, 'home'>, { icon: LucideIcon; label: string }> = {
+  list: { icon: ShoppingCart, label: 'Einkaufsliste' },
+  bring: { icon: Backpack, label: 'Mitbringen' },
+  mealplan: { icon: Pizza, label: 'Essensplan' },
+  expenses: { icon: Wallet, label: 'Ausgaben' },
+  bristol: { icon: Activity, label: 'Bristol' },
+  weather: { icon: Sun, label: 'Wetter' },
+  settings: { icon: Settings, label: 'Einstellungen' },
 }
 
 export default function App() {
@@ -240,15 +250,15 @@ export default function App() {
     setInstallPrompt(null)
   }
 
-  const featureTitles: Record<Exclude<TabView, 'home'>, { icon: LucideIcon; label: string }> = {
-    list: { icon: ShoppingCart, label: 'Einkaufsliste' },
-    bring: { icon: Backpack, label: 'Mitbringen' },
-    mealplan: { icon: Pizza, label: 'Essensplan' },
-    expenses: { icon: Wallet, label: 'Ausgaben' },
-    bristol: { icon: Activity, label: 'Bristol' },
-    weather: { icon: Sun, label: 'Wetter' },
-    settings: { icon: Settings, label: 'Einstellungen' },
-  }
+  // ── Memoized callback wrappers for screen props ─────────────────────
+  const handleNotesChange = useCallback(() => { if (list) fetchNotes(list.id) }, [list, fetchNotes])
+  const handleShoppingItemsChange = useCallback(() => { if (list) fetchItems(list.id, 'shopping') }, [list, fetchItems])
+  const handleBringItemsChange = useCallback(() => { if (list) fetchItems(list.id, 'bring') }, [list, fetchItems])
+  const handleCategoriesChange = useCallback(() => { if (list) fetchCategories(list.id) }, [list, fetchCategories])
+  const handleMealsChange = useCallback(() => { if (list) fetchMeals(list.id) }, [list, fetchMeals])
+  const handleIdeasChange = useCallback(() => { if (list) fetchMealIdeas(list.id) }, [list, fetchMealIdeas])
+  const handleExpensesChange = useCallback(() => { if (list) fetchExpenses(list.id) }, [list, fetchExpenses])
+  const handleParticipantsChange = useCallback(() => { if (list) fetchParticipants(list.id) }, [list, fetchParticipants])
 
   // ── Render ─────────────────────────────────────────────────────────
   const expenseCategories = useMemo(() => categories.filter(c => c.list_type === 'expense'), [categories])
@@ -258,7 +268,9 @@ export default function App() {
       {!userName || !list ? (
         <>
           <div className="mozza-bg">
-            <MozzaScene fullscreen />
+            <Suspense fallback={null}>
+              <MozzaScene fullscreen />
+            </Suspense>
           </div>
           <JoinScreen onJoin={handleJoin} />
         </>
@@ -325,7 +337,7 @@ export default function App() {
         </div>
       )}
 
-      <main className="app-main" key={tab}>
+      <main className="app-main">
         {tab === 'home' && (
           <DashboardScreen
             listId={list.id}
@@ -341,7 +353,7 @@ export default function App() {
             notes={notes}
             isLoading={isLoading}
             onNavigate={setTab}
-            onNotesChange={() => fetchNotes(list.id)}
+            onNotesChange={handleNotesChange}
             onReorderNotes={reorderNotes}
             onToggleFavorite={toggleNoteFavorite}
             installPrompt={installPrompt}
@@ -360,9 +372,9 @@ export default function App() {
               onItemToggle={toggleShoppingItem}
               onBatchToggle={batchToggleShoppingItems}
               onItemDelete={deleteShoppingItem}
-              onItemChange={() => fetchItems(list.id, 'shopping')}
+              onItemChange={handleShoppingItemsChange}
               onReorder={reorderItems}
-              onCategoriesChange={() => fetchCategories(list.id)}
+              onCategoriesChange={handleCategoriesChange}
             />
           </Suspense>
         )}
@@ -375,9 +387,9 @@ export default function App() {
               userName={userName}
               onItemToggle={toggleBringItem}
               onItemDelete={deleteBringItem}
-              onItemChange={() => fetchItems(list.id, 'bring')}
+              onItemChange={handleBringItemsChange}
               onReorder={reorderItems}
-              onCategoriesChange={() => fetchCategories(list.id)}
+              onCategoriesChange={handleCategoriesChange}
               persons={participants.map(p => p.name)}
             />
           </Suspense>
@@ -389,8 +401,8 @@ export default function App() {
               mealIdeas={mealIdeas}
               listId={list.id}
               userName={userName}
-              onMealsChange={() => fetchMeals(list.id)}
-              onIdeasChange={() => fetchMealIdeas(list.id)}
+              onMealsChange={handleMealsChange}
+              onIdeasChange={handleIdeasChange}
             />
           </Suspense>
         )}
@@ -404,8 +416,8 @@ export default function App() {
               knownPersons={knownPersons}
               expenseCategories={expenseCategories}
               isLoading={isLoading}
-              onExpensesChange={() => fetchExpenses(list.id)}
-              onCategoriesChange={() => fetchCategories(list.id)}
+              onExpensesChange={handleExpensesChange}
+              onCategoriesChange={handleCategoriesChange}
             />
           </Suspense>
         )}
@@ -432,9 +444,9 @@ export default function App() {
               onRename={handleRename}
               categories={categories}
               listId={list.id}
-              onCategoriesChange={() => fetchCategories(list.id)}
+              onCategoriesChange={handleCategoriesChange}
               participants={participants}
-              onParticipantsChange={() => fetchParticipants(list.id)}
+              onParticipantsChange={handleParticipantsChange}
               isAdmin={isAdmin}
               adminUnlocked={adminUnlocked}
               hasAdminPassword={!!list.admin_password}

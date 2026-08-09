@@ -48,6 +48,10 @@ export function useListData() {
   // ── Fetch guard for realtime sync debounce ─────────────────────────
   const isFetchingRef = useRef(false)
 
+  // ── Realtime debounce: accumulate changed tables, refetch once ──────
+  const pendingRealtimeTablesRef = useRef<Set<string>>(new Set())
+  const realtimeDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   // ── Race guard for atomic expense+splits fetch ─────────────────────
   const fetchSeq = useRef(0)
 
@@ -270,30 +274,52 @@ export function useListData() {
   // ── Realtime sync (replaces adaptive polling) ──────────────────────
   const handleRealtimeChange = useCallback((table: string) => {
     if (!list) return
-    // Debounce: nur refetchen wenn nicht gerade ein fetch läuft
-    if (!isFetchingRef.current) {
-      if (table === 'items') {
-        fetchItems(list.id, 'shopping')
-        fetchItems(list.id, 'bring')
-      } else if (table === 'categories') {
-        fetchCategories(list.id)
-      } else if (table === 'meals') {
-        fetchMeals(list.id)
-        fetchMealIdeas(list.id)
-      } else if (table === 'notes') {
-        fetchNotes(list.id)
-      } else if (table === 'expenses' || table === 'expense_splits') {
-        fetchExpenses(list.id)
-      } else if (table === 'participants') {
-        fetchParticipants(list.id)
+    // Accumulate the changed table and debounce the refetch
+    pendingRealtimeTablesRef.current.add(table)
+    if (realtimeDebounceRef.current) clearTimeout(realtimeDebounceRef.current)
+    realtimeDebounceRef.current = setTimeout(() => {
+      const tables = pendingRealtimeTablesRef.current
+      const lid = list.id
+      if (tables.has('items')) {
+        fetchItems(lid, 'shopping')
+        fetchItems(lid, 'bring')
       }
-    }
+      if (tables.has('categories')) {
+        fetchCategories(lid)
+      }
+      if (tables.has('meals') || tables.has('meal_ideas')) {
+        fetchMeals(lid)
+        fetchMealIdeas(lid)
+      }
+      if (tables.has('notes')) {
+        fetchNotes(lid)
+      }
+      if (tables.has('expenses') || tables.has('expense_splits')) {
+        fetchExpenses(lid)
+      }
+      if (tables.has('participants')) {
+        fetchParticipants(lid)
+      }
+      // bristol_entries is handled by BristolScreen's own realtime subscription
+      tables.clear()
+      realtimeDebounceRef.current = null
+    }, 400)
   }, [list, fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes, fetchExpenses, fetchParticipants])
 
   useRealtimeSync({
     listId: list?.id ?? null,
     onTableChange: handleRealtimeChange,
   })
+
+  // ── Cleanup realtime debounce timeout on unmount ───────────────────
+  useEffect(() => {
+    return () => {
+      if (realtimeDebounceRef.current) {
+        clearTimeout(realtimeDebounceRef.current)
+        realtimeDebounceRef.current = null
+      }
+    }
+  }, [])
 
   // ── Auto-restore session ───────────────────────────────────────────
   useEffect(() => {

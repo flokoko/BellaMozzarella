@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Pencil, Trash2 } from 'lucide-react'
-import { supabase } from '../lib/supabase'
+import { supabase, getJoinCode } from '../lib/supabase'
 import { logError } from '../lib/logger'
 import { useToast } from '../context/ToastContext'
 import { useOfflineQueue } from '../hooks/useOfflineQueue'
@@ -9,7 +9,6 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   LineChart, Line, CartesianGrid, Legend,
 } from 'recharts'
-import confetti from 'canvas-confetti'
 import {
   BRISTOL_ADJECTIVES,
   BRISTOL_COLORS,
@@ -59,6 +58,26 @@ export default function BristolScreen({ listId, userName, isAdmin }: BristolScre
     fetchEntries()
   }, [fetchEntries])
 
+  // ── Realtime sync: refetch when bristol_entries change in this list ──
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
+  useEffect(() => {
+    const joinCode = getJoinCode()
+    const channel = supabase.channel(`bristol:${listId}`, {
+      config: { headers: { 'x-join-code': joinCode } },
+    } as any)
+    channel.on(
+      'postgres_changes' as any,
+      { event: '*', schema: 'public', table: 'bristol_entries', filter: `list_id=eq.${listId}` },
+      () => { fetchEntries() }
+    )
+    channel.subscribe()
+    channelRef.current = channel
+    return () => {
+      supabase.removeChannel(channel)
+      channelRef.current = null
+    }
+  }, [listId, fetchEntries])
+
   const handleSubmitEntry = useCallback(async (value: number) => {
     setSubmitting(true)
     if (isOnline) {
@@ -98,6 +117,7 @@ export default function BristolScreen({ listId, userName, isAdmin }: BristolScre
     // Plasma-Effekt bei Wert 13
     if (value === 13) {
       navigator.vibrate?.([50, 30, 50, 30, 100, 50, 200])
+      const { default: confetti } = await import('canvas-confetti')
       confetti({
         particleCount: 150,
         spread: 120,
