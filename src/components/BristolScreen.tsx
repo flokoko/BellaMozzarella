@@ -239,6 +239,99 @@ export default function BristolScreen({ listId, userName, isAdmin }: BristolScre
     return days
   }, [entries])
 
+  // ── Highscore / Leaderboard ──
+  const highscore = useMemo(() => {
+    if (entries.length === 0) return null
+
+    // Group entries by participant
+    const byParticipant: Record<string, BristolEntry[]> = {}
+    entries.forEach(e => {
+      ;(byParticipant[e.participant_name] ??= []).push(e)
+    })
+
+    // Helper: rank top 3 by a metric
+    const top3 = <T,>(sorted: { name: string; value: T; extra?: unknown }[]) => sorted.slice(0, 3)
+
+    // Best average (descending — highest average = most "extreme")
+    const avgRanked = Object.entries(byParticipant)
+      .map(([name, es]) => ({
+        name,
+        value: es.reduce((s, e) => s + e.value, 0) / es.length,
+        count: es.length,
+      }))
+      .sort((a, b) => b.value - a.value)
+
+    // Most entries
+    const entriesRanked = Object.entries(byParticipant)
+      .map(([name, es]) => ({
+        name,
+        value: es.length,
+      }))
+      .sort((a, b) => b.value - a.value)
+
+    // Most Plasma (value 13)
+    const plasmaRanked = Object.entries(byParticipant)
+      .map(([name, es]) => ({
+        name,
+        value: es.filter(e => e.value === 13).length,
+      }))
+      .sort((a, b) => b.value - a.value)
+
+    return {
+      bestAvg: top3(avgRanked),
+      mostEntries: top3(entriesRanked),
+      mostPlasma: top3(plasmaRanked),
+    }
+  }, [entries])
+
+  // ── Biggest change vs previous day ──
+  const biggestChange = useMemo(() => {
+    if (entries.length === 0) return null
+
+    // Group entries by participant, then by date
+    const byParticipant: Record<string, Record<string, number>> = {}
+    entries.forEach(e => {
+      ;(byParticipant[e.participant_name] ??= {})[e.entry_date] = e.value
+    })
+
+    // Collect all distinct dates, sort descending (most recent first)
+    const allDates = [...new Set(entries.map(e => e.entry_date))].sort().reverse()
+
+    // Find the most recent date where the previous day also has data for the same participant
+    let bestPos: { name: string; before: number; after: number; change: number; dayLabel: string; prevLabel: string } | null = null
+    let bestNeg: { name: string; before: number; after: number; change: number; dayLabel: string; prevLabel: string } | null = null
+
+    for (let i = 0; i < allDates.length - 1; i++) {
+      const dayDate = allDates[i]
+      const prevDate = allDates[i + 1]
+      // Check if consecutive calendar days
+      const dayMs = new Date(dayDate).getTime()
+      const prevMs = new Date(prevDate).getTime()
+      const dayDiff = Math.round((dayMs - prevMs) / (1000 * 60 * 60 * 24))
+      if (dayDiff !== 1) continue
+
+      const dayLabel = new Date(dayDate).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
+      const prevLabel = new Date(prevDate).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
+
+      for (const [name, dayMap] of Object.entries(byParticipant)) {
+        const after = dayMap[dayDate]
+        const before = dayMap[prevDate]
+        if (after === undefined || before === undefined) continue
+        const change = after - before
+        if (change > 0 && (!bestPos || change > bestPos.change)) {
+          bestPos = { name, before, after, change, dayLabel, prevLabel }
+        }
+        if (change < 0 && (!bestNeg || change < bestNeg.change)) {
+          bestNeg = { name, before, after, change, dayLabel, prevLabel }
+        }
+      }
+      // We found a day pair with data — use the most recent such pair
+      break
+    }
+
+    return { positive: bestPos, negative: bestNeg }
+  }, [entries])
+
   const hasData = entries.length > 0
 
   return (
@@ -420,6 +513,110 @@ export default function BristolScreen({ listId, userName, isAdmin }: BristolScre
                 />
               </LineChart>
             </ResponsiveContainer>
+          </div>
+        </div>
+      )}
+
+      {/* ── Highscore / Biggest Change ── */}
+      {highscore && (
+        <div className="bristol-card">
+          <div className="bristol-card-header">
+            <span className="bristol-card-title">🏆 Highscore</span>
+          </div>
+
+          {/* Leaderboard: Best average */}
+          <div className="bristol-leaderboard">
+            <div className="bristol-leaderboard-title">Bester Ø-Wert</div>
+            {highscore.bestAvg.length === 0 ? (
+              <p className="bristol-empty-state">Noch keine Daten.</p>
+            ) : (
+              highscore.bestAvg.map((p, i) => (
+                <div key={p.name} className="bristol-leaderboard-row">
+                  <span className="bristol-medal">{['🥇', '🥈', '🥉'][i]}</span>
+                  <span className="bristol-leaderboard-name">{p.name}</span>
+                  <span className="bristol-leaderboard-value">
+                    Ø {p.value.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Leaderboard: Most entries */}
+          <div className="bristol-leaderboard">
+            <div className="bristol-leaderboard-title">Meiste Einträge</div>
+            {highscore.mostEntries.length === 0 ? (
+              <p className="bristol-empty-state">Noch keine Daten.</p>
+            ) : (
+              highscore.mostEntries.map((p, i) => (
+                <div key={p.name} className="bristol-leaderboard-row">
+                  <span className="bristol-medal">{['🥇', '🥈', '🥉'][i]}</span>
+                  <span className="bristol-leaderboard-name">{p.name}</span>
+                  <span className="bristol-leaderboard-value">{p.value}</span>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Leaderboard: Most Plasma */}
+          <div className="bristol-leaderboard">
+            <div className="bristol-leaderboard-title">Meistens Plasma 💩</div>
+            {highscore.mostPlasma.length === 0 || highscore.mostPlasma[0].value === 0 ? (
+              <p className="bristol-empty-state">Noch niemand hat Plasma eingetragen.</p>
+            ) : (
+              highscore.mostPlasma
+                .filter(p => p.value > 0)
+                .map((p, i) => (
+                  <div key={p.name} className="bristol-leaderboard-row">
+                    <span className="bristol-medal">{['🥇', '🥈', '🥉'][i]}</span>
+                    <span className="bristol-leaderboard-name">{p.name}</span>
+                    <span className="bristol-leaderboard-value">{p.value}× 💩</span>
+                  </div>
+                ))
+            )}
+          </div>
+
+          {/* Biggest change vs previous day */}
+          <div className="bristol-change-section">
+            <div className="bristol-change-title">Größte Veränderung vs. Vortag</div>
+            {(!biggestChange?.positive && !biggestChange?.negative) ? (
+              <p className="bristol-empty-state">
+                Noch nicht genug Daten für einen Tagesvergleich. Mindestens zwei aufeinanderfolgende Tage mit Einträgen nötig.
+              </p>
+            ) : (
+              <>
+                {biggestChange.positive && (
+                  <div className="bristol-change-row bristol-change-pos">
+                    <span className="bristol-change-arrow">📈</span>
+                    <span className="bristol-change-name">{biggestChange.positive.name}</span>
+                    <span className="bristol-change-detail">
+                      {biggestChange.positive.before} → {biggestChange.positive.after}
+                    </span>
+                    <span className="bristol-change-delta">
+                      +{biggestChange.positive.change}
+                    </span>
+                    <span className="bristol-change-date">
+                      {biggestChange.positive.prevLabel} → {biggestChange.positive.dayLabel}
+                    </span>
+                  </div>
+                )}
+                {biggestChange.negative && (
+                  <div className="bristol-change-row bristol-change-neg">
+                    <span className="bristol-change-arrow">📉</span>
+                    <span className="bristol-change-name">{biggestChange.negative.name}</span>
+                    <span className="bristol-change-detail">
+                      {biggestChange.negative.before} → {biggestChange.negative.after}
+                    </span>
+                    <span className="bristol-change-delta">
+                      {biggestChange.negative.change}
+                    </span>
+                    <span className="bristol-change-date">
+                      {biggestChange.negative.prevLabel} → {biggestChange.negative.dayLabel}
+                    </span>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
       )}

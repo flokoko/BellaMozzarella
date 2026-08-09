@@ -1,10 +1,18 @@
-import { useState, useEffect } from 'react'
-import { Coffee, Sandwich, UtensilsCrossed, Calendar, Pizza, X, Check, Pencil, Trash2, type LucideIcon } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { Coffee, Sandwich, UtensilsCrossed, Calendar, Pizza, X, Check, Pencil, Trash2, Carrot, ShoppingCart, type LucideIcon } from 'lucide-react'
 import type { Meal, MealIdea, DayOfWeek, MealType } from '../types'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../context/ToastContext'
 import { useOfflineQueue } from '../hooks/useOfflineQueue'
 import './MealPlanScreen.css'
+
+interface MealIngredient {
+  id: string
+  meal_id: string
+  name: string
+  quantity: string | null
+  created_at: string
+}
 
 interface MealPlanScreenProps {
   meals: Meal[]
@@ -13,6 +21,7 @@ interface MealPlanScreenProps {
   userName: string
   onMealsChange: () => void
   onIdeasChange: () => void
+  onAddToShoppingList?: (ingredients: { name: string; quantity: string | null }[]) => void
 }
 
 const DAYS: DayOfWeek[] = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
@@ -44,6 +53,7 @@ export default function MealPlanScreen({
   userName,
   onMealsChange,
   onIdeasChange,
+  onAddToShoppingList,
 }: MealPlanScreenProps) {
   const { toast, confirm } = useToast()
   const { isOnline, enqueue } = useOfflineQueue()
@@ -57,6 +67,13 @@ export default function MealPlanScreen({
   const [planPickerFor, setPlanPickerFor] = useState<string | null>(null)
   const [planDay, setPlanDay] = useState<DayOfWeek>('Montag')
   const [planMealType, setPlanMealType] = useState<MealType>('Abendessen')
+
+  // ── Ingredient state ──
+  const [ingredientsByMeal, setIngredientsByMeal] = useState<Record<string, MealIngredient[]>>({})
+  const [ingredientEditorFor, setIngredientEditorFor] = useState<string | null>(null)
+  const [newIngredientName, setNewIngredientName] = useState('')
+  const [newIngredientQty, setNewIngredientQty] = useState('')
+  const [ingredientsLoading, setIngredientsLoading] = useState(false)
 
   // Track "today" so it stays correct if the app stays open past midnight
   const [todayName, setTodayName] = useState<DayOfWeek>(() =>
@@ -293,6 +310,133 @@ export default function MealPlanScreen({
     return tags.split(',').map((t) => t.trim()).filter(Boolean)
   }
 
+  // ── Ingredient functions ──
+  const fetchIngredients = useCallback(async (mealId: string) => {
+    if (!isOnline) return
+    setIngredientsLoading(true)
+    const { data, error } = await supabase
+      .from('meal_ingredients')
+      .select('*')
+      .eq('meal_id', mealId)
+      .order('created_at', { ascending: true })
+    if (error) {
+      toast(`Fehler beim Laden der Zutaten: ${error.message}`, 'error')
+    } else {
+      setIngredientsByMeal((prev) => ({ ...prev, [mealId]: data as MealIngredient[] }))
+    }
+    setIngredientsLoading(false)
+  }, [isOnline, toast])
+
+  const toggleIngredientEditor = (mealId: string) => {
+    if (ingredientEditorFor === mealId) {
+      setIngredientEditorFor(null)
+    } else {
+      setIngredientEditorFor(mealId)
+      if (!ingredientsByMeal[mealId]) {
+        fetchIngredients(mealId)
+      }
+    }
+    setNewIngredientName('')
+    setNewIngredientQty('')
+  }
+
+  const addIngredient = async (mealId: string) => {
+    const n = newIngredientName.trim()
+    if (!n) return
+    const q = newIngredientQty.trim() || null
+    if (isOnline) {
+      const { data, error } = await supabase
+        .from('meal_ingredients')
+        .insert({ meal_id: mealId, name: n, quantity: q })
+        .select()
+      if (error) {
+        toast(`Fehler beim Hinzufügen: ${error.message}`, 'error')
+        return
+      }
+      setIngredientsByMeal((prev) => ({
+        ...prev,
+        [mealId]: [...(prev[mealId] || []), ...(data as MealIngredient[])],
+      }))
+    } else {
+      enqueue({
+        type: 'insert',
+        table: 'meal_ingredients',
+        payload: { meal_id: mealId, name: n, quantity: q },
+      })
+      setIngredientsByMeal((prev) => ({
+        ...prev,
+        [mealId]: [...(prev[mealId] || []), {
+          id: crypto.randomUUID(),
+          meal_id: mealId,
+          name: n,
+          quantity: q,
+          created_at: new Date().toISOString(),
+        }],
+      }))
+    }
+    setNewIngredientName('')
+    setNewIngredientQty('')
+    navigator.vibrate?.(10)
+  }
+
+  const deleteIngredient = async (mealId: string, ingredientId: string) => {
+    if (isOnline) {
+      const { error } = await supabase
+        .from('meal_ingredients')
+        .delete()
+        .eq('id', ingredientId)
+      if (error) {
+        toast(`Fehler beim Löschen: ${error.message}`, 'error')
+        return
+      }
+    } else {
+      enqueue({
+        type: 'delete',
+        table: 'meal_ingredients',
+        payload: {},
+        filterColumn: 'id',
+        filterValue: ingredientId,
+      })
+    }
+    setIngredientsByMeal((prev) => ({
+      ...prev,
+      [mealId]: (prev[mealId] || []).filter((i) => i.id !== ingredientId),
+    }))
+    navigator.vibrate?.(10)
+  }
+
+  const addToShoppingList = async (mealId: string) => {
+    const ingredients = ingredientsByMeal[mealId] || []
+    if (ingredients.length === 0) {
+      toast('Keine Zutaten vorhanden — füge zuerst Zutaten hinzu!', 'error')
+      return
+    }
+    const rows = ingredients.map((i) => ({
+      list_type: 'shopping' as const,
+      name: i.name,
+      quantity: i.quantity,
+      category: 'Essen',
+      assigned_to: null,
+      is_checked: false,
+      is_brought: false,
+      created_by: userName,
+    }))
+    if (isOnline) {
+      const { error } = await supabase.from('items').insert(rows)
+      if (error) {
+        toast(`Fehler: ${error.message}`, 'error')
+        return
+      }
+    } else {
+      for (const row of rows) {
+        enqueue({ type: 'insert', table: 'items', payload: row })
+      }
+    }
+    navigator.vibrate?.(10)
+    toast('Zutaten zur Einkaufsliste hinzugefügt!', 'success')
+    onAddToShoppingList?.(ingredients.map((i) => ({ name: i.name, quantity: i.quantity })))
+  }
+
   const mealCount = meals.length
   const ideaCount = mealIdeas.length
 
@@ -388,6 +532,14 @@ export default function MealPlanScreen({
                               <div className="meal-cell-buttons">
                                 <button
                                   className="meal-cell-btn"
+                                  onClick={() => toggleIngredientEditor(meal.id)}
+                                  aria-label="Zutaten"
+                                  title="Zutaten"
+                                >
+                                  <Carrot size={14} strokeWidth={2} />
+                                </button>
+                                <button
+                                  className="meal-cell-btn"
                                   onClick={() => startEdit(meal)}
                                   aria-label="Bearbeiten"
                                 >
@@ -404,6 +556,66 @@ export default function MealPlanScreen({
                             </div>
                             <div className="meal-cell-name">{meal.name}</div>
                             {meal.note && <div className="meal-cell-note">{meal.note}</div>}
+
+                            {ingredientEditorFor === meal.id && (
+                              <div className="ingredient-editor">
+                                <div className="ingredient-editor-header">🥕 Zutaten</div>
+                                {ingredientsLoading && <div className="ingredient-loading">Lade…</div>}
+                                {!ingredientsLoading && (ingredientsByMeal[meal.id] || []).length === 0 && (
+                                  <div className="ingredient-empty">Noch keine Zutaten</div>
+                                )}
+                                {(ingredientsByMeal[meal.id] || []).map((ing) => (
+                                  <div key={ing.id} className="ingredient-row">
+                                    <span className="ingredient-name">{ing.name}</span>
+                                    {ing.quantity && <span className="ingredient-qty">{ing.quantity}</span>}
+                                    <button
+                                      className="ingredient-delete-btn"
+                                      onClick={() => deleteIngredient(meal.id, ing.id)}
+                                      aria-label="Zutat löschen"
+                                    >
+                                      <X size={12} strokeWidth={2} />
+                                    </button>
+                                  </div>
+                                ))}
+                                <div className="ingredient-add-form">
+                                  <input
+                                    className="meal-input ingredient-input-name"
+                                    type="text"
+                                    placeholder="Zutat"
+                                    value={newIngredientName}
+                                    onChange={(e) => setNewIngredientName(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') addIngredient(meal.id)
+                                      if (e.key === 'Escape') setIngredientEditorFor(null)
+                                    }}
+                                  />
+                                  <input
+                                    className="meal-input ingredient-input-qty"
+                                    type="text"
+                                    placeholder="Menge"
+                                    value={newIngredientQty}
+                                    onChange={(e) => setNewIngredientQty(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') addIngredient(meal.id)
+                                      if (e.key === 'Escape') setIngredientEditorFor(null)
+                                    }}
+                                  />
+                                  <button
+                                    className="ingredient-add-btn"
+                                    onClick={() => addIngredient(meal.id)}
+                                    disabled={!newIngredientName.trim()}
+                                  >
+                                    +
+                                  </button>
+                                </div>
+                                <button
+                                  className="ingredient-to-shopping-btn"
+                                  onClick={() => addToShoppingList(meal.id)}
+                                >
+                                  <ShoppingCart size={14} strokeWidth={2} /> Zur Einkaufsliste
+                                </button>
+                              </div>
+                            )}
                           </div>
                         )
                       }

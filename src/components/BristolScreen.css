@@ -671,3 +671,149 @@
 .bristol-toggle-btn:not(.active):hover {
   color: var(--text-primary);
 }
+
+/* ── Highscore / Leaderboard ── */
+.bristol-leaderboard {
+  margin-bottom: 1rem;
+}
+
+.bristol-leaderboard:last-of-type {
+  margin-bottom: 0;
+}
+
+.bristol-leaderboard-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-bottom: 0.45rem;
+}
+
+.bristol-leaderboard-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  background: var(--button-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 0.3rem;
+}
+
+.bristol-leaderboard-row:last-child {
+  margin-bottom: 0;
+}
+
+.bristol-medal {
+  font-size: 1.1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.bristol-leaderboard-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bristol-leaderboard-value {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* ── Biggest Change Section ── */
+.bristol-change-section {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.bristol-change-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-bottom: 0.45rem;
+}
+
+.bristol-change-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.6rem 0.7rem;
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 0.4rem;
+}
+
+.bristol-change-row:last-child {
+  margin-bottom: 0;
+}
+
+.bristol-change-pos {
+  background: linear-gradient(135deg, rgba(0, 146, 70, 0.08) 0%, var(--button-bg) 100%);
+  border-color: rgba(0, 146, 70, 0.25);
+}
+
+.bristol-change-neg {
+  background: linear-gradient(135deg, rgba(206, 43, 55, 0.08) 0%, var(--button-bg) 100%);
+  border-color: rgba(206, 43, 55, 0.25);
+}
+
+.bristol-change-arrow {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.bristol-change-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bristol-change-detail {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.bristol-change-delta {
+  font-size: 0.85rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.bristol-change-pos .bristol-change-delta {
+  background: rgba(0, 146, 70, 0.15);
+  color: #009246;
+}
+
+.bristol-change-neg .bristol-change-delta {
+  background: rgba(206, 43, 55, 0.15);
+  color: #ce2b37;
+}
+
+.bristol-change-date {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-basis: 100%;
+  margin-top: 0.15rem;
+}

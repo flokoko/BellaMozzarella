@@ -403,6 +403,7 @@ export default function App() {
               userName={userName}
               onMealsChange={handleMealsChange}
               onIdeasChange={handleIdeasChange}
+              onAddToShoppingList={handleShoppingItemsChange}
             />
           </Suspense>
         )}
