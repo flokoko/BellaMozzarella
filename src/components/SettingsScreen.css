@@ -515,3 +515,12 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/* ── Push hint text ───────────────────────────────────────────────── */
+.settings-push-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 0.6rem;
+  margin-bottom: 0;
+  line-height: 1.4;
+}

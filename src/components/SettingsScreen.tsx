@@ -396,6 +396,11 @@ export default function SettingsScreen({
             )}
           </>
         )}
+        {pushEnabled && (
+          <p className="settings-push-hint">
+            Änderungen werden gebündelt als eine Benachrichtigung zusammengefasst.
+          </p>
+        )}
       </div>
 
       {/* ── Bristol Modus ──────────────────────────────────────────────── */}

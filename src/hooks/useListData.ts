@@ -24,6 +24,12 @@ import {
   deriveIsAdmin,
   deriveCheckedCount,
 } from '../lib/derivedState'
+import {
+  notifyEvent,
+  setNotifyListId,
+  setNotifyUserName,
+  resetNotifyBuffer,
+} from '../lib/notify'
 
 export function useListData() {
   // ── Offline queue ──────────────────────────────────────────────────
@@ -57,6 +63,8 @@ export function useListData() {
 
   // ── Track previous shopping items for push notifications ───────────
   const prevShoppingItemsRef = useRef<ListItem[]>([])
+  // ── Track previous bring items for push notifications ─────────────
+  const prevBringItemsRef = useRef<ListItem[]>([])
 
   // ── userNameRef: avoids cascading re-creation of fetchItems ────────
   const userNameRef = useRef<string | null>(userName)
@@ -92,24 +100,94 @@ export function useListData() {
     // Write to read cache for offline access
     writeCache(listId, listType === 'shopping' ? 'shopping_items' : 'bring_items', items)
     if (listType === 'shopping') {
-      // ── Push notification: check for new items added by others ──
-      const prevIds = new Set(prevShoppingItemsRef.current.map(i => i.id))
-      const newItems = items.filter(i => !prevIds.has(i.id) && i.created_by !== userNameRef.current)
-      if (
-        newItems.length > 0 &&
-        document.hidden &&
-        'Notification' in window &&
-        Notification.permission === 'granted' &&
-        localStorage.getItem('push_notifications_enabled') === 'true'
-      ) {
-        new Notification('Neue Items in der Einkaufsliste', {
-          body: `🛒 ${newItems.length} neue(s) Item(s) in der Einkaufsliste`,
-          tag: 'shopping-update',
-        })
+      // ── Batched push notifications for shopping items ──────────────
+      const pushEnabled = localStorage.getItem('push_notifications_enabled') === 'true'
+
+      if (pushEnabled) {
+        const prevItems = prevShoppingItemsRef.current
+        const prevMap = new Map(prevItems.map(i => [i.id, i]))
+        const prevIds = new Set(prevMap.keys())
+
+        // New items added by others
+        const newItems = items.filter(
+          i => !prevIds.has(i.id) && i.created_by !== userNameRef.current,
+        )
+
+        if (newItems.length > 0 && prevItems.length > 0) {
+          notifyEvent('new_shopping', 'neue Items in der Einkaufsliste', newItems.length)
+        }
+
+        // Checkbox toggles by others (is_checked changed)
+        if (prevItems.length > 0) {
+          let checkedCount = 0
+          let uncheckedCount = 0
+          for (const item of items) {
+            const prev = prevMap.get(item.id)
+            if (!prev) continue
+            // Only count changes on items NOT created by us
+            // (if we toggled our own item, we shouldn't be notified)
+            if (item.created_by !== userNameRef.current) {
+              if (!prev.is_checked && item.is_checked) {
+                checkedCount++
+              } else if (prev.is_checked && !item.is_checked) {
+                uncheckedCount++
+              }
+            }
+          }
+          if (checkedCount > 0) {
+            notifyEvent('checked_shopping', 'Items abgehakt', checkedCount)
+          }
+          if (uncheckedCount > 0) {
+            notifyEvent('unchecked_shopping', 'Items wieder offen', uncheckedCount)
+          }
+        }
       }
+
       prevShoppingItemsRef.current = items
       setShoppingItems(items)
     } else {
+      // ── Batched push notifications for bring items ────────────────
+      const pushEnabled = localStorage.getItem('push_notifications_enabled') === 'true'
+
+      if (pushEnabled) {
+        const prevItems = prevBringItemsRef.current
+        const prevMap = new Map(prevItems.map(i => [i.id, i]))
+        const prevIds = new Set(prevMap.keys())
+
+        // New bring items added by others
+        const newBringItems = items.filter(
+          i => !prevIds.has(i.id) && i.created_by !== userNameRef.current,
+        )
+
+        if (newBringItems.length > 0 && prevItems.length > 0) {
+          notifyEvent('new_bring', 'neue Mitbring-Items', newBringItems.length)
+        }
+
+        // is_brought toggles by others
+        if (prevItems.length > 0) {
+          let broughtCount = 0
+          let unbroughtCount = 0
+          for (const item of items) {
+            const prev = prevMap.get(item.id)
+            if (!prev) continue
+            if (item.created_by !== userNameRef.current) {
+              if (!prev.is_brought && item.is_brought) {
+                broughtCount++
+              } else if (prev.is_brought && !item.is_brought) {
+                unbroughtCount++
+              }
+            }
+          }
+          if (broughtCount > 0) {
+            notifyEvent('brought', 'Items als mitgebracht markiert', broughtCount)
+          }
+          if (unbroughtCount > 0) {
+            notifyEvent('unbrought', 'Items nicht mehr mitgebracht', unbroughtCount)
+          }
+        }
+      }
+
+      prevBringItemsRef.current = items
       setBringItems(items)
     }
   }, [])
@@ -320,6 +398,15 @@ export function useListData() {
       }
     }
   }, [])
+
+  // ── Sync list id + user name to the notification module ────────────
+  useEffect(() => {
+    setNotifyListId(list?.id ?? null)
+  }, [list?.id])
+
+  useEffect(() => {
+    setNotifyUserName(userName)
+  }, [userName])
 
   // ── Auto-restore session ───────────────────────────────────────────
   useEffect(() => {
@@ -588,6 +675,8 @@ export function useListData() {
     setAdminUnlocked(false)
     setUndoState(null)
     prevShoppingItemsRef.current = []
+    prevBringItemsRef.current = []
+    resetNotifyBuffer()
   }, [list])
 
   const handleRename = useCallback(async (newName: string): Promise<string | null> => {
