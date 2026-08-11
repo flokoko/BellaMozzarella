@@ -37,10 +37,22 @@ export default function ExpenseQuotaManager({
   // ── Start editing a category: load existing quotas into draft ──
   const startEdit = useCallback((category: string) => {
     const existing = quotaMap[category] ?? {}
+    const hasExisting = Object.keys(existing).length > 0
     const newDraft: Record<string, string> = {}
-    for (const person of knownPersons) {
-      const val = existing[person] ?? 0
-      newDraft[person] = String(val)
+    if (hasExisting) {
+      // Load existing quotas as-is
+      for (const person of knownPersons) {
+        newDraft[person] = String(existing[person] ?? 0)
+      }
+    } else if (knownPersons.length > 0) {
+      // No config yet → evenly distribute 100% across all persons,
+      // rounding to one decimal and putting the remainder on the first persons
+      const totalTenths = 1000 // 100.0% in tenths of a percent
+      const base = Math.floor(totalTenths / knownPersons.length)
+      const remainder = totalTenths - base * knownPersons.length
+      knownPersons.forEach((person, i) => {
+        newDraft[person] = String((base + (i < remainder ? 1 : 0)) / 10)
+      })
     }
     setDraft(newDraft)
     setEditingCategory(category)
