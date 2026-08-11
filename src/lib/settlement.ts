@@ -1,4 +1,4 @@
-import type { Expense, ExpenseSplit } from '../types'
+import type { Expense, ExpenseSplit, ExpenseQuota } from '../types'
 
 export interface SettlementTxn {
   from: string
@@ -126,6 +126,59 @@ export function calculateShareAmounts(
     const val = parseFloat(exactShares[p] ?? '0')
     return { person_name: p, share_amount: isNaN(val) ? 0 : val }
   })
+}
+
+/**
+ * Calculate share amounts from quota percentages.
+ * Same rounding logic as calculateShareAmounts: floor to cents,
+ * remainder goes to the largest quota holders (by absolute cents).
+ */
+export function calculateQuotaShares(
+  quotas: ExpenseQuota[],
+  allPersons: string[],
+  amountNum: number,
+): { person_name: string; share_amount: number }[] {
+  if (allPersons.length === 0 || amountNum <= 0) return []
+
+  // Build person -> percent map from quotas (only persons in allPersons)
+  const percentMap = new Map<string, number>()
+  for (const q of quotas) {
+    if (allPersons.includes(q.person_name)) {
+      percentMap.set(q.person_name, (percentMap.get(q.person_name) ?? 0) + q.percent)
+    }
+  }
+
+  // Only persons with a quota > 0 participate
+  const participants = allPersons.filter(p => (percentMap.get(p) ?? 0) > 0)
+  if (participants.length === 0) return []
+
+  const totalCents = Math.round(amountNum * 100)
+
+  // Calculate raw cents per person (floored)
+  const rawCents = participants.map(p => {
+    const pct = percentMap.get(p) ?? 0
+    return { person_name: p, cents: Math.floor((totalCents * pct) / 100) }
+  })
+
+  // Remainder: distribute to those with the highest fractional part
+  // (i.e. those whose floor cost them the most relative to their quota)
+  const distributed = rawCents.reduce((s, r) => s + r.cents, 0)
+  let remainder = totalCents - distributed
+
+  if (remainder > 0) {
+    // Sort by who lost the most to flooring (highest raw value before floor)
+    const fractionalLoss = participants.map((p, i) => {
+      const pct = percentMap.get(p) ?? 0
+      const raw = (totalCents * pct) / 100
+      return { person_name: p, loss: raw - rawCents[i].cents, idx: i }
+    })
+    fractionalLoss.sort((a, b) => b.loss - a.loss)
+    for (let i = 0; i < remainder && i < fractionalLoss.length; i++) {
+      rawCents[fractionalLoss[i].idx].cents += 1
+    }
+  }
+
+  return rawCents.map(r => ({ person_name: r.person_name, share_amount: r.cents / 100 }))
 }
 
 /** Total expenses */

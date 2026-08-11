@@ -102,6 +102,15 @@ export interface Participant {
   joined_at: string
 }
 
+export interface ExpenseQuota {
+  id: string
+  list_id: string
+  category: string
+  person_name: string
+  percent: number
+  created_at: string
+}
+
 export interface BristolEntry {
   id: string
   list_id: string

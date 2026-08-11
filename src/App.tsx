@@ -87,12 +87,12 @@ export default function App() {
   const { toast } = useToast()
   const {
     userName, list, participantId, shoppingItems, bringItems, categories, meals, mealIdeas,
-    notes, expenses, expenseSplits, participants, adminUnlocked,
+    notes, expenses, expenseSplits, expenseQuotas, participants, adminUnlocked,
     isAdmin, shoppingCategories, bringCategories, knownPersons, userBalance,
     expenseTotal, checkedCount, isLoading, isOnline, queueLength, flushQueue,
     setList, setAdminUnlocked,
     fetchAll,
-    fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes, fetchExpenses, fetchParticipants,
+    fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes, fetchExpenses, fetchParticipants, fetchExpenseQuotas,
     toggleShoppingItem, deleteShoppingItem, undoDelete, batchToggleShoppingItems, toggleBringItem, deleteBringItem, reorderItems, reorderNotes, toggleNoteFavorite,
     handleJoin, handleLeave, handleRename,
     undoState,
@@ -258,6 +258,7 @@ export default function App() {
   const handleMealsChange = useCallback(() => { if (list) fetchMeals(list.id) }, [list, fetchMeals])
   const handleIdeasChange = useCallback(() => { if (list) fetchMealIdeas(list.id) }, [list, fetchMealIdeas])
   const handleExpensesChange = useCallback(() => { if (list) fetchExpenses(list.id) }, [list, fetchExpenses])
+  const handleQuotasChange = useCallback(() => { if (list) fetchExpenseQuotas(list.id) }, [list, fetchExpenseQuotas])
   const handleParticipantsChange = useCallback(() => { if (list) fetchParticipants(list.id) }, [list, fetchParticipants])
 
   // ── Render ─────────────────────────────────────────────────────────
@@ -412,13 +413,17 @@ export default function App() {
             <ExpenseScreen
               expenses={expenses}
               expenseSplits={expenseSplits}
+              expenseQuotas={expenseQuotas}
               listId={list.id}
               userName={userName}
               knownPersons={knownPersons}
               expenseCategories={expenseCategories}
               isLoading={isLoading}
+              isAdmin={isAdmin}
+              adminUnlocked={adminUnlocked}
               onExpensesChange={handleExpensesChange}
               onCategoriesChange={handleCategoriesChange}
+              onQuotasChange={handleQuotasChange}
             />
           </Suspense>
         )}

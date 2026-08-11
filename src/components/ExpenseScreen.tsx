@@ -1,39 +1,48 @@
 import { useState, useMemo, useCallback } from 'react'
-import { Wallet, Receipt, Table2 } from 'lucide-react'
-import type { Expense, ExpenseSplit, ItemCategory } from '../types'
+import { Wallet, Receipt, Table2, Percent } from 'lucide-react'
+import type { Expense, ExpenseSplit, ExpenseQuota, ItemCategory } from '../types'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../context/ToastContext'
 import ExpenseForm from './ExpenseForm'
 import ExpenseList from './ExpenseList'
 import ExpenseSettlement from './ExpenseSettlement'
 import ExpenseMatrix from './ExpenseMatrix'
+import ExpenseQuotaManager from './ExpenseQuotaManager'
 import './ExpenseScreen.css'
 
 interface ExpenseScreenProps {
   expenses: Expense[]
   expenseSplits: ExpenseSplit[]
+  expenseQuotas: ExpenseQuota[]
   listId: string
   userName: string
   knownPersons: string[]
   expenseCategories: ItemCategory[]
   isLoading?: boolean
+  isAdmin: boolean
+  adminUnlocked: boolean
   onExpensesChange: () => void
   onCategoriesChange: () => void
+  onQuotasChange: () => void
 }
 
 export default function ExpenseScreen({
   expenses,
   expenseSplits,
+  expenseQuotas,
   listId,
   userName,
   knownPersons,
   expenseCategories,
   isLoading,
+  isAdmin,
+  adminUnlocked,
   onExpensesChange,
   onCategoriesChange,
+  onQuotasChange,
 }: ExpenseScreenProps) {
   const { toast, confirm } = useToast()
-  const [section, setSection] = useState<'expenses' | 'settlement' | 'matrix'>('expenses')
+  const [section, setSection] = useState<'expenses' | 'settlement' | 'matrix' | 'quotas'>('expenses')
   const [formExpanded, setFormExpanded] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [description, setDescription] = useState('')
@@ -52,6 +61,14 @@ export default function ExpenseScreen({
     const names = new Set<string>(knownPersons)
     return Array.from(names).sort((a, b) => a.localeCompare(b))
   }, [knownPersons])
+
+  // ── Quotas for the selected category (for auto-split in form) ──
+  const categoryQuotas = useMemo(() => {
+    if (!expenseCategory) return []
+    return expenseQuotas.filter(q => q.category === expenseCategory)
+  }, [expenseQuotas, expenseCategory])
+
+  const hasQuotaConfig = categoryQuotas.length > 0
 
   // ── Splits for a given expense ──
   const getSplitsForExpense = useCallback(
@@ -154,6 +171,8 @@ export default function ExpenseScreen({
     URL.revokeObjectURL(url)
   }
 
+  const showQuotaTab = isAdmin && adminUnlocked
+
   return (
     <div className="expense-screen">
       {/* ── Sub-Toggle ── */}
@@ -176,6 +195,14 @@ export default function ExpenseScreen({
         >
           <Table2 size={16} strokeWidth={2} /> Matrix
         </button>
+        {showQuotaTab && (
+          <button
+            className={`expense-toggle-btn ${section === 'quotas' ? 'active' : ''}`}
+            onClick={() => { navigator.vibrate?.(8); setSection('quotas') }}
+          >
+            <Percent size={16} strokeWidth={2} /> Quoten
+          </button>
+        )}
       </div>
 
       {/* ── Ausgaben Section ── */}
@@ -203,6 +230,8 @@ export default function ExpenseScreen({
               expenseNote={expenseNote}
               expenseCategory={expenseCategory}
               formExpanded={formExpanded}
+              hasQuotaConfig={hasQuotaConfig}
+              categoryQuotas={categoryQuotas}
               setDescription={setDescription}
               setAmount={setAmount}
               setPaidBy={setPaidBy}
@@ -244,6 +273,17 @@ export default function ExpenseScreen({
       {/* ── Matrix Section ── */}
       {section === 'matrix' && (
         <ExpenseMatrix expenses={expenses} expenseSplits={expenseSplits} />
+      )}
+
+      {/* ── Quoten Section (Admin only) ── */}
+      {section === 'quotas' && showQuotaTab && (
+        <ExpenseQuotaManager
+          listId={listId}
+          expenseCategories={expenseCategories}
+          knownPersons={allPersons}
+          expenseQuotas={expenseQuotas}
+          onQuotasChange={onQuotasChange}
+        />
       )}
     </div>
   )

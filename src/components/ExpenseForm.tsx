@@ -1,10 +1,10 @@
 import { useState, useMemo, useCallback } from 'react'
 import { Trash2, Plus } from 'lucide-react'
-import type { ExpenseSplit, ItemCategory } from '../types'
+import type { ExpenseSplit, ExpenseQuota, ItemCategory } from '../types'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../context/ToastContext'
 import { useCategories } from '../hooks/useCategories'
-import { calculateShareAmounts, fmtEUR } from '../lib/settlement'
+import { calculateShareAmounts, calculateQuotaShares, fmtEUR } from '../lib/settlement'
 
 interface ExpenseFormProps {
   listId: string
@@ -22,6 +22,8 @@ interface ExpenseFormProps {
   expenseNote: string
   expenseCategory: string
   formExpanded: boolean
+  hasQuotaConfig: boolean
+  categoryQuotas: ExpenseQuota[]
   // Setters
   setDescription: (v: string) => void
   setAmount: (v: string) => void
@@ -56,6 +58,8 @@ export default function ExpenseForm({
   expenseNote,
   expenseCategory,
   formExpanded,
+  hasQuotaConfig,
+  categoryQuotas,
   setDescription,
   setAmount,
   setPaidBy,
@@ -90,11 +94,11 @@ export default function ExpenseForm({
     splitMode === 'equal' ||
     Math.abs(exactSum - amountNum) < 0.01
 
+  // When quota config is active, the split is automatic — no manual validation needed
   const canSave =
     description.trim() !== '' &&
     amountNum > 0 &&
-    splitPeople.length > 0 &&
-    exactSumOk
+    (hasQuotaConfig || (splitPeople.length > 0 && exactSumOk))
 
   const togglePerson = (name: string) => {
     setSplitPeople((prev) =>
@@ -116,15 +120,30 @@ export default function ExpenseForm({
     return `${splitPeople.length} Personen à ${fmtEUR(lower)}–${fmtEUR(higher)}`
   }, [splitMode, splitPeople, amountNum])
 
+  // ── Preview for quota split ──
+  const quotaPreview = useMemo(() => {
+    if (!hasQuotaConfig || amountNum <= 0) return null
+    const shares = calculateQuotaShares(categoryQuotas, allPersons, amountNum)
+    if (shares.length === 0) return null
+    return shares.map(s => `${s.person_name}: ${fmtEUR(s.share_amount)}`).join(', ')
+  }, [hasQuotaConfig, categoryQuotas, allPersons, amountNum])
+
   const calculateShares = useCallback((): { person_name: string; share_amount: number }[] => {
+    // If category has quota config, override everything
+    if (hasQuotaConfig) {
+      return calculateQuotaShares(categoryQuotas, allPersons, amountNum)
+    }
     return calculateShareAmounts(splitMode, splitPeople, amountNum, exactShares)
-  }, [splitMode, splitPeople, amountNum, exactShares])
+  }, [hasQuotaConfig, categoryQuotas, allPersons, amountNum, splitMode, splitPeople, exactShares])
+
+  // ── The effective split_mode to store in DB ──
+  const effectiveSplitMode: 'equal' | 'exact' = hasQuotaConfig ? 'exact' : splitMode
 
   // ── Save (insert or update) ──
   const handleSave = async () => {
     const desc = description.trim()
-    if (!desc || amountNum <= 0 || splitPeople.length === 0) return
-    if (!exactSumOk) return
+    if (!desc || amountNum <= 0) return
+    if (!hasQuotaConfig && (splitPeople.length === 0 || !exactSumOk)) return
 
     const shares = calculateShares()
 
@@ -135,7 +154,7 @@ export default function ExpenseForm({
           description: desc,
           amount: amountNum,
           paid_by: paidBy,
-          split_mode: splitMode,
+          split_mode: effectiveSplitMode,
           expense_date: expenseDate,
           note: expenseNote.trim() || null,
           category: expenseCategory || null,
@@ -188,7 +207,7 @@ export default function ExpenseForm({
           description: desc,
           amount: amountNum,
           paid_by: paidBy,
-          split_mode: splitMode,
+          split_mode: effectiveSplitMode,
           expense_date: expenseDate,
           note: expenseNote.trim() || null,
           category: expenseCategory || null,
@@ -211,6 +230,7 @@ export default function ExpenseForm({
         )
         if (splitErr) {
           toast(`Fehler beim Speichern der Aufteilung: ${splitErr.message}`, 'error')
+          // Rollback: delete the orphaned expense to avoid inconsistent state
           await supabase.from('expenses').delete().eq('id', expenseId)
           return
         }
@@ -357,43 +377,54 @@ export default function ExpenseForm({
         onChange={(e) => setExpenseNote(e.target.value)}
       />
 
-      {/* Split among chips */}
-      <div>
-        <div className="expense-chips-label">Geteilt durch</div>
-        <div className="expense-chips">
-          {allPersons.map((p) => (
-            <button
-              key={p}
-              className={`expense-chip ${splitPeople.includes(p) ? 'active' : ''}`}
-              onClick={() => togglePerson(p)}
-              type="button"
-            >
-              {p}
-            </button>
-          ))}
+      {/* Quota info banner — shown when category has quota config */}
+      {hasQuotaConfig && (
+        <div className="quota-form-banner">
+          📊 Diese Kategorie hat feste Quoten — die Aufteilung erfolgt automatisch nach Prozenten.
         </div>
-      </div>
+      )}
 
-      {/* Split mode toggle */}
-      <div className="expense-mode-toggle">
-        <button
-          className={`expense-mode-btn ${splitMode === 'equal' ? 'active' : ''}`}
-          onClick={() => setSplitMode('equal')}
-          type="button"
-        >
-          Gleichmäßig
-        </button>
-        <button
-          className={`expense-mode-btn ${splitMode === 'exact' ? 'active' : ''}`}
-          onClick={() => setSplitMode('exact')}
-          type="button"
-        >
-          Exakt
-        </button>
-      </div>
+      {/* Split among chips — hidden when quota config is active */}
+      {!hasQuotaConfig && (
+        <div>
+          <div className="expense-chips-label">Geteilt durch</div>
+          <div className="expense-chips">
+            {allPersons.map((p) => (
+              <button
+                key={p}
+                className={`expense-chip ${splitPeople.includes(p) ? 'active' : ''}`}
+                onClick={() => togglePerson(p)}
+                type="button"
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
-      {/* Exact split inputs */}
-      {splitMode === 'exact' && splitPeople.length > 0 && (
+      {/* Split mode toggle — hidden when quota config is active */}
+      {!hasQuotaConfig && (
+        <div className="expense-mode-toggle">
+          <button
+            className={`expense-mode-btn ${splitMode === 'equal' ? 'active' : ''}`}
+            onClick={() => setSplitMode('equal')}
+            type="button"
+          >
+            Gleichmäßig
+          </button>
+          <button
+            className={`expense-mode-btn ${splitMode === 'exact' ? 'active' : ''}`}
+            onClick={() => setSplitMode('exact')}
+            type="button"
+          >
+            Exakt
+          </button>
+        </div>
+      )}
+
+      {/* Exact split inputs — hidden when quota config is active */}
+      {!hasQuotaConfig && splitMode === 'exact' && splitPeople.length > 0 && (
         <div className="expense-exact-splits">
           {splitPeople.map((p) => (
             <div key={p} className="expense-exact-row">
@@ -417,8 +448,13 @@ export default function ExpenseForm({
         </div>
       )}
 
-      {/* Equal preview */}
-      {equalPreview && (
+      {/* Quota preview — shown when quota config is active */}
+      {quotaPreview && (
+        <div className="expense-form-preview">{quotaPreview}</div>
+      )}
+
+      {/* Equal preview — shown when no quota config */}
+      {!hasQuotaConfig && equalPreview && (
         <div className="expense-form-preview">{equalPreview}</div>
       )}
 
