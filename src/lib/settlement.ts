@@ -154,6 +154,23 @@ export function calculateQuotaShares(
 
   const totalCents = Math.round(amountNum * 100)
 
+  // If all participating quotas are (to within rounding) equal, this is an
+  // even distribution → split the amount equally in cents. Doing this via the
+  // rounded percentages (e.g. 33.33 / 33.33 / 33.34) would inflate the tiny
+  // 0.01% rounding difference into real cent gaps at large amounts (at 1000 €
+  // a 33.33 vs 33.34 split is off by 10 cents). Equal-splitting directly keeps
+  // every person within 1 cent of each other, the mathematical optimum.
+  const firstPct = percentMap.get(participants[0]) ?? 0
+  const isEven = participants.every(p => Math.abs((percentMap.get(p) ?? 0) - firstPct) < 0.011)
+  if (isEven) {
+    const perCents = Math.floor(totalCents / participants.length)
+    const remainder = totalCents - perCents * participants.length
+    return participants.map((p, i) => ({
+      person_name: p,
+      share_amount: (perCents + (i < remainder ? 1 : 0)) / 100,
+    }))
+  }
+
   // Calculate raw cents per person (floored)
   const rawCents = participants.map(p => {
     const pct = percentMap.get(p) ?? 0
