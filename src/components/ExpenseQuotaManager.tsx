@@ -46,12 +46,12 @@ export default function ExpenseQuotaManager({
       }
     } else if (knownPersons.length > 0) {
       // No config yet → evenly distribute 100% across all persons,
-      // rounding to one decimal and putting the remainder on the first persons
-      const totalTenths = 1000 // 100.0% in tenths of a percent
-      const base = Math.floor(totalTenths / knownPersons.length)
-      const remainder = totalTenths - base * knownPersons.length
+      // rounding to two decimals and putting the remainder on the first persons
+      const totalHundredths = 10000 // 100.00% in hundredths of a percent
+      const base = Math.floor(totalHundredths / knownPersons.length)
+      const remainder = totalHundredths - base * knownPersons.length
       knownPersons.forEach((person, i) => {
-        newDraft[person] = String((base + (i < remainder ? 1 : 0)) / 10)
+        newDraft[person] = String((base + (i < remainder ? 1 : 0)) / 100)
       })
     }
     setDraft(newDraft)
@@ -67,7 +67,7 @@ export default function ExpenseQuotaManager({
     }, 0)
   }, [editingCategory, draft, knownPersons])
 
-  const sumOk = Math.abs(draftSum - 100) < 0.01
+  const sumOk = Math.abs(draftSum - 100) < 0.005
 
   // ── Save quotas for the current category ──
   const handleSave = useCallback(async () => {
@@ -127,14 +127,14 @@ export default function ExpenseQuotaManager({
     confirm(
       `Quoten für "${category}" gleichmäßig auf ${knownPersons.length} ${knownPersons.length === 1 ? 'Person' : 'Personen'} neu verteilen?`,
       async () => {
-        const totalTenths = 1000 // 100.0% in tenths of a percent
-        const base = Math.floor(totalTenths / knownPersons.length)
-        const remainder = totalTenths - base * knownPersons.length
+        const totalHundredths = 10000 // 100.00% in hundredths of a percent
+        const base = Math.floor(totalHundredths / knownPersons.length)
+        const remainder = totalHundredths - base * knownPersons.length
         const rows = knownPersons.map((person, i) => ({
           list_id: listId,
           category,
           person_name: person,
-          percent: (base + (i < remainder ? 1 : 0)) / 10,
+          percent: (base + (i < remainder ? 1 : 0)) / 100,
         }))
 
         const { error: delError } = await supabase
@@ -220,7 +220,7 @@ export default function ExpenseQuotaManager({
                         <input
                           className="quota-percent-input"
                           type="number"
-                          step="0.1"
+                          step="0.01"
                           min="0"
                           max="100"
                           value={draft[person] ?? '0'}
@@ -235,11 +235,11 @@ export default function ExpenseQuotaManager({
                 </div>
 
                 <div className={`quota-sum-row ${sumOk ? 'ok' : 'warn'}`}>
-                  <span>Summe: {draftSum.toFixed(1)}%</span>
+                  <span>Summe: {draftSum.toFixed(2)}%</span>
                   <span>
                     {sumOk
                       ? '✓ Bereit zum Speichern'
-                      : `Muss 100% ergeben (noch ${(100 - draftSum).toFixed(1)}%)`}
+                      : `Muss 100% ergeben (noch ${(100 - draftSum).toFixed(2)}%)`}
                   </span>
                 </div>
 
@@ -265,7 +265,7 @@ export default function ExpenseQuotaManager({
                   .filter(p => (existing[p] ?? 0) > 0)
                   .map(p => (
                     <span key={p} className="quota-summary-chip">
-                      {p}: {existing[p]}%
+                      {p}: {existing[p].toFixed(2)}%
                     </span>
                   ))}
               </div>
