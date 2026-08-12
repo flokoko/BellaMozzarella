@@ -18,7 +18,7 @@ export default function ExpenseQuotaManager({
   expenseQuotas,
   onQuotasChange,
 }: ExpenseQuotaManagerProps) {
-  const { toast } = useToast()
+  const { toast, confirm } = useToast()
   const [editingCategory, setEditingCategory] = useState<string | null>(null)
 
   // ── Build a map: category -> { personName -> percent } ──
@@ -121,6 +121,49 @@ export default function ExpenseQuotaManager({
     return (quotaMap[category] && Object.keys(quotaMap[category]).length > 0) ?? false
   }, [quotaMap])
 
+  // ── Evenly re-distribute one category's quotas across all persons ──
+  const handleRedistribute = useCallback(async (category: string) => {
+    if (knownPersons.length === 0) return
+    confirm(
+      `Quoten für "${category}" gleichmäßig auf ${knownPersons.length} ${knownPersons.length === 1 ? 'Person' : 'Personen'} neu verteilen?`,
+      async () => {
+        const totalTenths = 1000 // 100.0% in tenths of a percent
+        const base = Math.floor(totalTenths / knownPersons.length)
+        const remainder = totalTenths - base * knownPersons.length
+        const rows = knownPersons.map((person, i) => ({
+          list_id: listId,
+          category,
+          person_name: person,
+          percent: (base + (i < remainder ? 1 : 0)) / 10,
+        }))
+
+        const { error: delError } = await supabase
+          .from('expense_quotas')
+          .delete()
+          .eq('list_id', listId)
+          .eq('category', category)
+        if (delError) {
+          toast(`Fehler beim Neuverteilen: ${delError.message}`, 'error')
+          return
+        }
+
+        const { error: insError } = await supabase.from('expense_quotas').insert(rows)
+        if (insError) {
+          toast(`Fehler beim Speichern: ${insError.message}`, 'error')
+          return
+        }
+
+        navigator.vibrate?.(10)
+        toast('Quoten gleichmäßig verteilt', 'success')
+        if (editingCategory === category) {
+          setEditingCategory(null)
+          setDraft({})
+        }
+        onQuotasChange()
+      }
+    )
+  }, [knownPersons, listId, confirm, toast, editingCategory, onQuotasChange])
+
   if (expenseCategories.length === 0) {
     return (
       <div className="expense-empty">
@@ -148,17 +191,25 @@ export default function ExpenseQuotaManager({
                 {cat.icon} {cat.name}
                 {configured && <span className="quota-badge-active">Aktiv</span>}
               </span>
-              {!isEditing ? (
+              <div className="quota-category-actions">
+                {!isEditing ? (
+                  <button
+                    className="quota-edit-btn"
+                    onClick={() => startEdit(cat.name)}
+                    type="button"
+                  >
+                    {configured ? 'Bearbeiten' : 'Festlegen'}
+                  </button>
+                ) : null}
                 <button
-                  className="quota-edit-btn"
-                  onClick={() => startEdit(cat.name)}
+                  className="quota-redistribute-btn"
+                  onClick={() => handleRedistribute(cat.name)}
                   type="button"
                 >
-                  {configured ? 'Bearbeiten' : 'Festlegen'}
+                  ⚖️ Gleichmäßig
                 </button>
-              ) : null}
+              </div>
             </div>
-
             {isEditing && (
               <div className="quota-edit-section">
                 <div className="quota-person-list">

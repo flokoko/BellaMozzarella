@@ -894,6 +894,13 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.quota-category-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .quota-category-title {
@@ -933,6 +940,30 @@
 }
 
 .quota-edit-btn:active {
+  transform: scale(0.96);
+}
+
+.quota-redistribute-btn {
+  padding: 0.3rem 0.6rem;
+  border: 2px solid var(--glass-border);
+  border-radius: 999px;
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.quota-redistribute-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+.quota-redistribute-btn:active {
   transform: scale(0.96);
 }
 
