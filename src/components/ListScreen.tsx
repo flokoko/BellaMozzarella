@@ -258,7 +258,7 @@ export default function ListScreen({ items, categories, listId, userName, isLoad
   // ── CSV Export ──
   const handleExportCSV = () => {
     const headers = ['Name', 'Kategorie', 'Erledigt']
-    const rows = items.map(i => [
+    const rows = searchFiltered.map(i => [
       i.name,
       i.category || '',
       i.is_checked ? 'ja' : 'nein',

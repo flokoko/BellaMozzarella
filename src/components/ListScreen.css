@@ -59,14 +59,14 @@
 }
 
 .list-export-btn {
-  border-color: #009246;
-  color: #009246;
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .list-export-btn:hover {
-  background: #009246;
+  background: var(--accent);
   color: white;
-  border-color: #009246;
+  border-color: var(--accent);
 }
 
 .list-search-input {

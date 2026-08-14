@@ -60,10 +60,10 @@
 .bring-export-btn {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  border: 2px solid #009246;
+  border: 2px solid var(--accent);
   border-radius: 12px;
   background: var(--card-bg);
-  color: #009246;
+  color: var(--accent);
   font-size: 0.82rem;
   font-weight: 600;
   font-family: inherit;
@@ -73,9 +73,9 @@
 }
 
 .bring-export-btn:hover {
-  background: #009246;
+  background: var(--accent);
   color: white;
-  border-color: #009246;
+  border-color: var(--accent);
 }
 
 .bring-empty {
