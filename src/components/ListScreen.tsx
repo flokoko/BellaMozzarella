@@ -255,6 +255,24 @@ export default function ListScreen({ items, categories, listId, userName, isLoad
     ? visibleItems.filter((i) => i.name.toLowerCase().includes(searchQuery.toLowerCase()))
     : visibleItems
 
+  // ── CSV Export ──
+  const handleExportCSV = () => {
+    const headers = ['Name', 'Kategorie', 'Erledigt']
+    const rows = items.map(i => [
+      i.name,
+      i.category || '',
+      i.is_checked ? 'ja' : 'nein',
+    ])
+    const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${c.replace(/"/g, '""')}"`).join(','))].join('\n')
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `einkaufsliste-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   // Skeleton loading state
   if (isLoading) {
     return (
@@ -291,6 +309,12 @@ export default function ListScreen({ items, categories, listId, userName, isLoad
             <Trash2 size={16} strokeWidth={2} /> Erledigte löschen ({checkedItems.length})
           </button>
         )}
+        <button
+          className="list-top-bar-btn list-export-btn"
+          onClick={handleExportCSV}
+        >
+          📥 CSV exportieren
+        </button>
       </div>
 
       <input type="text" className="list-search-input" placeholder="🔍 Suchen…" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />

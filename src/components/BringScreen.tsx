@@ -381,6 +381,25 @@ export default function BringScreen({ items, categories, listId, userName, onIte
     return sorted
   }, [filtered, userName])
 
+  // ── CSV Export for bring list ──
+  const handleExportCSV = () => {
+    const headers = ['Name', 'Kategorie', 'Person', 'Erledigt']
+    const rows = filtered.map(i => [
+      i.name,
+      i.category || '',
+      i.assigned_to || '',
+      i.is_brought ? 'ja' : 'nein',
+    ])
+    const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${c.replace(/"/g, '""')}"`).join(','))].join('\n')
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `mitbringen-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <div className="bring-screen">
       {/* ── Sub-tab toggle: Mitbringen vs Meine Packliste ── */}
@@ -426,6 +445,10 @@ export default function BringScreen({ items, categories, listId, userName, onIte
           </div>
 
           <input type="text" className="bring-search-input" placeholder="🔍 Suchen…" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+
+          <button className="bring-export-btn" onClick={handleExportCSV}>
+            📥 CSV exportieren
+          </button>
 
           <CategoryManager
             categories={categories}

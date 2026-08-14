@@ -58,6 +58,17 @@
   border-color: var(--danger);
 }
 
+.list-export-btn {
+  border-color: #009246;
+  color: #009246;
+}
+
+.list-export-btn:hover {
+  background: #009246;
+  color: white;
+  border-color: #009246;
+}
+
 .list-search-input {
   width: 100%;
   padding: 0.5rem 0.75rem;
