@@ -263,6 +263,29 @@
   align-items: center;
 }
 
+/* ── Notes Search Input ── */
+.dash-notes-search {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: var(--card-bg);
+  backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(var(--glass-saturate));
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  margin-bottom: 0.6rem;
+  transition: border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dash-notes-search:focus {
+  border-color: var(--italian-green);
+  box-shadow: 0 0 0 3px rgba(0, 146, 70, 0.12);
+}
+
 .dash-add-btn {
   width: 100%;
   padding: 0.6rem 0.75rem;

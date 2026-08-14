@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useState, useMemo, type ReactNode } from 'react'
 import { ShoppingCart, Backpack, Pizza, Wallet, Smartphone, StickyNote, Trash2, ExternalLink, ChevronDown, ChevronUp, GripVertical, Star } from 'lucide-react'
 import type { QuickNote, TabView } from '../types'
 import { supabase } from '../lib/supabase'
@@ -98,6 +98,7 @@ export default function DashboardScreen({
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [editContent, setEditContent] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
 
   // ── Notes collapsible state from localStorage ──
   const [notesExpanded, setNotesExpanded] = useState(() => {
@@ -120,6 +121,15 @@ export default function DashboardScreen({
     handlePointerUp,
     registerItem,
   } = useDragReorder(notes, onReorderNotes)
+
+  const filteredNotes = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase()
+    if (!q) return notes
+    return notes.filter((n) =>
+      (n.title ?? '').toLowerCase().includes(q) ||
+      n.content.toLowerCase().includes(q),
+    )
+  }, [notes, searchQuery])
 
   const handleSave = async () => {
     const content = formContent.trim()
@@ -328,6 +338,15 @@ export default function DashboardScreen({
             </div>
           ) : (
           <>
+          {notes.length > 0 && (
+            <input
+              type="text"
+              className="dash-notes-search"
+              placeholder="🔍 Suchen…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          )}
           {!showForm && (
             <button className="dash-add-btn" onClick={() => setShowForm(true)}>
               + Notiz hinzufügen
@@ -367,8 +386,12 @@ export default function DashboardScreen({
             <p className="dash-notes-empty">Noch keine Notizen — füge Infos wie die Hausadresse hinzu!</p>
           )}
 
+          {notes.length > 0 && filteredNotes.length === 0 && (
+            <p className="dash-notes-empty">Keine Notizen gefunden für „{searchQuery}"</p>
+          )}
+
           <div className="dash-notes-list">
-            {notes.map((note) => {
+            {filteredNotes.map((note) => {
               const isEditing = editingId === note.id
               const isDragging = dragState.draggingId === note.id
               const isDragOver = dragState.dragOverId === note.id
