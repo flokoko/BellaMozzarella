@@ -59,6 +59,28 @@
   animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ── Such-Input ── */
+.mealplan-search-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  background: var(--card-bg);
+  backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(var(--glass-saturate));
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  margin-bottom: 0.75rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.mealplan-search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
 /* ── Wochenplan ── */
 .mealplan-week {
   display: flex;

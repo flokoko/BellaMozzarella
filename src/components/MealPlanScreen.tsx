@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Coffee, Sandwich, UtensilsCrossed, Calendar, Pizza, X, Check, Pencil, Trash2, Carrot, ShoppingCart, type LucideIcon } from 'lucide-react'
 import type { Meal, MealIdea, DayOfWeek, MealType } from '../types'
 import { supabase } from '../lib/supabase'
@@ -67,6 +67,7 @@ export default function MealPlanScreen({
   const [planPickerFor, setPlanPickerFor] = useState<string | null>(null)
   const [planDay, setPlanDay] = useState<DayOfWeek>('Montag')
   const [planMealType, setPlanMealType] = useState<MealType>('Abendessen')
+  const [searchQuery, setSearchQuery] = useState('')
 
   // ── Ingredient state ──
   const [ingredientsByMeal, setIngredientsByMeal] = useState<Record<string, MealIngredient[]>>({})
@@ -437,6 +438,37 @@ export default function MealPlanScreen({
     onAddToShoppingList?.(ingredients.map((i) => ({ name: i.name, quantity: i.quantity })))
   }
 
+  // ── Search filtering ──
+  const searchLower = searchQuery.trim().toLowerCase()
+  const filteredMeals = useMemo(() => {
+    if (!searchLower) return meals
+    return meals.filter((m) =>
+      m.name.toLowerCase().includes(searchLower) ||
+      (m.note != null && m.note.toLowerCase().includes(searchLower))
+    )
+  }, [meals, searchLower])
+
+  const filteredMealIdeas = useMemo(() => {
+    if (!searchLower) return mealIdeas
+    return mealIdeas.filter((idea) => {
+      const nameMatch = idea.name.toLowerCase().includes(searchLower)
+      if (nameMatch) return true
+      const tags = parseTags(idea.tags)
+      return tags.some((t) => t.toLowerCase().includes(searchLower))
+    })
+  }, [mealIdeas, searchLower])
+
+  // Days that have at least one matching meal (for hiding empty days during search)
+  const visibleDays = useMemo(() => {
+    if (!searchLower) return DAYS
+    return DAYS.filter((day) =>
+      MEAL_TYPES.some((type) => {
+        const meal = filteredMeals.find((m) => m.day === day && m.meal_type === type)
+        return meal != null
+      })
+    )
+  }, [filteredMeals, searchLower])
+
   const mealCount = meals.length
   const ideaCount = mealIdeas.length
 
@@ -458,12 +490,24 @@ export default function MealPlanScreen({
         </button>
       </div>
 
+      {/* ── Suche ── */}
+      <input
+        type="text"
+        className="mealplan-search-input"
+        placeholder="🔍 Suchen…"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+      />
+
       {/* ── Wochenplan ── */}
       {section === 'week' && (
         <section className="mealplan-section" key="week">
+          {visibleDays.length === 0 && searchLower && (
+            <p className="mealplan-empty"><Pizza size={28} strokeWidth={1.5} /> Keine Treffer im Wochenplan!</p>
+          )}
           <div className="mealplan-week">
-            {DAYS.map((day) => {
-              const dayMeals = MEAL_TYPES.map((t) => getMeal(day, t)).filter(Boolean)
+            {visibleDays.map((day) => {
+              const dayMeals = MEAL_TYPES.map((t) => filteredMeals.find((m) => m.day === day && m.meal_type === t)).filter(Boolean)
               const hasMeals = dayMeals.length > 0
               return (
                 <div key={day} className={`meal-day-card ${hasMeals ? 'has-meals' : ''} ${day === todayName ? 'today' : ''}`}>
@@ -478,7 +522,7 @@ export default function MealPlanScreen({
                   <div className="meal-day-grid">
                     {MEAL_TYPES.map((type) => {
                       const cellKey = `${day}-${type}`
-                      const meal = getMeal(day, type)
+                      const meal = filteredMeals.find((m) => m.day === day && m.meal_type === type)
                       const isEditing = editingCell === cellKey
 
                       if (isEditing) {
@@ -665,12 +709,15 @@ export default function MealPlanScreen({
             </button>
           </div>
 
-          {mealIdeas.length === 0 && (
+          {mealIdeas.length === 0 && !searchLower && (
             <p className="mealplan-empty"><Pizza size={28} strokeWidth={1.5} /> Noch keine Ideen — füge welche hinzu!</p>
+          )}
+          {filteredMealIdeas.length === 0 && searchLower && (
+            <p className="mealplan-empty"><Pizza size={28} strokeWidth={1.5} /> Keine Treffer bei den Ideen!</p>
           )}
 
           <div className="mealplan-idea-list">
-            {mealIdeas.map((idea) => {
+            {filteredMealIdeas.map((idea) => {
               const tags = parseTags(idea.tags)
               const isPickerOpen = planPickerFor === idea.id
               return (
