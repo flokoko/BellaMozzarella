@@ -62,6 +62,33 @@ function fmtRadarTime(ts: number) {
   return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
 }
 
+/** Tracks the resolved theme ('light' | 'dark'), reacting to both the manual
+ *  toggle (data-theme on <html>) and system colour-scheme changes in auto mode. */
+function useIsDark(): boolean {
+  const [isDark, setIsDark] = useState(
+    () => document.documentElement.getAttribute('data-theme') === 'dark'
+      || window.matchMedia('(prefers-color-scheme: dark)').matches
+  )
+
+  useEffect(() => {
+    const themeObserver = new MutationObserver(() => {
+      setIsDark(document.documentElement.getAttribute('data-theme') === 'dark')
+    })
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+
+    const mql = window.matchMedia('(prefers-color-scheme: dark)')
+    const handler = () => setIsDark(document.documentElement.getAttribute('data-theme') === 'dark')
+    mql.addEventListener('change', handler)
+
+    return () => {
+      themeObserver.disconnect()
+      mql.removeEventListener('change', handler)
+    }
+  }, [])
+
+  return isDark
+}
+
 /** Component that updates the map view when coordinates change */
 function MapUpdater({ lat, lon }: { lat: number; lon: number }) {
   const map = useMap()
@@ -72,6 +99,7 @@ function MapUpdater({ lat, lon }: { lat: number; lon: number }) {
 }
 
 export default function WeatherScreen() {
+  const isDark = useIsDark()
   const [weather, setWeather] = useState<WeatherData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -414,15 +442,20 @@ export default function WeatherScreen() {
                   dragging={true}
                 >
                   <TileLayer
+                    key={isDark ? 'base-dark' : 'base-light'}
                     attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                    url={
+                      isDark
+                        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+                        : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+                    }
                     maxNativeZoom={7}
                   />
                   {radarHost && radarFrames[radarIndex] && (
                     <TileLayer
-                      key={radarFrames[radarIndex].path}
+                      key={`${radarFrames[radarIndex].path}-${isDark ? 'd' : 'l'}`}
                       url={`${radarHost}${radarFrames[radarIndex].path}/256/{z}/{x}/{y}/2/1.png`}
-                      opacity={0.55}
+                      opacity={isDark ? 0.55 : 0.65}
                       maxNativeZoom={7}
                     />
                   )}
