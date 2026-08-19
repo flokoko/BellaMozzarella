@@ -8,7 +8,6 @@ import { useDragReorder } from '../hooks/useDragReorder'
 import { SkeletonCard, SkeletonNote } from './Skeleton'
 import WeatherWidget from './WeatherWidget'
 import BristolWidget from './BristolWidget'
-import { greetByTime } from '../lib/italianFlair'
 import './DashboardScreen.css'
 
 /** Detect URLs in text and render them as clickable links. */
@@ -241,10 +240,7 @@ export default function DashboardScreen({
 
   return (
     <div className="dashboard-screen">
-      {/* ── Italienische Begrüßung ── */}
-      <div className="dash-greeting">{greetByTime(userName)}</div>
-
-      {/* ── Info-Ticker (Marquee) ── */}
+      {/* ── Info-Ticker (Marquee) — inkl. Begrüßung als erste Meldung ── */}
       {tickerMsgs.length > 0 && (
         <div className="dash-ticker" aria-live="polite">
           <div className="dash-ticker-track">

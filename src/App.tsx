@@ -6,7 +6,7 @@ import { supabase, changeParticipantPassword } from './lib/supabase'
 import { useToast } from './context/ToastContext'
 import JoinScreen from './components/JoinScreen'
 import DashboardScreen from './components/DashboardScreen'
-import { italianSuccess } from './lib/italianFlair'
+import { italianSuccess, greetByTime } from './lib/italianFlair'
 const MozzaScene = lazy(() => import('./components/MozzaScene'))
 import { useListData } from './hooks/useListData'
 
@@ -110,6 +110,17 @@ export default function App() {
 
   // ── Tab state ──────────────────────────────────────────────────────
   const [tab, setTab] = useState<TabView>('home')
+
+  // ── Greeting als erste Ticker-Meldung beim Dashboard-Aufruf ───────
+  useEffect(() => {
+    if (tab === 'home' && userName) {
+      setTickerMsgs(prev => {
+        const greeting = greetByTime(userName)
+        if (prev.length > 0 && prev[0] === greeting) return prev
+        return [greeting, ...prev].slice(0, 9)
+      })
+    }
+  }, [tab, userName])
 
   // ── PWA update available banner ─────────────────────────────────────
   const [updateAvailable, setUpdateAvailable] = useState(false)

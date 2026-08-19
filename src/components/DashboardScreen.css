@@ -3,17 +3,6 @@
   animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ── Italienische Begrüßung ── */
-.dash-greeting {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 0.85rem;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
 /* ── Bristol Row ── */
 .dash-bristol-row {
   display: flex;
