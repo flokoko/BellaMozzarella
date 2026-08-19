@@ -70,6 +70,11 @@
   text-align: center;
 }
 
+/* Settlement sub-toggle: more compact than the main expense toggle */
+.expense-settlement-toggle {
+  margin-bottom: 0.75rem;
+}
+
 /* ── Add Expense Form ── */
 .expense-add-trigger {
   width: 100%;

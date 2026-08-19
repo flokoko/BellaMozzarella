@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Wallet, ArrowRight, CheckCircle2, Trash2, X } from 'lucide-react'
+import { Wallet, ArrowRight, CheckCircle2, Trash2, X, BarChart3, Receipt } from 'lucide-react'
 import type { Expense, ExpenseSplit, Settlement } from '../types'
 import {
   computeBalances,
@@ -37,6 +37,7 @@ export default function ExpenseSettlement({
   const { toast, confirm } = useToast()
 
   // ── All hooks MUST be before any conditional return ──
+  const [view, setView] = useState<'settlement' | 'charts'>('settlement')
   const total = useMemo(() => totalExpenses(expenses), [expenses])
   const originalBalances = useMemo(() => computeBalances(expenses, expenseSplits), [expenses, expenseSplits])
 
@@ -152,13 +153,30 @@ export default function ExpenseSettlement({
 
   return (
     <div key="settlement">
+      {/* ── Compact total banner ── */}
       <div className="expense-total-banner">
         <Wallet size={18} strokeWidth={2} /> Gesamtausgaben: {fmtEUR(total)}
       </div>
 
-      <ExpenseCharts expenses={expenses} />
+      {/* ── Sub-Toggle: Abrechnung | Charts ── */}
+      <div className="expense-toggle expense-settlement-toggle">
+        <button
+          className={`expense-toggle-btn ${view === 'settlement' ? 'active' : ''}`}
+          onClick={() => { navigator.vibrate?.(8); setView('settlement') }}
+        >
+          <Receipt size={16} strokeWidth={2} /> Abrechnung
+        </button>
+        <button
+          className={`expense-toggle-btn ${view === 'charts' ? 'active' : ''}`}
+          onClick={() => { navigator.vibrate?.(8); setView('charts') }}
+        >
+          <BarChart3 size={16} strokeWidth={2} /> Charts
+        </button>
+      </div>
 
-      {expenses.length === 0 ? (
+      {view === 'charts' ? (
+        <ExpenseCharts expenses={expenses} />
+      ) : expenses.length === 0 ? (
         <p className="expense-empty">Noch keine Ausgaben zur Abrechnung.</p>
       ) : (
         <>
