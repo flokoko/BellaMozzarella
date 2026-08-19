@@ -589,6 +589,7 @@
 .expense-txn {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.35rem;
   padding: 0.5rem 0.7rem;
   border-radius: 10px;
@@ -1109,19 +1110,24 @@
   display: flex;
   align-items: center;
   gap: 0.3rem;
-  margin-left: auto;
-  flex-shrink: 0;
+  flex-basis: 100%;
+  margin-left: 0;
+  justify-content: flex-end;
+  margin-top: 0.15rem;
+  padding-top: 0.15rem;
+  border-top: 1px dashed var(--border-color);
   animation: fadeIn 0.3s ease;
 }
 
 .expense-settle-input {
-  width: 4.5rem;
-  padding: 0.25rem 0.4rem;
+  width: 5rem;
+  padding: 0.3rem 0.45rem;
   border: 1px solid var(--glass-border);
   border-radius: 8px;
   background: var(--card-bg);
   color: var(--text-primary);
-  font-size: 0.78rem;
+  font-size: 0.82rem;
+  font-weight: 600;
   font-family: inherit;
   outline: none;
   text-align: right;
@@ -1134,14 +1140,15 @@
 }
 
 .expense-settle-date {
-  padding: 0.25rem 0.35rem;
+  padding: 0.3rem 0.4rem;
   border: 1px solid var(--glass-border);
   border-radius: 8px;
   background: var(--card-bg);
   color: var(--text-primary);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-family: inherit;
   outline: none;
+  max-width: 8.5rem;
 }
 
 .expense-settle-date:focus {
@@ -1152,12 +1159,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
   border: none;
   border-radius: 999px;
   background: var(--accent-gradient);
   color: white;
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0;
   transition: all 0.3s;
 }
 
@@ -1178,12 +1187,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
   border: 1px solid var(--glass-border);
   border-radius: 999px;
   background: var(--card-bg);
   color: var(--text-secondary);
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0;
   transition: all 0.3s;
 }
 
