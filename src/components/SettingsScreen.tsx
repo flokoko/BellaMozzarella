@@ -15,6 +15,7 @@ import { useToast } from '../context/ToastContext'
 import { useCategories } from '../hooks/useCategories'
 import { useDebouncedCallback } from '../hooks/useDebouncedCallback'
 import { APP_VERSION } from '../version'
+import { italianMotto } from '../lib/italianFlair'
 
 import './SettingsScreen.css'
 
@@ -706,6 +707,7 @@ export default function SettingsScreen({
           <p className="settings-app-desc">
             Gemeinsame Einkaufsliste mit Realtime-Sync. Built with React, Supabase &amp; Vite.
           </p>
+          <p className="settings-app-motto">{italianMotto()}</p>
           <a
             className="settings-link"
             href="https://github.com/flokoko/BellaMozzarella"

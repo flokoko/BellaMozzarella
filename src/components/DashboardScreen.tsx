@@ -8,6 +8,7 @@ import { useDragReorder } from '../hooks/useDragReorder'
 import { SkeletonCard, SkeletonNote } from './Skeleton'
 import WeatherWidget from './WeatherWidget'
 import BristolWidget from './BristolWidget'
+import { greetByTime } from '../lib/italianFlair'
 import './DashboardScreen.css'
 
 /** Detect URLs in text and render them as clickable links. */
@@ -238,6 +239,9 @@ export default function DashboardScreen({
 
   return (
     <div className="dashboard-screen">
+      {/* ── Italienische Begrüßung ── */}
+      <div className="dash-greeting">{greetByTime(userName)}</div>
+
       {/* ── Weather Widget ── */}
       <WeatherWidget onNavigate={() => { navigator.vibrate?.(8); onNavigate('weather') }} />
 

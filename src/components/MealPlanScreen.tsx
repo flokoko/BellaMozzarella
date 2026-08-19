@@ -4,6 +4,7 @@ import type { Meal, MealIdea, DayOfWeek, MealType } from '../types'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../context/ToastContext'
 import { useOfflineQueue } from '../hooks/useOfflineQueue'
+import { italianSuccess } from '../lib/italianFlair'
 import './MealPlanScreen.css'
 
 interface MealIngredient {
@@ -434,7 +435,7 @@ export default function MealPlanScreen({
       }
     }
     navigator.vibrate?.(10)
-    toast('Zutaten zur Einkaufsliste hinzugefügt!', 'success')
+    toast(`${italianSuccess()} Zutaten zur Einkaufsliste hinzugefügt!`, 'success')
     onAddToShoppingList?.(ingredients.map((i) => ({ name: i.name, quantity: i.quantity })))
   }
 

@@ -6,6 +6,7 @@ import { supabase, changeParticipantPassword } from './lib/supabase'
 import { useToast } from './context/ToastContext'
 import JoinScreen from './components/JoinScreen'
 import DashboardScreen from './components/DashboardScreen'
+import { italianSuccess } from './lib/italianFlair'
 const MozzaScene = lazy(() => import('./components/MozzaScene'))
 import { useListData } from './hooks/useListData'
 
@@ -162,7 +163,7 @@ export default function App() {
         if (failed > 0) {
           toast('Einige Änderungen konnten nicht synchronisiert werden.', 'error')
         } else if (success > 0) {
-          toast('Synchronisiert!', 'success')
+          toast(`${italianSuccess()} Synchronisiert!`, 'success')
           // Full refetch after successful sync — single fetchAll with force=true
           if (list) {
             fetchAll(list.id, true)

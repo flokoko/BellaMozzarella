@@ -15,6 +15,7 @@ import {
   BRISTOL_EMOJIS,
   BRISTOL_VALUES,
 } from '../lib/bristolConstants'
+import { italianSuccess } from '../lib/italianFlair'
 import './BristolScreen.css'
 
 interface BristolScreenProps {
@@ -112,7 +113,7 @@ export default function BristolScreen({ listId, userName, isAdmin }: BristolScre
     }
     const isToday = selectedDate === today
     const dateLabel = isToday ? '' : ` (${new Date(selectedDate).toLocaleDateString('de-DE')})`
-    toast(`Bristol-Wert ${value} (${BRISTOL_ADJECTIVES[value]})${dateLabel} eingetragen!`, 'success')
+    toast(`${italianSuccess()} Bristol-Wert ${value} (${BRISTOL_ADJECTIVES[value]})${dateLabel} eingetragen!`, 'success')
     navigator.vibrate?.(20)
     // Plasma-Effekt bei Wert 13
     if (value === 13) {
@@ -152,7 +153,7 @@ export default function BristolScreen({ listId, userName, isAdmin }: BristolScre
       })
       setSubmitting(false)
     }
-    toast(`Bristol-Wert auf ${value} (${BRISTOL_ADJECTIVES[value]}) geändert!`, 'success')
+    toast(`${italianSuccess()} Bristol-Wert auf ${value} (${BRISTOL_ADJECTIVES[value]}) geändert!`, 'success')
     navigator.vibrate?.(20)
     setEditingEntryId(null)
     fetchEntries()
@@ -176,7 +177,7 @@ export default function BristolScreen({ listId, userName, isAdmin }: BristolScre
           filterValue: entryId,
         })
       }
-      toast('Eintrag gelöscht!', 'success')
+      toast(`${italianSuccess()} Eintrag gelöscht!`, 'success')
       navigator.vibrate?.(10)
       setEditingEntryId(null)
       fetchEntries()

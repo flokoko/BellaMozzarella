@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { ListItem, ItemCategory } from '../types'
 import { supabase } from '../lib/supabase'
 import { logError } from '../lib/logger'
+import { italianSuccess } from '../lib/italianFlair'
 import { useToast } from '../context/ToastContext'
 import './AddItemForm.css'
 
@@ -34,7 +35,7 @@ export default function EditItemForm({ item, categories, onSaved, onCancel }: Ed
       toast(`Fehler beim Speichern: ${error.message}`, 'error')
       return
     }
-    toast('Item aktualisiert', 'success')
+    toast(`${italianSuccess()} Item aktualisiert`, 'success')
     onSaved()
   }
 
