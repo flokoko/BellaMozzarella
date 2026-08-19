@@ -4,7 +4,8 @@ import type { Meal, MealIdea, DayOfWeek, MealType } from '../types'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../context/ToastContext'
 import { useOfflineQueue } from '../hooks/useOfflineQueue'
-import { italianSuccess } from '../lib/italianFlair'
+import { italianSuccess, italianTickerPhrase } from '../lib/italianFlair'
+import { publishTicker, markOwnAction } from '../lib/tickerBus'
 import './MealPlanScreen.css'
 
 interface MealIngredient {
@@ -152,6 +153,8 @@ export default function MealPlanScreen({
           toast(`Fehler beim Speichern: ${error.message}`, 'error')
           return
         }
+        markOwnAction(`meals:${n}`)
+        publishTicker(`${italianTickerPhrase('add')} ${n} im Essensplan`)
       } else {
         enqueue({
           type: 'insert',
@@ -165,6 +168,8 @@ export default function MealPlanScreen({
             created_by: userName,
           },
         })
+        markOwnAction(`meals:${n}`)
+        publishTicker(`${italianTickerPhrase('add')} ${n} im Essensplan`)
       }
     }
     navigator.vibrate?.(10)
@@ -278,6 +283,8 @@ export default function MealPlanScreen({
           },
         })
       }
+      markOwnAction(`meals:${idea.name}`)
+      publishTicker(`${italianTickerPhrase('add')} ${idea.name} im Essensplan`)
       setPlanPickerFor(null)
       navigator.vibrate?.(10)
       onMealsChange()

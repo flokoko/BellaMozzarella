@@ -5,6 +5,8 @@ import { supabase } from '../lib/supabase'
 import { useToast } from '../context/ToastContext'
 import { useCategories } from '../hooks/useCategories'
 import { calculateShareAmounts, calculateQuotaShares, fmtEUR } from '../lib/settlement'
+import { publishTicker, markOwnAction } from '../lib/tickerBus'
+import { italianTickerPhrase } from '../lib/italianFlair'
 
 interface ExpenseFormProps {
   listId: string
@@ -239,6 +241,11 @@ export default function ExpenseForm({
           return
         }
       }
+    }
+    if (!editingId) {
+      // Ticker: neue Ausgabe sofort lokal melden (zuverlässig auf eigenem Gerät), Echo unterdrücken
+      markOwnAction(`expenses:${desc}`)
+      publishTicker(`${italianTickerPhrase('add')} ${desc} als Ausgabe eingetragen`)
     }
 
     navigator.vibrate?.(10)

@@ -7,6 +7,7 @@ import { useToast } from './context/ToastContext'
 import JoinScreen from './components/JoinScreen'
 import DashboardScreen from './components/DashboardScreen'
 import { italianSuccess, greetByTime } from './lib/italianFlair'
+import { subscribeTicker } from './lib/tickerBus'
 const MozzaScene = lazy(() => import('./components/MozzaScene'))
 import { useListData } from './hooks/useListData'
 
@@ -107,6 +108,17 @@ export default function App() {
       return [...prev.slice(-8), msg]
     }),
   })
+
+  // ── Subscribe to the ticker bus (AddItemForm / MealPlan / ExpenseForm) ──
+  useEffect(() => {
+    const unsub = subscribeTicker((msg: string) =>
+      setTickerMsgs(prev => {
+        if (prev.length > 0 && prev[prev.length - 1] === msg) return prev
+        return [...prev.slice(-8), msg]
+      }),
+    )
+    return unsub
+  }, [])
 
   // ── Tab state ──────────────────────────────────────────────────────
   const [tab, setTab] = useState<TabView>('home')

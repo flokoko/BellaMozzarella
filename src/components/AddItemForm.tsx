@@ -3,6 +3,8 @@ import type { ItemCategory, ListType } from '../types'
 import { supabase } from '../lib/supabase'
 import { logError } from '../lib/logger'
 import { useToast } from '../context/ToastContext'
+import { publishTicker, markOwnAction } from '../lib/tickerBus'
+import { italianTickerPhrase } from '../lib/italianFlair'
 import './AddItemForm.css'
 
 interface AddItemFormProps {
@@ -64,6 +66,10 @@ export default function AddItemForm({
     setAssignedTo(defaultAssignedTo ?? '')
     setCategory(categories[0]?.name ?? '')
     setExpanded(false)
+    // Ticker: sofort lokal melden (zuverlässig auf eigenem Gerät), Echo unterdrücken
+    markOwnAction(`items:${n}`)
+    const target = listType === 'bring' ? 'Mitbringen' : 'Einkaufsliste'
+    publishTicker(`${italianTickerPhrase('add')} ${n} zur ${target} hinzugefügt`)
     onAdded?.()
   }
 

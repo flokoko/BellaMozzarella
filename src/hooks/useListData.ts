@@ -33,6 +33,7 @@ import {
   resetNotifyBuffer,
 } from '../lib/notify'
 import { italianTickerPhrase } from '../lib/italianFlair'
+import { publishTicker, markOwnAction, consumeOwnAction } from '../lib/tickerBus'
 
 export function useListData({ onActivity }: { onActivity?: (msg: string) => void } = {}) {
   // ── Offline queue ──────────────────────────────────────────────────
@@ -80,12 +81,6 @@ export function useListData({ onActivity }: { onActivity?: (msg: string) => void
     items: ListItem[]
     timeout: ReturnType<typeof setTimeout> | null
   } | null>(null)
-
-  // ── Own-item check actions fired locally (to suppress the realtime echo) ──
-  // We fire the ticker message immediately on toggle for instant feedback.
-  // The realtime echo of OUR OWN action would show the same item twice, so we
-  // remember which (name, kind) we just fired locally and skip that echo.
-  const ownActionRef = useRef<{ name: string; kind: 'check'; at: number } | null>(null)
 
   // ── Fetch functions ────────────────────────────────────────────────
   const fetchItems = useCallback(async (listId: string, listType: ListType) => {
@@ -410,35 +405,37 @@ export function useListData({ onActivity }: { onActivity?: (msg: string) => void
         kind = 'add'
         if (table === 'items') {
           const name = newRec?.name ?? 'Item'
-          const lt = newRec?.list_type
-          const target = lt === 'bring' ? 'Mitbringen' : 'Einkaufsliste'
-          msg = `${name} zur ${target} hinzugefügt`
+          // Suppress our own realtime echo (AddItemForm fires locally + marks)
+          if (!consumeOwnAction(`items:${name}`)) {
+            const lt = newRec?.list_type
+            const target = lt === 'bring' ? 'Mitbringen' : 'Einkaufsliste'
+            msg = `${name} zur ${target} hinzugefügt`
+          }
         } else if (table === 'notes') {
           msg = `${newRec?.title ?? 'Notiz'} hinzugefügt`
         } else if (table === 'expenses') {
-          msg = `${newRec?.description ?? 'Ausgabe'} als Ausgabe eingetragen`
+          const name = newRec?.description ?? 'Ausgabe'
+          if (!consumeOwnAction(`expenses:${name}`)) {
+            msg = `${name} als Ausgabe eingetragen`
+          }
         } else if (table === 'meals') {
-          msg = `${newRec?.name ?? 'Gericht'} im Essensplan`
+          const name = newRec?.name ?? 'Gericht'
+          if (!consumeOwnAction(`meals:${name}`)) {
+            msg = `${name} im Essensplan`
+          }
         }
       } else if (eventType === 'UPDATE') {
         if (table === 'items') {
           if (oldRec?.is_checked === false && newRec?.is_checked === true) {
             kind = 'check'
             const name = newRec?.name ?? 'Item'
-            // Suppress our own realtime echo (we already fired the message locally on toggle)
-            const own = ownActionRef.current
-            if (own && own.kind === 'check' && own.name === name && Date.now() - own.at < 3000) {
-              ownActionRef.current = null
-            } else {
+            if (!consumeOwnAction(`check:${name}`)) {
               msg = `${name} abgehakt`
             }
           } else if (oldRec?.is_brought === false && newRec?.is_brought === true) {
             kind = 'check'
             const name = newRec?.name ?? 'Item'
-            const own = ownActionRef.current
-            if (own && own.kind === 'check' && own.name === name && Date.now() - own.at < 3000) {
-              ownActionRef.current = null
-            } else {
+            if (!consumeOwnAction(`brought:${name}`)) {
               msg = `${name} als mitgebracht markiert`
             }
           }
@@ -591,8 +588,8 @@ export function useListData({ onActivity }: { onActivity?: (msg: string) => void
     setShoppingItems(prev => prev.map(i => i.id === item.id ? { ...i, is_checked: nextChecked } : i))
     // Ticker: "abgehakt" sofort lokal melden (unabhängig vom Realtime-Echo der eigenen Aktion)
     if (nextChecked) {
-      ownActionRef.current = { name: item.name, kind: 'check', at: Date.now() }
-      onActivityRef.current?.(`${italianTickerPhrase('check')} ${item.name} abgehakt`)
+      markOwnAction(`check:${item.name}`)
+      publishTicker(`${italianTickerPhrase('check')} ${item.name} abgehakt`)
     }
     if (isOnline) {
       supabase.from('items').update({ is_checked: nextChecked }).eq('id', item.id).then(({ error }) => {
@@ -662,8 +659,8 @@ export function useListData({ onActivity }: { onActivity?: (msg: string) => void
     setBringItems(prev => prev.map(i => i.id === item.id ? { ...i, is_brought: nextBrought } : i))
     // Ticker: "als mitgebracht markiert" sofort lokal melden
     if (nextBrought) {
-      ownActionRef.current = { name: item.name, kind: 'check', at: Date.now() }
-      onActivityRef.current?.(`${italianTickerPhrase('check')} ${item.name} als mitgebracht markiert`)
+      markOwnAction(`brought:${item.name}`)
+      publishTicker(`${italianTickerPhrase('check')} ${item.name} als mitgebracht markiert`)
     }
     if (isOnline) {
       supabase.from('items').update({ is_brought: nextBrought }).eq('id', item.id).then(({ error }) => {
