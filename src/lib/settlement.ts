@@ -108,8 +108,17 @@ export function computeMatrix(
 ): ExpenseMatrix {
   const debtGrid: Record<string, Record<string, number>> = {}
 
+  // Pre-index splits by expense_id once (O(n) instead of O(n·m) filtering
+  // inside the expenses loop below).
+  const splitsByExpense = new Map<string, ExpenseSplit[]>()
+  for (const s of expenseSplits) {
+    const list = splitsByExpense.get(s.expense_id)
+    if (list) list.push(s)
+    else splitsByExpense.set(s.expense_id, [s])
+  }
+
   for (const expense of expenses) {
-    const splits = expenseSplits.filter(s => s.expense_id === expense.id)
+    const splits = splitsByExpense.get(expense.id) ?? []
     const payer = expense.paid_by
     for (const split of splits) {
       if (split.person_name === payer) continue

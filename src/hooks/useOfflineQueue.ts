@@ -128,7 +128,7 @@ export function useOfflineQueue() {
         try {
           await executeOp(op)
         } catch {
-          // Retry mit exponentiellem Backoff (max 3 Versuche)
+          // Retry mit exponentiellem Backoff (max 3 Versuche insgesamt)
           let retries = 0
           let lastError: unknown = null
           while (retries < 2) {
@@ -147,12 +147,16 @@ export function useOfflineQueue() {
           }
         }
 
+        // Nach Erfolg oder endgültigem Fehlschlag den Op aus der Queue entfernen.
+        // Ein dauerhaft scheiternder Op (z.B. RLS-Fehler, inzwischen gelöschte Zeile)
+        // darf die restliche Queue NICHT blockieren — sonst würden alle nachfolgenden
+        // Änderungen nie synchronisiert. Der fehlgeschlagene Op geht verloren, aber
+        // der Rest der Queue wird zuverlässig abgearbeitet.
         if (opError) {
           failed++
-          break // Stop on first failure — keep remaining in queue
+        } else {
+          success++
         }
-
-        success++
         queue = queue.slice(1)
         saveQueue(queue)
       }

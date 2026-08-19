@@ -17,11 +17,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 const LIST_JOIN_CODE = import.meta.env.VITE_JOIN_CODE || 'BELLA26'
 
 // Module-level variable for the current join code (used for RLS)
-let currentJoinCode = LIST_JOIN_CODE
-
-export function setJoinCode(code: string) {
-  currentJoinCode = code
-}
+const currentJoinCode = LIST_JOIN_CODE
 
 export function getJoinCode() {
   return currentJoinCode

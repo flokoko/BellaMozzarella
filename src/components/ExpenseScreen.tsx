@@ -156,8 +156,11 @@ export default function ExpenseScreen({
 
   // ── CSV Export ──
   const handleExportCSV = () => {
+    const filtered = searchQuery.trim()
+      ? expenses.filter((e) => e.description.toLowerCase().includes(searchQuery.toLowerCase()))
+      : expenses
     const headers = ['Datum', 'Beschreibung', 'Betrag', 'Bezahlt von', 'Kategorie', 'Notiz']
-    const rows = expenses.map(e => [
+    const rows = filtered.map(e => [
       e.expense_date,
       e.description,
       e.amount.toFixed(2),

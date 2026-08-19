@@ -79,6 +79,7 @@ export default function ExpenseForm({
   const [catEditorOpen, setCatEditorOpen] = useState(false)
   const [catLocalNames, setCatLocalNames] = useState<Record<string, string>>({})
   const [newCatName, setNewCatName] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const amountNum = parseFloat(amount) || 0
 
@@ -141,10 +142,13 @@ export default function ExpenseForm({
 
   // ── Save (insert or update) ──
   const handleSave = async () => {
+    if (isSubmitting) return
     const desc = description.trim()
     if (!desc || amountNum <= 0) return
     if (!hasQuotaConfig && (splitPeople.length === 0 || !exactSumOk)) return
 
+    setIsSubmitting(true)
+    try {
     const shares = calculateShares()
 
     if (editingId) {
@@ -240,6 +244,9 @@ export default function ExpenseForm({
     navigator.vibrate?.(10)
     resetForm()
     onExpensesChange()
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (!formExpanded) return null
@@ -466,9 +473,9 @@ export default function ExpenseForm({
         <button
           className="expense-btn-save"
           onClick={handleSave}
-          disabled={!canSave}
+          disabled={!canSave || isSubmitting}
         >
-          {editingId ? 'Aktualisieren' : 'Speichern'}
+          {isSubmitting ? 'Speichere…' : editingId ? 'Aktualisieren' : 'Speichern'}
         </button>
       </div>
     </div>

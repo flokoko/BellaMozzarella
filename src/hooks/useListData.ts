@@ -13,7 +13,7 @@ import type {
   Participant,
   Settlement,
 } from '../types'
-import { supabase } from '../lib/supabase'
+import { supabase, restoreParticipantSession } from '../lib/supabase'
 import { useOfflineQueue } from './useOfflineQueue'
 import { useRealtimeSync } from './useRealtimeSync'
 import { logError } from '../lib/logger'
@@ -453,19 +453,19 @@ export function useListData() {
     const savedName = localStorage.getItem('user_name')
     const savedParticipantId = localStorage.getItem('participant_id')
     if (savedName && savedParticipantId) {
-      import('../lib/supabase').then(({ restoreParticipantSession }) => {
-        restoreParticipantSession(savedParticipantId).then((result) => {
-          if (result.error || !result.list_id) return
-          setUserName(result.participant_name)
-          setParticipantId(result.participant_id)
-          setIsLoading(true)
-          Promise.resolve(
-            supabase
-              .from('lists')
-              .select('*')
-              .eq('id', result.list_id)
-              .single()
-          ).then(({ data, error }) => {
+      restoreParticipantSession(savedParticipantId).then((result) => {
+        if (result.error || !result.list_id) return
+        setUserName(result.participant_name)
+        setParticipantId(result.participant_id)
+        setIsLoading(true)
+        Promise.resolve(
+          supabase
+            .from('lists')
+            .select('*')
+            .eq('id', result.list_id)
+            .single()
+        )
+          .then(({ data, error }) => {
             if (error || !data) {
               // List was deleted or query failed — clean up session and stop loading
               setIsLoading(false)
@@ -478,10 +478,10 @@ export function useListData() {
             }
             setList(data as ShoppingList)
             fetchAll(result.list_id)
-          }).catch(() => {
+          })
+          .catch(() => {
             setIsLoading(false)
           })
-        })
       })
     }
   }, [fetchAll])
