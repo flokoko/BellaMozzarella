@@ -81,6 +81,12 @@ export function useListData({ onActivity }: { onActivity?: (msg: string) => void
     timeout: ReturnType<typeof setTimeout> | null
   } | null>(null)
 
+  // ── Own-item check actions fired locally (to suppress the realtime echo) ──
+  // We fire the ticker message immediately on toggle for instant feedback.
+  // The realtime echo of OUR OWN action would show the same item twice, so we
+  // remember which (name, kind) we just fired locally and skip that echo.
+  const ownActionRef = useRef<{ name: string; kind: 'check'; at: number } | null>(null)
+
   // ── Fetch functions ────────────────────────────────────────────────
   const fetchItems = useCallback(async (listId: string, listType: ListType) => {
     const { data, error: err } = await supabase
@@ -418,10 +424,23 @@ export function useListData({ onActivity }: { onActivity?: (msg: string) => void
         if (table === 'items') {
           if (oldRec?.is_checked === false && newRec?.is_checked === true) {
             kind = 'check'
-            msg = `${newRec?.name ?? 'Item'} abgehakt`
+            const name = newRec?.name ?? 'Item'
+            // Suppress our own realtime echo (we already fired the message locally on toggle)
+            const own = ownActionRef.current
+            if (own && own.kind === 'check' && own.name === name && Date.now() - own.at < 3000) {
+              ownActionRef.current = null
+            } else {
+              msg = `${name} abgehakt`
+            }
           } else if (oldRec?.is_brought === false && newRec?.is_brought === true) {
             kind = 'check'
-            msg = `${newRec?.name ?? 'Item'} als mitgebracht markiert`
+            const name = newRec?.name ?? 'Item'
+            const own = ownActionRef.current
+            if (own && own.kind === 'check' && own.name === name && Date.now() - own.at < 3000) {
+              ownActionRef.current = null
+            } else {
+              msg = `${name} als mitgebracht markiert`
+            }
           }
         }
       } else if (eventType === 'DELETE') {
@@ -568,9 +587,15 @@ export function useListData({ onActivity }: { onActivity?: (msg: string) => void
   }, [isOnline, enqueue, list, fetchItems])
 
   const toggleShoppingItem = useCallback((item: ListItem) => {
-    setShoppingItems(prev => prev.map(i => i.id === item.id ? { ...i, is_checked: !i.is_checked } : i))
+    const nextChecked = !item.is_checked
+    setShoppingItems(prev => prev.map(i => i.id === item.id ? { ...i, is_checked: nextChecked } : i))
+    // Ticker: "abgehakt" sofort lokal melden (unabhängig vom Realtime-Echo der eigenen Aktion)
+    if (nextChecked) {
+      ownActionRef.current = { name: item.name, kind: 'check', at: Date.now() }
+      onActivityRef.current?.(`${italianTickerPhrase('check')} ${item.name} abgehakt`)
+    }
     if (isOnline) {
-      supabase.from('items').update({ is_checked: !item.is_checked }).eq('id', item.id).then(({ error }) => {
+      supabase.from('items').update({ is_checked: nextChecked }).eq('id', item.id).then(({ error }) => {
         if (error) {
           logError('toggleShoppingItem error:', error)
           setShoppingItems(prev => prev.map(i => i.id === item.id ? { ...i, is_checked: item.is_checked } : i))
@@ -579,7 +604,7 @@ export function useListData({ onActivity }: { onActivity?: (msg: string) => void
         if (list) fetchItems(list.id, 'shopping')
       })
     } else {
-      enqueue({ type: 'update', table: 'items', payload: { is_checked: !item.is_checked }, filterColumn: 'id', filterValue: item.id })
+      enqueue({ type: 'update', table: 'items', payload: { is_checked: nextChecked }, filterColumn: 'id', filterValue: item.id })
     }
   }, [isOnline, enqueue, list, fetchItems])
 
@@ -633,9 +658,15 @@ export function useListData({ onActivity }: { onActivity?: (msg: string) => void
   }, [undoState, isOnline, enqueue, list, fetchItems])
 
   const toggleBringItem = useCallback((item: ListItem) => {
-    setBringItems(prev => prev.map(i => i.id === item.id ? { ...i, is_brought: !i.is_brought } : i))
+    const nextBrought = !item.is_brought
+    setBringItems(prev => prev.map(i => i.id === item.id ? { ...i, is_brought: nextBrought } : i))
+    // Ticker: "als mitgebracht markiert" sofort lokal melden
+    if (nextBrought) {
+      ownActionRef.current = { name: item.name, kind: 'check', at: Date.now() }
+      onActivityRef.current?.(`${italianTickerPhrase('check')} ${item.name} als mitgebracht markiert`)
+    }
     if (isOnline) {
-      supabase.from('items').update({ is_brought: !item.is_brought }).eq('id', item.id).then(({ error }) => {
+      supabase.from('items').update({ is_brought: nextBrought }).eq('id', item.id).then(({ error }) => {
         if (error) {
           logError('toggleBringItem error:', error)
           setBringItems(prev => prev.map(i => i.id === item.id ? { ...i, is_brought: item.is_brought } : i))
@@ -643,7 +674,7 @@ export function useListData({ onActivity }: { onActivity?: (msg: string) => void
         if (list) fetchItems(list.id, 'bring')
       })
     } else {
-      enqueue({ type: 'update', table: 'items', payload: { is_brought: !item.is_brought }, filterColumn: 'id', filterValue: item.id })
+      enqueue({ type: 'update', table: 'items', payload: { is_brought: nextBrought }, filterColumn: 'id', filterValue: item.id })
     }
   }, [isOnline, enqueue, list, fetchItems])
 
