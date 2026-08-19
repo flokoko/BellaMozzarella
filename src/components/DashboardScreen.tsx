@@ -64,6 +64,7 @@ interface DashboardScreenProps {
   installPrompt: BeforeInstallPromptEvent | null
   onInstall: () => void
   bristolEnabled: boolean
+  tickerMsgs: string[]
 }
 
 interface BeforeInstallPromptEvent extends Event {
@@ -90,6 +91,7 @@ export default function DashboardScreen({
   installPrompt,
   onInstall,
   bristolEnabled,
+  tickerMsgs,
 }: DashboardScreenProps) {
   const { toast, confirm } = useToast()
   const { isOnline, enqueue } = useOfflineQueue()
@@ -241,6 +243,20 @@ export default function DashboardScreen({
     <div className="dashboard-screen">
       {/* ── Italienische Begrüßung ── */}
       <div className="dash-greeting">{greetByTime(userName)}</div>
+
+      {/* ── Info-Ticker (Marquee) ── */}
+      {tickerMsgs.length > 0 && (
+        <div className="dash-ticker" aria-live="polite">
+          <div className="dash-ticker-track">
+            {tickerMsgs.map((m, i) => (
+              <span key={`a-${i}`} className="dash-ticker-item">· {m}</span>
+            ))}
+            {tickerMsgs.map((m, i) => (
+              <span key={`b-${i}`} className="dash-ticker-item">· {m}</span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── Weather Widget ── */}
       <WeatherWidget onNavigate={() => { navigator.vibrate?.(8); onNavigate('weather') }} />

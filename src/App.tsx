@@ -86,6 +86,9 @@ const featureTitles: Record<Exclude<TabView, 'home'>, { icon: LucideIcon; label:
 
 export default function App() {
   const { toast } = useToast()
+  // ── Ticker messages (Marquee) ──────────────────────────────────────
+  const [tickerMsgs, setTickerMsgs] = useState<string[]>([])
+
   const {
     userName, list, participantId, shoppingItems, bringItems, categories, meals, mealIdeas,
     notes, expenses, expenseSplits, expenseQuotas, participants, adminUnlocked,
@@ -98,7 +101,12 @@ export default function App() {
     handleJoin, handleLeave, handleRename,
     undoState,
     settlements,
-  } = useListData()
+  } = useListData({
+    onActivity: (msg: string) => setTickerMsgs(prev => {
+      if (prev.length > 0 && prev[prev.length - 1] === msg) return prev
+      return [...prev.slice(-8), msg]
+    }),
+  })
 
   // ── Tab state ──────────────────────────────────────────────────────
   const [tab, setTab] = useState<TabView>('home')
@@ -363,6 +371,7 @@ export default function App() {
             installPrompt={installPrompt}
             onInstall={handleInstall}
             bristolEnabled={bristolEnabled}
+            tickerMsgs={tickerMsgs}
           />
         )}
         {tab === 'list' && (

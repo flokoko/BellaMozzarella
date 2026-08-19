@@ -5,7 +5,7 @@ type TableName = 'items' | 'categories' | 'meals' | 'meal_ideas' | 'notes' | 'ex
 
 interface UseRealtimeSyncOptions {
   listId: string | null
-  onTableChange: (table: TableName) => void
+  onTableChange: (table: TableName, payload: any) => void
 }
 
 export function useRealtimeSync({ listId, onTableChange }: UseRealtimeSyncOptions) {
@@ -39,8 +39,8 @@ export function useRealtimeSync({ listId, onTableChange }: UseRealtimeSyncOption
           table,
           filter: `list_id=eq.${listId}`,
         },
-        () => {
-          onTableChangeRef.current(table)
+        (payload: any) => {
+          onTableChangeRef.current(table, payload)
         }
       )
     }

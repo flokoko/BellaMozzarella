@@ -42,3 +42,31 @@ const MOTTO_QUOTES = [
 export function italianMotto(): string {
   return MOTTO_QUOTES[Math.floor(Math.random() * MOTTO_QUOTES.length)]
 }
+
+/** Sprüche für "hinzugefügt"-Aktionen (Ticker). */
+const ADD_QUOTES = [
+  'Mamma mia! 🍅',
+  'Ecco fatto! 🎉',
+  'Forza! 💪',
+  'Bellissimo! ✨',
+  'Che bello! 🥳',
+  'Magnifico! 🌟',
+  'Bravissimo! 👏',
+]
+
+/** Sprüche für "abgehakt/mitgebracht"-Aktionen (Ticker). */
+const CHECK_QUOTES = [
+  'Ecco fatto! ✓',
+  'Perfetto! ✓',
+  'Dolce vittoria! 🍰',
+  'Andiamo! 🛵',
+  'Molto bene! ✨',
+  'Bravo! 🎓',
+  'Tutto fatto! ✅',
+]
+
+/** Zufälligen Ticker-Spruch liefern — 'add' für Inserts, 'check' für Abhaken/Mitbringen. */
+export function italianTickerPhrase(kind: 'add' | 'check'): string {
+  const pool = kind === 'add' ? ADD_QUOTES : CHECK_QUOTES
+  return pool[Math.floor(Math.random() * pool.length)]
+}

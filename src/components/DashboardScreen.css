@@ -676,3 +676,54 @@
   color: var(--accent);
   flex-shrink: 0;
 }
+
+/* ── Info-Ticker (Marquee) ── */
+.dash-ticker {
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  border-left: 3px solid var(--italian-green);
+  border-radius: 12px;
+  background: var(--card-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+  padding: 0.4rem 0;
+  margin-bottom: 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.dash-ticker-track {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.2rem;
+  white-space: nowrap;
+  animation: dashTicker 30s linear infinite;
+  padding-left: 1.2rem;
+}
+
+.dash-ticker-item {
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+
+@keyframes dashTicker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.dash-ticker:hover .dash-ticker-track,
+.dash-ticker:focus-within .dash-ticker-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dash-ticker-track {
+    animation: none;
+    transform: translateX(0);
+    overflow-x: auto;
+  }
+}

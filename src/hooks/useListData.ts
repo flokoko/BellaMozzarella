@@ -32,8 +32,9 @@ import {
   setNotifyUserName,
   resetNotifyBuffer,
 } from '../lib/notify'
+import { italianTickerPhrase } from '../lib/italianFlair'
 
-export function useListData() {
+export function useListData({ onActivity }: { onActivity?: (msg: string) => void } = {}) {
   // ── Offline queue ──────────────────────────────────────────────────
   const { isOnline, enqueue, flushQueue, queueLength } = useOfflineQueue()
 
@@ -384,8 +385,59 @@ export function useListData() {
     }
   }, [fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes, fetchExpenses, fetchParticipants, fetchExpenseQuotas, fetchSettlements])
   // ── Realtime sync (replaces adaptive polling) ──────────────────────
-  const handleRealtimeChange = useCallback((table: string) => {
+  // ref keeps latest onActivity without re-creating handleRealtimeChange
+  const onActivityRef = useRef(onActivity)
+  onActivityRef.current = onActivity
+
+  const handleRealtimeChange = useCallback((table: string, payload: any) => {
     if (!list) return
+
+    // ── Build ticker message from realtime payload ──
+    if (payload && onActivityRef.current) {
+      const eventType: string = payload.eventType ?? ''
+      const newRec: any = payload.new
+      const oldRec: any = payload.old
+      let msg: string | null = null
+      let kind: 'add' | 'check' = 'add'
+
+      if (eventType === 'INSERT') {
+        kind = 'add'
+        if (table === 'items') {
+          const name = newRec?.name ?? 'Item'
+          const lt = newRec?.list_type
+          const target = lt === 'bring' ? 'Mitbringen' : 'Einkaufsliste'
+          msg = `${name} zur ${target} hinzugefügt`
+        } else if (table === 'notes') {
+          msg = `${newRec?.title ?? 'Notiz'} hinzugefügt`
+        } else if (table === 'expenses') {
+          msg = `${newRec?.description ?? 'Ausgabe'} als Ausgabe eingetragen`
+        } else if (table === 'meals') {
+          msg = `${newRec?.name ?? 'Gericht'} im Essensplan`
+        }
+      } else if (eventType === 'UPDATE') {
+        if (table === 'items') {
+          if (oldRec?.is_checked === false && newRec?.is_checked === true) {
+            kind = 'check'
+            msg = `${newRec?.name ?? 'Item'} abgehakt`
+          } else if (oldRec?.is_brought === false && newRec?.is_brought === true) {
+            kind = 'check'
+            msg = `${newRec?.name ?? 'Item'} als mitgebracht markiert`
+          }
+        }
+      } else if (eventType === 'DELETE') {
+        const name = oldRec?.name
+        if (name) {
+          kind = 'add'
+          msg = `${name} entfernt`
+        }
+      }
+
+      if (msg) {
+        const tickerMsg = `${italianTickerPhrase(kind)} ${msg}`
+        onActivityRef.current(tickerMsg)
+      }
+    }
+
     // Accumulate the changed table and debounce the refetch
     pendingRealtimeTablesRef.current.add(table)
     if (realtimeDebounceRef.current) clearTimeout(realtimeDebounceRef.current)
@@ -801,5 +853,7 @@ export function useListData() {
     handleJoin,
     handleLeave,
     handleRename,
+    // ticker
+    onActivity,
   }
 }
