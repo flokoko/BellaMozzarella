@@ -32,6 +32,31 @@ export function computeBalances(
   return map
 }
 
+/**
+ * Subtract settled payments from net balances to get OPEN balances.
+ * For each settlement: payer balance += amount (debt decreases),
+ *                       payee balance -= amount (credit decreases).
+ * Rounded to cents. Does not modify the input balances map.
+ */
+export function computeOpenBalances(
+  balances: Record<string, number>,
+  settlements: SettlementTxn[],
+): Record<string, number> {
+  const result: Record<string, number> = {}
+  for (const [name, balance] of Object.entries(balances)) {
+    result[name] = Math.round(balance * 100) / 100
+  }
+  for (const s of settlements) {
+    // payer's debt decreases → their balance goes up (toward zero)
+    result[s.from] = (result[s.from] ?? 0) + s.amount
+    // payee's credit decreases → their balance goes down (toward zero)
+    result[s.to] = (result[s.to] ?? 0) - s.amount
+    result[s.from] = Math.round(result[s.from] * 100) / 100
+    result[s.to] = Math.round(result[s.to] * 100) / 100
+  }
+  return result
+}
+
 /** Greedy minimized-transaction settlement from a balances map */
 export function computeSettlement(balances: Record<string, number>): SettlementTxn[] {
   const creditors: { name: string; amount: number }[] = []

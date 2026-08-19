@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from 'react'
 import { Wallet, Receipt, Table2, Percent } from 'lucide-react'
-import type { Expense, ExpenseSplit, ExpenseQuota, ItemCategory } from '../types'
+import type { Expense, ExpenseSplit, ExpenseQuota, ItemCategory, Settlement } from '../types'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../context/ToastContext'
 import ExpenseForm from './ExpenseForm'
@@ -24,6 +24,8 @@ interface ExpenseScreenProps {
   onExpensesChange: () => void
   onCategoriesChange: () => void
   onQuotasChange: () => void
+  settlements: Settlement[]
+  onSettlementsChange: () => void
 }
 
 export default function ExpenseScreen({
@@ -40,6 +42,8 @@ export default function ExpenseScreen({
   onExpensesChange,
   onCategoriesChange,
   onQuotasChange,
+  settlements,
+  onSettlementsChange,
 }: ExpenseScreenProps) {
   const { toast, confirm } = useToast()
   const [section, setSection] = useState<'expenses' | 'settlement' | 'matrix' | 'quotas'>('expenses')
@@ -267,7 +271,15 @@ export default function ExpenseScreen({
 
       {/* ── Abrechnung Section ── */}
       {section === 'settlement' && (
-        <ExpenseSettlement expenses={expenses} expenseSplits={expenseSplits} />
+        <ExpenseSettlement
+          expenses={expenses}
+          expenseSplits={expenseSplits}
+          listId={listId}
+          userName={userName}
+          settlements={settlements}
+          onSettlementsChange={onSettlementsChange}
+          onExpensesChange={onExpensesChange}
+        />
       )}
 
       {/* ── Matrix Section ── */}

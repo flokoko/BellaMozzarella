@@ -111,6 +111,17 @@ export interface ExpenseQuota {
   created_at: string
 }
 
+export interface Settlement {
+  id: string
+  list_id: string
+  payer: string
+  payee: string
+  amount: number
+  settled_at: string
+  created_by: string | null
+  created_at: string
+}
+
 export interface BristolEntry {
   id: string
   list_id: string

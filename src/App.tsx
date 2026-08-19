@@ -92,10 +92,11 @@ export default function App() {
     expenseTotal, checkedCount, isLoading, isOnline, queueLength, flushQueue,
     setList, setAdminUnlocked,
     fetchAll,
-    fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes, fetchExpenses, fetchParticipants, fetchExpenseQuotas,
+    fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes, fetchExpenses, fetchParticipants, fetchExpenseQuotas, fetchSettlements,
     toggleShoppingItem, deleteShoppingItem, undoDelete, batchToggleShoppingItems, toggleBringItem, deleteBringItem, reorderItems, reorderNotes, toggleNoteFavorite,
     handleJoin, handleLeave, handleRename,
     undoState,
+    settlements,
   } = useListData()
 
   // ── Tab state ──────────────────────────────────────────────────────
@@ -259,6 +260,7 @@ export default function App() {
   const handleIdeasChange = useCallback(() => { if (list) fetchMealIdeas(list.id) }, [list, fetchMealIdeas])
   const handleExpensesChange = useCallback(() => { if (list) fetchExpenses(list.id) }, [list, fetchExpenses])
   const handleQuotasChange = useCallback(() => { if (list) fetchExpenseQuotas(list.id) }, [list, fetchExpenseQuotas])
+  const handleSettlementsChange = useCallback(() => { if (list) fetchSettlements(list.id) }, [list, fetchSettlements])
   const handleParticipantsChange = useCallback(() => { if (list) fetchParticipants(list.id) }, [list, fetchParticipants])
 
   // ── Render ─────────────────────────────────────────────────────────
@@ -424,6 +426,8 @@ export default function App() {
               onExpensesChange={handleExpensesChange}
               onCategoriesChange={handleCategoriesChange}
               onQuotasChange={handleQuotasChange}
+              settlements={settlements}
+              onSettlementsChange={handleSettlementsChange}
             />
           </Suspense>
         )}

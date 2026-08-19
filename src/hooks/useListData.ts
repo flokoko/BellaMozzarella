@@ -11,6 +11,7 @@ import type {
   ExpenseSplit,
   ExpenseQuota,
   Participant,
+  Settlement,
 } from '../types'
 import { supabase } from '../lib/supabase'
 import { useOfflineQueue } from './useOfflineQueue'
@@ -49,6 +50,7 @@ export function useListData() {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [expenseSplits, setExpenseSplits] = useState<ExpenseSplit[]>([])
   const [expenseQuotas, setExpenseQuotas] = useState<ExpenseQuota[]>([])
+  const [settlements, setSettlements] = useState<Settlement[]>([])
   const [participants, setParticipants] = useState<Participant[]>([])
   const [adminUnlocked, setAdminUnlocked] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -344,6 +346,20 @@ export function useListData() {
     setExpenseQuotas((data || []) as ExpenseQuota[])
   }, [])
 
+  const fetchSettlements = useCallback(async (listId: string) => {
+    const { data, error: err } = await supabase
+      .from('settlements')
+      .select('*')
+      .eq('list_id', listId)
+      .order('settled_at', { ascending: true })
+      .order('created_at', { ascending: true })
+    if (err) {
+      logError('fetchSettlements error:', err)
+      return
+    }
+    setSettlements((data || []) as Settlement[])
+  }, [])
+
   const fetchAll = useCallback(async (listId: string, force = false) => {
     // Guard against overlapping fetches — Mutation-Refetches können mit force=true
     // den Guard umgehen, damit sie nicht vom Realtime-Sync blockiert werden.
@@ -360,12 +376,13 @@ export function useListData() {
         fetchExpenses(listId),
         fetchParticipants(listId),
         fetchExpenseQuotas(listId),
+        fetchSettlements(listId),
       ])
     } finally {
       isFetchingRef.current = false
       setIsLoading(false)
     }
-  }, [fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes, fetchExpenses, fetchParticipants, fetchExpenseQuotas])
+  }, [fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes, fetchExpenses, fetchParticipants, fetchExpenseQuotas, fetchSettlements])
   // ── Realtime sync (replaces adaptive polling) ──────────────────────
   const handleRealtimeChange = useCallback((table: string) => {
     if (!list) return
@@ -395,6 +412,9 @@ export function useListData() {
       if (tables.has('expense_quotas')) {
         fetchExpenseQuotas(lid)
       }
+      if (tables.has('settlements')) {
+        fetchSettlements(lid)
+      }
       if (tables.has('participants')) {
         fetchParticipants(lid)
       }
@@ -402,7 +422,7 @@ export function useListData() {
       tables.clear()
       realtimeDebounceRef.current = null
     }, 400)
-  }, [list, fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes, fetchExpenses, fetchExpenseQuotas, fetchParticipants])
+  }, [list, fetchItems, fetchCategories, fetchMeals, fetchMealIdeas, fetchNotes, fetchExpenses, fetchExpenseQuotas, fetchParticipants, fetchSettlements])
 
   useRealtimeSync({
     listId: list?.id ?? null,
@@ -692,6 +712,7 @@ export function useListData() {
     setExpenses([])
     setExpenseSplits([])
     setExpenseQuotas([])
+    setSettlements([])
     setParticipants([])
     setAdminUnlocked(false)
     setUndoState(null)
@@ -734,6 +755,7 @@ export function useListData() {
     expenses,
     expenseSplits,
     expenseQuotas,
+    settlements,
     participants,
     adminUnlocked,
     isLoading,
@@ -764,6 +786,7 @@ export function useListData() {
     fetchExpenses,
     fetchParticipants,
     fetchExpenseQuotas,
+    fetchSettlements,
     // mutations
     toggleShoppingItem,
     batchToggleShoppingItems,
