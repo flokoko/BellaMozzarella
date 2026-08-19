@@ -287,7 +287,7 @@ export default function ExpenseScreen({
 
       {/* ── Matrix Section ── */}
       {section === 'matrix' && (
-        <ExpenseMatrix expenses={expenses} expenseSplits={expenseSplits} />
+        <ExpenseMatrix expenses={expenses} expenseSplits={expenseSplits} settlements={settlements} />
       )}
 
       {/* ── Quoten Section (Admin only) ── */}

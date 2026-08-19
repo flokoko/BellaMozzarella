@@ -1,16 +1,20 @@
 import { useMemo } from 'react'
 import { Wallet } from 'lucide-react'
-import type { Expense, ExpenseSplit } from '../types'
+import type { Expense, ExpenseSplit, Settlement } from '../types'
 import { computeMatrix, totalExpenses, fmtEUR } from '../lib/settlement'
 
 interface ExpenseMatrixProps {
   expenses: Expense[]
   expenseSplits: ExpenseSplit[]
+  settlements: Settlement[]
 }
 
-export default function ExpenseMatrix({ expenses, expenseSplits }: ExpenseMatrixProps) {
+export default function ExpenseMatrix({ expenses, expenseSplits, settlements }: ExpenseMatrixProps) {
   const total = useMemo(() => totalExpenses(expenses), [expenses])
-  const matrix = useMemo(() => computeMatrix(expenses, expenseSplits), [expenses, expenseSplits])
+  const matrix = useMemo(
+    () => computeMatrix(expenses, expenseSplits, settlements),
+    [expenses, expenseSplits, settlements],
+  )
 
   return (
     <div key="matrix">

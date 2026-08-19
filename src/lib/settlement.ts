@@ -1,4 +1,4 @@
-import type { Expense, ExpenseSplit, ExpenseQuota } from '../types'
+import type { Expense, ExpenseSplit, ExpenseQuota, Settlement } from '../types'
 
 export interface SettlementTxn {
   from: string
@@ -100,11 +100,13 @@ export function sortedBalanceEntries(balances: Record<string, number>): BalanceE
 
 /**
  * Matrix: who owes whom (debtor × creditor grid).
- * Shows ORIGINAL (unnetted) debts — what each person owes each other person.
+ * Zeigt die offenen (bereits beglichene Schulden abgezogene) Beträge — was
+ * jede Person der jeweils anderen aktuell noch zahlen muss.
  */
 export function computeMatrix(
   expenses: Expense[],
   expenseSplits: ExpenseSplit[],
+  settlements: Settlement[] = [],
 ): ExpenseMatrix {
   const debtGrid: Record<string, Record<string, number>> = {}
 
@@ -124,6 +126,21 @@ export function computeMatrix(
       if (split.person_name === payer) continue
       if (!debtGrid[split.person_name]) debtGrid[split.person_name] = {}
       debtGrid[split.person_name][payer] = (debtGrid[split.person_name][payer] ?? 0) + split.share_amount
+    }
+  }
+
+  // Bereits beglichene Beträge von der jeweiligen Zelle abziehen:
+  // eine Zahlung payer → payee reduziert exakt die Schuld payer→payee.
+  // Auf 0 gedeckelt — eine Überzahlung erzeugt keine negative Zelle.
+  for (const s of settlements) {
+    const cell = debtGrid[s.payer]?.[s.payee]
+    if (cell === undefined) continue
+    const remaining = cell - s.amount
+    if (remaining <= 0) {
+      delete debtGrid[s.payer][s.payee]
+      if (Object.keys(debtGrid[s.payer]).length === 0) delete debtGrid[s.payer]
+    } else {
+      debtGrid[s.payer][s.payee] = Math.round(remaining * 100) / 100
     }
   }
 

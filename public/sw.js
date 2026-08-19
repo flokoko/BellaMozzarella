@@ -1,6 +1,6 @@
 // IMPORTANT: Bump this version when deploying changes.
 // Keep in sync with APP_VERSION in src/version.ts
-const CACHE_NAME = 'bella-mozzarella-v1.3.4';
+const CACHE_NAME = 'bella-mozzarella-v1.3.5';
 
 // Install: skipWaiting to activate immediately
 self.addEventListener('install', (e) => {
