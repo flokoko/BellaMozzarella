@@ -2,16 +2,29 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 
 // Mock supabase before importing useOfflineQueue
-vi.mock('../../lib/supabase', () => ({
-  supabase: {
-    rpc: vi.fn(),
-    from: vi.fn(() => ({
-      insert: vi.fn(),
-      update: vi.fn(() => ({ eq: vi.fn() })),
-      delete: vi.fn(() => ({ eq: vi.fn() })),
-    })),
-  },
-}))
+vi.mock('../../lib/supabase', () => {
+  // checkConnectivity ruft .from('participants').select('id').limit(1)
+  //   .abortSignal(signal).maybeSingle() auf — das muss eine erfolgreiche,
+  //   fehlerfreie Antwort liefern, damit navigator.onLine == true erhalten bleibt.
+  const selectChain = () => ({
+    limit: () => ({
+      abortSignal: () => ({
+        maybeSingle: () => Promise.resolve({ data: null, error: null }),
+      }),
+    }),
+  })
+  return {
+    supabase: {
+      rpc: vi.fn(),
+      from: vi.fn(() => ({
+        insert: vi.fn(),
+        update: vi.fn(() => ({ eq: vi.fn() })),
+        delete: vi.fn(() => ({ eq: vi.fn() })),
+        select: selectChain,
+      })),
+    },
+  }
+})
 
 import { useOfflineQueue } from '../useOfflineQueue'
 
@@ -82,14 +95,16 @@ describe('useOfflineQueue', () => {
     expect(result.current.queueLength).toBe(1)
   })
 
-  it('tracks online/offline status', () => {
+  it('tracks online/offline status', async () => {
     const { result } = renderHook(() => useOfflineQueue())
     expect(result.current.isOnline).toBe(true)
     act(() => {
       window.dispatchEvent(new Event('offline'))
     })
     expect(result.current.isOnline).toBe(false)
-    act(() => {
+    // checkConnectivity() ist asynchron — das Ergebnis wird erst in einer
+    // Mikrotask nach dem online-Event gesetzt. Deshalb hier await act verwenden.
+    await act(async () => {
       window.dispatchEvent(new Event('online'))
     })
     expect(result.current.isOnline).toBe(true)
