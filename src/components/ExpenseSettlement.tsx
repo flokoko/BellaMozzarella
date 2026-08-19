@@ -252,8 +252,10 @@ export default function ExpenseSettlement({
                     <button
                       className="expense-settle-btn"
                       onClick={() => handleStartSettle(i, txn.amount)}
+                      aria-label="Als beglichen markieren"
+                      title="Beglichen"
                     >
-                      <CheckCircle2 size={16} strokeWidth={2} /> ✓ Beglichen
+                      <CheckCircle2 size={17} strokeWidth={2.2} />
                     </button>
                   )}
                 </div>

@@ -1083,17 +1083,15 @@
 .expense-settle-btn {
   display: flex;
   align-items: center;
-  gap: 0.2rem;
-  padding: 0.25rem 0.55rem;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0;
   border: 1px solid var(--accent);
   border-radius: 999px;
   background: var(--accent-light);
   color: var(--accent);
-  font-size: 0.75rem;
-  font-weight: 700;
   cursor: pointer;
-  font-family: inherit;
-  white-space: nowrap;
   flex-shrink: 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
