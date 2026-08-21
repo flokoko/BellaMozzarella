@@ -3,6 +3,7 @@ import { Wallet, Receipt, Table2, Percent } from 'lucide-react'
 import type { Expense, ExpenseSplit, ExpenseQuota, ItemCategory, Settlement } from '../types'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../context/ToastContext'
+import { isEqualQuotaDistribution } from '../lib/settlement'
 import ExpenseForm from './ExpenseForm'
 import ExpenseList from './ExpenseList'
 import ExpenseSettlement from './ExpenseSettlement'
@@ -72,7 +73,11 @@ export default function ExpenseScreen({
     return expenseQuotas.filter(q => q.category === expenseCategory)
   }, [expenseQuotas, expenseCategory])
 
-  const hasQuotaConfig = categoryQuotas.length > 0
+  // A category is "quota-driven" only when it has a real, non-equal quota
+  // config. If the quotas were adjusted but still split evenly across all
+  // participants (everyone the same percent), behave exactly like a category
+  // without any quota config — no banner, normal equal/exact behaviour.
+  const hasQuotaConfig = categoryQuotas.length > 0 && !isEqualQuotaDistribution(categoryQuotas, allPersons)
 
   // ── Splits for a given expense ──
   const getSplitsForExpense = useCallback(

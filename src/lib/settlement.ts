@@ -249,6 +249,34 @@ export function calculateQuotaShares(
   return rawCents.map(r => ({ person_name: r.person_name, share_amount: r.cents / 100 }))
 }
 
+/**
+ * True when a category's quota config is effectively an even split across ALL
+ * participants (every person has the same non-zero percent). In that case the
+ * category behaves exactly like one without any quota config — the quota banner
+ * is hidden and the split falls back to the normal equal/exact behaviour.
+ */
+export function isEqualQuotaDistribution(
+  quotas: ExpenseQuota[],
+  allPersons: string[],
+): boolean {
+  if (allPersons.length === 0) return false
+
+  // Build person -> percent map (same logic as calculateQuotaShares)
+  const percentMap = new Map<string, number>()
+  for (const q of quotas) {
+    if (allPersons.includes(q.person_name)) {
+      percentMap.set(q.person_name, (percentMap.get(q.person_name) ?? 0) + q.percent)
+    }
+  }
+
+  // Every person must participate with the same non-zero percent
+  const participants = allPersons.filter(p => (percentMap.get(p) ?? 0) > 0)
+  if (participants.length !== allPersons.length) return false
+
+  const firstPct = percentMap.get(participants[0]) ?? 0
+  return participants.every(p => Math.abs((percentMap.get(p) ?? 0) - firstPct) < 0.011)
+}
+
 /** Total expenses */
 export function totalExpenses(expenses: Expense[]): number {
   return expenses.reduce((sum, e) => sum + e.amount, 0)
