@@ -128,8 +128,8 @@ export const ABRUZZANTI_QUOTES = [
  */
 export function italianTickerPhrase(kind: 'add' | 'check'): string {
   const base = (kind === 'add' ? ADD_QUOTES : CHECK_QUOTES)[Math.floor(Math.random() * (kind === 'add' ? ADD_QUOTES : CHECK_QUOTES).length)]
-  // In ~18 % der Meldungen ein Abbrunzati-Zitat voranstellen
-  if (Math.random() < 0.18) {
+  // ~40 % der Meldungen ein Abbrunzati-Zitat voranstellen
+  if (Math.random() < 0.4) {
     const q = ABRUZZANTI_QUOTES[Math.floor(Math.random() * ABRUZZANTI_QUOTES.length)]
     return Math.random() < 0.08 ? `${q} — Gebiss` : q
   }
