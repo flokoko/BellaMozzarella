@@ -131,8 +131,8 @@ export function italianTickerPhrase(kind: 'add' | 'check'): string {
   // In ~18 % der Meldungen ein Abbrunzati-Zitat voranstellen
   if (Math.random() < 0.18) {
     const q = ABRUZZANTI_QUOTES[Math.floor(Math.random() * ABRUZZANTI_QUOTES.length)]
-    return Math.random() < 0.15 ? `${q} — Gebiss` : q
+    return Math.random() < 0.08 ? `${q} — Gebiss` : q
   }
   // Ansonsten Standard-Spruch, hin und wieder mit "Gebiss"
-  return Math.random() < 0.12 ? `${base} Gebiss` : base
+  return Math.random() < 0.08 ? `${base} Gebiss` : base
 }
