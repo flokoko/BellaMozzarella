@@ -1,65 +1,10 @@
 import { useState, useMemo, lazy, Suspense } from 'react'
 import type { ShoppingList } from '../types'
 import { supabase, loginParticipant } from '../lib/supabase'
+import { ABRUZZANTI_QUOTES } from '../lib/italianFlair'
 const MozzaScene = lazy(() => import('./MozzaScene'))
 
 import './JoinScreen.css'
-
-// 🎵 Zitate von Roy Bianco & Die Abbrunzati Boys — bei jedem Aufruf ein anderes
-const ROY_BIANCO_QUOTES = [
-  'Träum mit mir diesen Traum, denn mein Herz schlägt Azzurro',
-  'Ein Blick von dir und ich weiß, alles wird wieder gut',
-  'Ein bisschen Glück liegt im Schatten des Vesuvs',
-  'Hab\' dich gefunden, Traum von Neapel',
-  'Eines weiß ich genau, meine Stadt liegt im Blau',
-  'In bella blu will ich nur eins und das bist du',
-  'Mein Herz schlägt Azzurro',
-  'Ein Traum vom Glück im Licht des ersten Tags',
-  'Auf dieser Insel, von der man sagt, dass hier das Leben so süß schmeckt',
-  'Ich nehm\' Reißaus, lass\' alles hinter mir',
-  'Auf der Brennerautobahn, seh\' ich uns nach Süden fahr\'n',
-  'Halte deine Hand und weiß, jetzt ist es gut',
-  'Baby, gleich sind wir da, auf der Autostrada',
-  'Ich will mit dir baden in der Adria',
-  'Reiß\' das Verdeck nach hinten, schrei: Jetzt sind wir wieder frei!',
-  'Wir fuhr\'n in uns\'ren eig\'nen Sonn\'nuntergang',
-  'Ich fahr\' so schnell zurück zu dir',
-  'Ciao bella, schieß\' los',
-  'Wie hab\' ich all die Jahre ohne dich gelebt',
-  'Denn dieses Mal bist du bei mir',
-  'Die Zeit fliegt vorbei, mit dir bin ich frei',
-  'Ganz ohne große Worte, mit dir bin ich frei',
-  'Der Morgen frisst die Nacht wie das Feuer Papier',
-  'Dein Brief erreicht mich zum Sonnenuntergang',
-  'Ich lehne träge hier am Fenster, Zigarette Light und ein Kaffee',
-  'Ciao bella, schieß\' los, bleib vor mir als tête de la course',
-  'Unter Palmen, wo die Zeit still steht',
-  'Radio Ipanema spielt unser Lied',
-  'Ein Spritz am Abend macht alles leicht',
-  'Tage am Pool, die Welt weit weg',
-  'Das ist Dolce Vita, das süße Leben',
-  'Auf Capri, wo die Sonne niemals untergeht',
-  'Baci, und die Welt steht still',
-  'Du raubst mir die Nächte und verschwendest mein Herz',
-  'Du gibst mir das Beste und ich vergess\' alle Welt',
-  'Du bist die Einzige für mich — so jemand wie dich, das gab\'s noch nicht',
-  'An jedem Haus lauf\' ich entlang, auf jedes schreib\' ich deinen Namen',
-  'Du und ich, so wie im Film — was niemand hat, doch jeder will',
-  'Für immer — Sophia Loren!',
-  'Ich will nie wieder Bardolino seh\'n',
-  'Uns\'re Tage des Glücks liegen hier am Grund des Gardasees',
-  'Mit Netzen aus Verlang\'n hast du mich eingefang\'n',
-  'Ich will heim, kann nicht geh\'n, nie wieder Bardolino seh\'n',
-  'Kann nicht geh\'n, ich will heim, zu viel billiger Wein',
-  'In Rimini, wo die Nächte nie enden',
-  'Die Diskokugel dreht sich, der Sommer gehört uns',
-  'Im August, als die Sonne uns verriet',
-  'Es war ein Sommer, der nie enden sollte',
-  'Schneeflocken in Calabria, so kalt war\'s nie in Neapel',
-  'Weiße Rosen auf dem Wasser, der Abend gehört uns beiden',
-  'Mille grazie, tausend Dank für jede Nacht',
-  'Es beginnt, wie es endet — mit einem Lied',
-]
 
 interface JoinScreenProps {
   onJoin: (name: string, list: ShoppingList, participantId: string) => void
@@ -74,7 +19,7 @@ export default function JoinScreen({ onJoin }: JoinScreenProps) {
   const subtitle = useMemo(
     () => Math.random() < 0.1
       ? 'Gebiss'
-      : ROY_BIANCO_QUOTES[Math.floor(Math.random() * ROY_BIANCO_QUOTES.length)],
+      : ABRUZZANTI_QUOTES[Math.floor(Math.random() * ABRUZZANTI_QUOTES.length)],
     []
   )
 
