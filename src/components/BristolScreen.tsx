@@ -28,6 +28,15 @@ function todayStr(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
+/** True if the user's last 3 Bristol entries (by date) are all value 13. */
+function hasThreeConsecutive13(entries: BristolEntry[], userName: string): boolean {
+  const mine = entries
+    .filter(e => e.participant_name === userName)
+    .sort((a, b) => b.entry_date.localeCompare(a.entry_date))
+  if (mine.length < 3) return false
+  return mine.slice(0, 3).every(e => e.value === 13)
+}
+
 export default function BristolScreen({ listId, userName, isAdmin }: BristolScreenProps) {
   const { toast, confirm } = useToast()
   const { isOnline, enqueue } = useOfflineQueue()
@@ -39,6 +48,12 @@ export default function BristolScreen({ listId, userName, isAdmin }: BristolScre
   const [selectedDate, setSelectedDate] = useState(todayStr())
 
   const today = todayStr()
+
+  // ── Value 14 unlock: user's last 3 entries are all 13 ──
+  const unlocked14 = useMemo(
+    () => hasThreeConsecutive13(entries, userName),
+    [entries, userName]
+  )
 
   const fetchEntries = useCallback(async () => {
     const { data, error } = await supabase
@@ -128,6 +143,33 @@ export default function BristolScreen({ listId, userName, isAdmin }: BristolScre
         scalar: 1.3,
       })
     }
+    // Mega-Plasma-Effekt bei Wert 14 (noch bombiger)
+    if (value === 14) {
+      navigator.vibrate?.([50, 30, 50, 30, 100, 50, 200, 50, 300])
+      const { default: confetti } = await import('canvas-confetti')
+      confetti({
+        particleCount: 300,
+        spread: 160,
+        origin: { y: 0.4 },
+        colors: ['#5C1A0E', '#8B4513', '#A0522D', '#D2691E', '#3E2723', '#FFD700'],
+        startVelocity: 45,
+        scalar: 1.6,
+      })
+      confetti({
+        particleCount: 100,
+        angle: 60,
+        spread: 80,
+        origin: { x: 0, y: 0.6 },
+        colors: ['#5C1A0E', '#8B4513', '#FFD700'],
+      })
+      confetti({
+        particleCount: 100,
+        angle: 120,
+        spread: 80,
+        origin: { x: 1, y: 0.6 },
+        colors: ['#5C1A0E', '#8B4513', '#FFD700'],
+      })
+    }
     fetchEntries()
   }, [listId, userName, selectedDate, today, toast, fetchEntries, isOnline, enqueue])
 
@@ -209,16 +251,17 @@ export default function BristolScreen({ listId, userName, isAdmin }: BristolScre
 
   const distributionData = useMemo(() => {
     const counts: Record<number, number> = {}
-    BRISTOL_VALUES.forEach(v => { counts[v] = 0 })
+    const values = unlocked14 ? [...BRISTOL_VALUES, 14] : BRISTOL_VALUES
+    values.forEach(v => { counts[v] = 0 })
     entries.forEach(e => { counts[e.value] = (counts[e.value] ?? 0) + 1 })
-    return BRISTOL_VALUES.map(v => ({
+    return values.map(v => ({
       value: v,
       label: `${v}`,
       count: counts[v],
       adjective: BRISTOL_ADJECTIVES[v],
       fill: BRISTOL_COLORS[v],
     }))
-  }, [entries])
+  }, [entries, unlocked14])
 
   const trendData = useMemo(() => {
     const days: { date: string; label: string; avg: number | null; count: number }[] = []
@@ -270,11 +313,11 @@ export default function BristolScreen({ listId, userName, isAdmin }: BristolScre
       }))
       .sort((a, b) => b.value - a.value)
 
-    // Most Plasma (value 13)
+    // Most Plasma (value 13) + Mega-Plasma (value 14)
     const plasmaRanked = Object.entries(byParticipant)
       .map(([name, es]) => ({
         name,
-        value: es.filter(e => e.value === 13).length,
+        value: es.filter(e => e.value === 13 || e.value === 14).length,
       }))
       .sort((a, b) => b.value - a.value)
 
@@ -360,7 +403,7 @@ export default function BristolScreen({ listId, userName, isAdmin }: BristolScre
         {mySelectedEntry ? (
           <div className="bristol-hero-value-wrap">
             <div
-              className={`bristol-hero-circle ${mySelectedEntry.value === 13 ? 'bristol-hero-plasma' : ''}`}
+              className={`bristol-hero-circle ${mySelectedEntry.value === 13 || mySelectedEntry.value === 14 ? 'bristol-hero-plasma' : ''}`}
               style={{ background: BRISTOL_COLORS[mySelectedEntry.value] }}
             >
               <span className="bristol-hero-emoji">{BRISTOL_EMOJIS[mySelectedEntry.value]}</span>
@@ -383,7 +426,10 @@ export default function BristolScreen({ listId, userName, isAdmin }: BristolScre
 
       {/* ── Value Picker (Grid) ── */}
       <div className="bristol-picker">
-        <div className="bristol-picker-label">Bristol-Skala 1–7 + Plasma 💩</div>
+        <div className="bristol-picker-label">
+          Bristol-Skala 1–7 + Plasma 💩
+          {unlocked14 && <span className="bristol-picker-unlocked-hint"> · Mega-Plasma 💥 freigeschaltet!</span>}
+        </div>
         <div className="bristol-picker-grid">
           {BRISTOL_VALUES.map(v => (
             <button
@@ -398,7 +444,24 @@ export default function BristolScreen({ listId, userName, isAdmin }: BristolScre
               <span className="bristol-picker-adj">{BRISTOL_ADJECTIVES[v]}</span>
             </button>
           ))}
+          {unlocked14 && (
+            <button
+              className={`bristol-picker-btn bristol-picker-btn-bonus bristol-picker-btn-mega ${mySelectedEntry?.value === 14 ? 'selected' : ''}`}
+              style={{ '--bristol-color': BRISTOL_COLORS[14] } as React.CSSProperties}
+              disabled={submitting}
+              onClick={() => handleSubmitEntry(14)}
+            >
+              <span className="bristol-picker-emoji">{BRISTOL_EMOJIS[14]}</span>
+              <span className="bristol-picker-num">14</span>
+              <span className="bristol-picker-adj">{BRISTOL_ADJECTIVES[14]}</span>
+            </button>
+          )}
         </div>
+        {!unlocked14 && (
+          <p className="bristol-picker-lock-hint">
+            🔒 Tippe 3× hintereinander Plasma 💩, um Mega-Plasma 💥 freizuschalten.
+          </p>
+        )}
       </div>
 
       {/* ── Today's Overview ── */}
@@ -489,7 +552,7 @@ export default function BristolScreen({ listId, userName, isAdmin }: BristolScre
               <LineChart data={trendData} margin={{ top: 4, right: 4, bottom: 0, left: -16 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} />
                 <XAxis dataKey="label" tick={{ fontSize: 10, fill: 'var(--text-secondary)' }} axisLine={false} tickLine={false} />
-                <YAxis domain={[1, 13]} ticks={[1, 3, 5, 7, 9, 11, 13]} tick={{ fontSize: 11, fill: 'var(--text-secondary)' }} axisLine={false} tickLine={false} />
+                <YAxis domain={[1, unlocked14 ? 14 : 13]} ticks={unlocked14 ? [1, 3, 5, 7, 9, 11, 13, 14] : [1, 3, 5, 7, 9, 11, 13]} tick={{ fontSize: 11, fill: 'var(--text-secondary)' }} axisLine={false} tickLine={false} />
                 <Tooltip
                   contentStyle={{
                     background: 'var(--card-bg-solid)',
@@ -660,6 +723,16 @@ export default function BristolScreen({ listId, userName, isAdmin }: BristolScre
                           {v}
                         </button>
                       ))}
+                      {unlocked14 && (
+                        <button
+                          className={`bristol-history-edit-btn bristol-history-edit-btn-bonus ${e.value === 14 ? 'selected' : ''}`}
+                          style={{ '--bristol-color': BRISTOL_COLORS[14] } as React.CSSProperties}
+                          disabled={submitting}
+                          onClick={() => handleUpdateEntry(e.id, 14)}
+                        >
+                          14
+                        </button>
+                      )}
                       <button
                         className="bristol-history-edit-cancel"
                         onClick={() => setEditingEntryId(null)}

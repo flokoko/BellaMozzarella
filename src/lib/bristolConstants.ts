@@ -11,6 +11,7 @@ export const BRISTOL_ADJECTIVES: Record<number, string> = {
   6: 'breiig',
   7: 'flüssig',
   13: 'Plasma',
+  14: 'Mega-Plasma',
 }
 
 export const BRISTOL_COLORS: Record<number, string> = {
@@ -22,6 +23,7 @@ export const BRISTOL_COLORS: Record<number, string> = {
   6: '#FFD700',
   7: '#FF6347',
   13: '#8B4513',
+  14: '#5C1A0E',
 }
 
 export const BRISTOL_EMOJIS: Record<number, string> = {
@@ -33,6 +35,7 @@ export const BRISTOL_EMOJIS: Record<number, string> = {
   6: '🥣',
   7: '💧',
   13: '💩',
+  14: '💥💩',
 }
 
 export const BRISTOL_VALUES = [1, 2, 3, 4, 5, 6, 7, 13]

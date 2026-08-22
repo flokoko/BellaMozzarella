@@ -254,6 +254,48 @@
   color: white;
 }
 
+/* ── Mega-Plasma-Wert 14 (freigeschaltet) ── */
+.bristol-picker-btn-mega {
+  border-color: #5C1A0E;
+  background: linear-gradient(135deg, var(--card-bg-solid) 0%, rgba(92, 26, 14, 0.15) 100%);
+  animation: bristol-mega-pulse 2s ease-in-out infinite;
+}
+
+.bristol-picker-btn-mega::after {
+  content: '💥';
+  top: -6px;
+  right: -6px;
+  font-size: 0.8rem;
+}
+
+.bristol-picker-btn-mega:hover {
+  border-color: #5C1A0E;
+  box-shadow: 0 0 25px rgba(92, 26, 14, 0.5);
+}
+
+.bristol-picker-btn-mega.selected {
+  border-style: solid;
+  background: #5C1A0E;
+  box-shadow: 0 0 35px rgba(92, 26, 14, 0.7);
+}
+
+@keyframes bristol-mega-pulse {
+  0%, 100% { box-shadow: 0 0 0 rgba(92, 26, 14, 0); }
+  50% { box-shadow: 0 0 18px rgba(92, 26, 14, 0.45); }
+}
+
+.bristol-picker-unlocked-hint {
+  color: #5C1A0E;
+  font-weight: 800;
+}
+
+.bristol-picker-lock-hint {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
 /* ── Plasma-Glow im Hero ── */
 .bristol-hero-plasma {
   box-shadow: 0 0 40px rgba(139, 69, 19, 0.6), 0 0 80px rgba(160, 82, 45, 0.3);

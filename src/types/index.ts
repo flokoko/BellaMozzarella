@@ -99,6 +99,7 @@ export interface Participant {
   list_id: string
   name: string
   is_admin: boolean
+  bristol_unlocked: boolean
   joined_at: string
 }
 
