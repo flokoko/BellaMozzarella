@@ -148,7 +148,7 @@ export default function App() {
       })
     }
     pushQuote() // sofort ein Zitat zeigen
-    quoteIntervalRef.current = window.setInterval(pushQuote, 14000)
+    quoteIntervalRef.current = window.setInterval(pushQuote, 8000)
     return () => {
       if (quoteIntervalRef.current !== null) {
         window.clearInterval(quoteIntervalRef.current)
