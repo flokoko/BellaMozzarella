@@ -6,7 +6,7 @@ import { supabase, changeParticipantPassword } from './lib/supabase'
 import { useToast } from './context/ToastContext'
 import JoinScreen from './components/JoinScreen'
 import DashboardScreen from './components/DashboardScreen'
-import { italianSuccess, greetByTime } from './lib/italianFlair'
+import { italianSuccess, greetByTime, italianQuote } from './lib/italianFlair'
 import { subscribeTicker } from './lib/tickerBus'
 const MozzaScene = lazy(() => import('./components/MozzaScene'))
 import { useListData } from './hooks/useListData'
@@ -131,6 +131,29 @@ export default function App() {
         if (prev.length > 0 && prev[0] === greeting) return prev
         return [greeting, ...prev].slice(0, 9)
       })
+    }
+  }, [tab, userName])
+
+  // ── Dauer-Ticker: Abbrunzati-Zitate laufen permanent auf dem Dashboard
+  //    und werden nur durch frische Aktivitäts-Meldungen unterbrochen ──
+  const quoteIntervalRef = useRef<number | null>(null)
+  useEffect(() => {
+    if (tab !== 'home') return
+    const pushQuote = () => {
+      setTickerMsgs(prev => {
+        const q = italianQuote()
+        // Keine direkte Wiederholung desselben Zitats direkt hintereinander
+        if (prev[0] === q) return prev
+        return [q, ...prev].slice(0, 9)
+      })
+    }
+    pushQuote() // sofort ein Zitat zeigen
+    quoteIntervalRef.current = window.setInterval(pushQuote, 14000)
+    return () => {
+      if (quoteIntervalRef.current !== null) {
+        window.clearInterval(quoteIntervalRef.current)
+        quoteIntervalRef.current = null
+      }
     }
   }, [tab, userName])
 

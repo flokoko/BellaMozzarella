@@ -121,18 +121,15 @@ export const ABRUZZANTI_QUOTES = [
   'Es beginnt, wie es endet — mit einem Lied',
 ]
 
-/**
- * Zufälligen Ticker-Spruch liefern — 'add' für Inserts, 'check' für Abhaken/Mitbringen.
- * ~18 % der Meldungen bekommen ein Abbrunzati-Zitat statt des Standard-Spruchs;
- * gelegentlich (hier und da) wird das Wort "Gebiss" eingestreut.
- */
+/** Zufälligen Ticker-Spruch liefern — 'add' für Inserts, 'check' für Abhaken/Mitbringen. */
 export function italianTickerPhrase(kind: 'add' | 'check'): string {
-  const base = (kind === 'add' ? ADD_QUOTES : CHECK_QUOTES)[Math.floor(Math.random() * (kind === 'add' ? ADD_QUOTES : CHECK_QUOTES).length)]
-  // ~40 % der Meldungen ein Abbrunzati-Zitat voranstellen
-  if (Math.random() < 0.4) {
-    const q = ABRUZZANTI_QUOTES[Math.floor(Math.random() * ABRUZZANTI_QUOTES.length)]
-    return Math.random() < 0.08 ? `${q} — Gebiss` : q
-  }
-  // Ansonsten Standard-Spruch, hin und wieder mit "Gebiss"
+  const pool = kind === 'add' ? ADD_QUOTES : CHECK_QUOTES
+  const base = pool[Math.floor(Math.random() * pool.length)]
   return Math.random() < 0.08 ? `${base} Gebiss` : base
+}
+
+/** Reines Abbrunzati-Zitat für den Dauer-Ticker — gelegentlich mit "Gebiss". */
+export function italianQuote(): string {
+  const q = ABRUZZANTI_QUOTES[Math.floor(Math.random() * ABRUZZANTI_QUOTES.length)]
+  return Math.random() < 0.08 ? `${q} — Gebiss` : q
 }
